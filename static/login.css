@@ -1,0 +1,157 @@
+/* static/login.css (Versión 3 - Corregida y Forzada) */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white !important; /* <--- Forzamos el color de texto */
+    
+    /* --- CORRECCIÓN: Fondo Animado (Arreglado) --- */
+    /* Combinamos todas las capas de fondo correctamente */
+    background-color: #0a0a0a !important; /* <--- Forzamos el color */
+    background-image: 
+        /* Capa 1: Rejilla vertical */
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        /* Capa 2: Rejilla horizontal */
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        /* Capa 3: Gradiente animado (fondo) */
+        linear-gradient( -45deg, #0a0a0a, #001f3f, #0a0a0a, #001f3f )
+        !important; /* <--- Forzamos la imagen de fondo */
+
+    /* Asignamos un tamaño a cada capa de imagen */
+    background-size: 
+        20px 20px,  /* Rejilla vertical */
+        20px 20px,  /* Rejilla horizontal */
+        400% 400%; /* Gradiente */
+    
+    animation: gradientBG 15s ease infinite;
+}
+
+/* Animación para el gradiente del body */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* --- CORRECCIÓN: Tarjeta de Vidrio Forzada --- */
+.login-card {
+    width: 420px;
+    /* Forzamos el fondo transparente para que se vea el body */
+    background: transparent !important; 
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+    border-radius: 10px;
+    padding: 30px 40px;
+    transition: box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+    box-shadow: 0 0 40px rgba(0, 191, 255, 0.3) !important;
+}
+
+.login-card h1 {
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 20px;
+    /* Nos aseguramos de que el H1 sea blanco */
+    color: white; 
+}
+
+/* --- Cajas de Input --- */
+.login-card .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px;
+    font-size: 16px;
+    /* Forzamos el color del texto que escribes */
+    color: white !important; 
+    padding: 0 45px 0 20px;
+    transition: border-color 0.3s ease;
+}
+
+.input-box input:focus {
+    border-color: rgba(0, 191, 255, 0.8);
+}
+
+.input-box input::placeholder {
+    /* Forzamos el color del placeholder */
+    color: #eee !important; 
+}
+
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+/* --- Botón de Login --- */
+.login-card .btn-login {
+    width: 100%;
+    height: 45px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.login-card .btn-login:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.03);
+}
+
+/* --- Mensajes de Flash --- */
+.flash-messages {
+    width: 100%;
+    margin-bottom: 15px;
+}
+.flash-error {
+    background-color: #b91c1c;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+.flash-success {
+    /* Este es el que se ve en tu captura */
+    background-color: #047857;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}

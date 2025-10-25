@@ -1,0 +1,16 @@
+# Archivo de configuración de entorno.
+# ¡MUY IMPORTANTE! Contiene secretos como la SECRET_KEY y datos de la BD.
+.env
+
+# Entornos virtuales de Python
+# No subas las dependencias, para eso está el archivo requirements.txt
+venv/
+.venv/
+
+# Caché de Python
+__pycache__/
+*.pyc
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
