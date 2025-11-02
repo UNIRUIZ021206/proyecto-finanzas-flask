@@ -1,136 +1,79 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Cuentas</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='catalogo.css') }}">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
-        <h1><i class="fa-solid fa-chart-line"></i> Sistema de Análisis Financiero</h1>
-    </header>
+{% block title %}
+<title>Catálogo de Cuentas</title>
+{% endblock %}
 
-    <nav>
-        <a href="{{ url_for('index') }}">
-            <i class="fa-solid fa-house"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="{{ url_for('analisis_vertical') }}">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Análisis Vertical</span>
-        </a>
-        <a href="{{ url_for('analisis_horizontal') }}">
-            <i class="fa-solid fa-chart-bar"></i>
-            <span>Análisis Horizontal</span>
-        </a>
-        <a href="{{ url_for('ratios_financieros') }}">
-            <i class="fa-solid fa-calculator"></i>
-            <span>Ratios Financieros</span>
-        </a>
-        <a href="{{ url_for('origen_aplicacion') }}">
-            <i class="fa-solid fa-right-left"></i>
-            <span>Origen y Aplicación</span>
-        </a>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='catalogo.css') }}">
+<h2 class="main-title">Gestión del Catálogo de Cuentas</h2>
+<p class="main-subtitle">Añade o edita las cuentas contables del sistema.</p>
 
-        {% if current_user.id_rol == 1 %}
-        <a href="{{ url_for('catalogo_cuentas') }}" class="active"> <i class="fa-solid fa-book"></i>
-            <span>Catálogo de Cuentas</span>
-        </a>
-        {% endif %}
-
-        <a href="{{ url_for('logout') }}" class="logout-button">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Cerrar Sesión</span>
-        </a>
-    </nav>
-
-    <main>
-        <h2 class="main-title">Gestión del Catálogo de Cuentas</h2>
-        <p class="main-subtitle">Añade o edita las cuentas contables del sistema.</p>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST" action="{{ url_for('catalogo_cuentas') }}" class="card" style="margin-bottom: 30px;">
-            <h3>Añadir Nueva Cuenta</h3>
-            <div class="form-grid">
-                <input type="text" name="codigo_cuenta" placeholder="Código (ej: 1101)" required>
-                <input type="text" name="nombre_cuenta" placeholder="Nombre (ej: Caja General)" required>
-                
-                <select name="tipo_cuenta" required>
-                    <option value="" disabled selected>Tipo de Cuenta...</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Pasivo">Pasivo</option>
-                    <option value="Patrimonio">Patrimonio</option>
-                    <option value="Ingreso">Ingreso</option>
-                    <option value="Costo">Costo</option>
-                    <option value="Gasto">Gasto</option>
-                </select>
-                
-                <select name="subtipo_cuenta" required>
-                    <option value="" disabled selected>SubTipo de Cuenta...</option>
-                    <optgroup label="Balance General">
-                        <option value="Activo Corriente">Activo Corriente</option>
-                        <option value="Activo No Corriente">Activo No Corriente</option>
-                        <option value="Pasivo Corriente">Pasivo Corriente</option>
-                        <option value="Pasivo No Corriente">Pasivo No Corriente</option>
-                        <option value="Patrimonio">Patrimonio</option>
-                    </optgroup>
-                    <optgroup label="Estado de Resultados">
-                        <option value="Ingreso">Ingreso</option>
-                        <option value="Costo">Costo</option>
-                        <option value="Gasto">Gasto</option>
-                    </optgroup>
-                </select>
-                
-                <button type="submit">Agregar Cuenta</button>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">
+                {{ message }}
             </div>
-        </form>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
-        <h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Cuentas Existentes</h2>
-        <table class="cuentas-tabla">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre de Cuenta</th>
-                    <th>Tipo de Cuenta</th>
-                    <th>SubTipo de Cuenta</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cuenta in cuentas %}
-                <tr>
-                    <td>{{ cuenta[0] }}</td> <td>{{ cuenta[1] }}</td> <td>{{ cuenta[2] }}</td> <td>{{ cuenta[3] }}</td> </tr>
-                {% else %}
-                <tr>
-                    <td colspan="4" style="text-align: center;">No hay cuentas registradas.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </main>
+<form method="POST" action="{{ url_for('catalogo_cuentas') }}" class="card" style="margin-bottom: 30px;">
+    <h3>Añadir Nueva Cuenta</h3>
+    <div class="form-grid">
+        <input type="text" name="cuenta_id" placeholder="Código (ej: 1101)" required>
+        <input type="text" name="nombre_cuenta" placeholder="Nombre (ej: Caja General)" required>
+        
+        <select name="tipo_cuenta" required>
+            <option value="" disabled selected>Tipo de Cuenta...</option>
+            <option value="Activo">Activo</option>
+            <option value="Pasivo">Pasivo</option>
+            <option value="Patrimonio">Patrimonio</option>
+            <option value="Ingreso">Ingreso</option>
+            <option value="Costo">Costo</option>
+            <option value="Gasto">Gasto</option>
+        </select>
+        
+        <select name="subtipo_cuenta" required>
+            <option value="" disabled selected>SubTipo de Cuenta...</option>
+            <optgroup label="Balance General">
+                <option value="Activo Corriente">Activo Corriente</option>
+                <option value="Activo No Corriente">Activo No Corriente</option>
+                <option value="Pasivo Corriente">Pasivo Corriente</option>
+                <option value="Pasivo No Corriente">Pasivo No Corriente</option>
+                <option value="Patrimonio">Patrimonio</option>
+            </optgroup>
+            <optgroup label="Estado de Resultados">
+                <option value="Ingreso">Ingreso</option>
+                <option value="Costo">Costo</option>
+                <option value="Gasto">Gasto</option>
+            </optgroup>
+        </select>
+        
+        <button type="submit">Agregar Cuenta</button>
+    </div>
+</form>
 
-    <footer>
-        <p>Proyecto desarrollado con Flask y SQL Server.</p>
-    </footer>
-
-</body>
-</html>
+<h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Cuentas Existentes</h2>
+<table class="cuentas-tabla">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nombre de Cuenta</th>
+            <th>Tipo de Cuenta</th>
+            <th>SubTipo de Cuenta</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cuenta in cuentas %}
+        <tr>
+            <td>{{ cuenta[0] }}</td> <td>{{ cuenta[1] }}</td> <td>{{ cuenta[2] }}</td> <td>{{ cuenta[3] }}</td> </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" style="text-align: center;">No hay cuentas registradas.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,145 +1,121 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ingresar Saldos de Período</title>
-    
-    <!-- Estilos compartidos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-    <!-- Estilo específico para esta página -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='saldos.css') }}">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <!-- Header y Nav (similar a otras páginas) -->
-    <header>
-        <h1><i class="fa-solid fa-chart-line"></i> Sistema de Análisis Financiero</h1>
-    </header>
+{% block title %}
+<title>Ingresar Saldos de Período</title>
+{% endblock %}
 
-    <nav>
-        <a href="{{ url_for('index') }}">
-            <i class="fa-solid fa-house"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="{{ url_for('analisis_vertical') }}">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Análisis Vertical</span>
-        </a>
-        <a href="{{ url_for('analisis_horizontal') }}">
-            <i class="fa-solid fa-chart-bar"></i>
-            <span>Análisis Horizontal</span>
-        </a>
-        <a href="{{ url_for('ratios_financieros') }}">
-            <i class="fa-solid fa-calculator"></i>
-            <span>Ratios Financieros</span>
-        </a>
-        <a href="{{ url_for('origen_aplicacion') }}">
-            <i class="fa-solid fa-right-left"></i>
-            <span>Origen y Aplicación</span>
-        </a>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='saldos.css') }}">
+<h2 class="main-title">Crear Nuevo Período Contable</h2>
+<p class="main-subtitle">Crea un nuevo período contable (año) con sus saldos iniciales. Los períodos contables son históricos y no pueden modificarse una vez creados.</p>
 
-        {% if current_user.id_rol == 1 %}
-        <a href="{{ url_for('catalogo_cuentas') }}">
-            <i class="fa-solid fa-book"></i>
-            <span>Catálogo</span>
-        </a>
-        <!-- Marcamos esta página como activa -->
-        <a href="{{ url_for('ingresar_saldos') }}" class="active">
-            <i class="fa-solid fa-file-invoice-dollar"></i>
-            <span>Ingresar Saldos</span>
-        </a>
-        {% endif %}
-
-        <a href="{{ url_for('logout') }}" class="logout-button">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Cerrar Sesión</span>
-        </a>
-    </nav>
-
-    <main>
-        <h2 class="main-title">Ingresar Saldos de Nuevo Período</h2>
-        <p class="main-subtitle">Completa los saldos para todas las cuentas del nuevo período.</p>
-
-        <!-- Mensajes Flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST" action="{{ url_for('ingresar_saldos') }}">
-            <!-- Sección 1: Datos del Período -->
-            <div class="card" style="margin-bottom: 30px;">
-                <h3>Datos del Período</h3>
-                <div class="form-grid-periodo">
-                    <div>
-                        <label for="anio">Año del Período</label>
-                        <input type="number" id="anio" name="anio" placeholder="Ej: 2024" required>
-                    </div>
-                    <div>
-                        <label for="fecha_cierre">Fecha de Cierre</label>
-                        <input type="date" id="fecha_cierre" name="fecha_cierre" required>
-                    </div>
-                </div>
+<!-- Mensajes Flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">
+                {{ message }}
             </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
-            <!-- Sección 2: Saldos de Cuentas -->
-            <h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Saldos de Cuentas</h2>
+<form method="POST" action="{{ url_for('ingresar_saldos') }}">
+    <!-- Sección 1: Datos del Período -->
+    <div class="card" style="margin-bottom: 30px;">
+        <h3>Datos del Nuevo Período</h3>
+        
+        <div class="form-grid-periodo">
+            <div>
+                <label for="anio">
+                    <i class="fa-solid fa-calendar"></i> Año del Período
+                </label>
+                <input type="number" 
+                       id="anio" 
+                       name="anio" 
+                       placeholder="Ej: 2024" 
+                       min="2000" 
+                       max="2100"
+                       value=""
+                       required>
+                <small style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px; display: block;">
+                    Ingresa el año del nuevo período contable
+                </small>
+            </div>
+            <div>
+                <label for="fecha_cierre">
+                    <i class="fa-solid fa-calendar-days"></i> Fecha de Cierre
+                </label>
+                <input type="date" 
+                       id="fecha_cierre" 
+                       name="fecha_cierre" 
+                       required>
+                <small style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px; display: block;">
+                    Fecha de cierre del período (ej: 31/12/2024)
+                </small>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border-left: 4px solid var(--success);">
+            <strong style="color: var(--success); display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-shield-check"></i> Seguridad e Integridad
+            </strong>
+            <p style="margin: 8px 0 0 0; color: var(--text-secondary); font-size: 0.9em; line-height: 1.6;">
+                Los períodos contables son registros históricos inmutables. Una vez creado un período con sus saldos, <strong>no podrá ser modificado</strong> para mantener la integridad de los datos financieros. Si necesitas corregir información, deberás crear un nuevo período.
+            </p>
+        </div>
+    </div>
+
+    <!-- Sección 2: Saldos de Cuentas -->
+    <h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Saldos de Cuentas</h2>
+    
+    <!-- Iteramos sobre los tipos principales (Activo, Pasivo, etc.) -->
+    {% for tipo, subtipos in cuentas_agrupadas.items() %}
+        <div class="account-group card">
+            <h3>{{ tipo }}</h3>
             
-            <!-- Iteramos sobre los tipos principales (Activo, Pasivo, etc.) -->
-            {% for tipo, subtipos in cuentas_agrupadas.items() %}
-                <div class="account-group card">
-                    <h3>{{ tipo }}</h3>
+            <!-- Iteramos sobre los subtipos (Activo Corriente, etc.) -->
+            {% for subtipo, cuentas in subtipos.items() %}
+                <h4>{{ subtipo }}</h4>
+                <div class="account-list">
                     
-                    <!-- Iteramos sobre los subtipos (Activo Corriente, etc.) -->
-                    {% for subtipo, cuentas in subtipos.items() %}
-                        <h4>{{ subtipo }}</h4>
-                        <div class="account-list">
-                            
-                            <!-- Iteramos sobre las cuentas finales -->
-                            {% for cuenta in cuentas %}
-                            <div class="account-input">
-                                <label for="monto-{{ cuenta.CuentaID }}">
-                                    ({{ cuenta.CuentaID }}) {{ cuenta.NombreCuenta }}
-                                </label>
-                                <!-- El 'name' es dinámico y crucial para el backend -->
-                                <input type="number" 
-                                       id="monto-{{ cuenta.CuentaID }}" 
-                                       name="monto-{{ cuenta.CuentaID }}" 
-                                       step="0.01" 
-                                       placeholder="C$ 0.00"
-                                       value="0.00">
-                            </div>
-                            {% endfor %}
-                        </div>
+                    <!-- Iteramos sobre las cuentas finales -->
+                    {% for cuenta in cuentas %}
+                    <div class="account-input">
+                        <label for="monto-{{ cuenta.CuentaID }}">
+                            ({{ cuenta.CuentaID }}) {{ cuenta.NombreCuenta }}
+                        </label>
+                        <!-- El 'name' es dinámico y crucial para el backend -->
+                        <input type="number" 
+                               id="monto-{{ cuenta.CuentaID }}" 
+                               name="monto-{{ cuenta.CuentaID }}" 
+                               step="0.01" 
+                               placeholder="C$ 0.00"
+                               value="0.00">
+                    </div>
                     {% endfor %}
                 </div>
             {% endfor %}
+        </div>
+    {% endfor %}
 
-            <!-- Botón de Envío Fijo -->
-            <div class="submit-wrapper">
-                <button type="submit" class="btn-submit-saldos">
-                    <i class="fa-solid fa-save"></i> Guardar Período Completo
-                </button>
-            </div>
-        </form>
+    <!-- Botón de Envío Fijo -->
+    <div class="submit-wrapper">
+        <button type="submit" class="btn-submit-saldos">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Crear Nuevo Período y Guardar Saldos</span>
+        </button>
+    </div>
+</form>
 
-    </main>
-
-    <footer>
-        <p>Proyecto desarrollado con Flask y SQL Server.</p>
-    </footer>
-
-</body>
-</html>
+<script>
+// Establecer año actual como sugerencia
+document.addEventListener('DOMContentLoaded', function() {
+    const yearInput = document.getElementById('anio');
+    if (yearInput && !yearInput.value) {
+        const currentYear = new Date().getFullYear();
+        yearInput.placeholder = `Ej: ${currentYear}`;
+    }
+});
+</script>
+{% endblock %}

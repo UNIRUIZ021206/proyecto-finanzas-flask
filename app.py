@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+import math
 from sqlalchemy import create_engine, text
 from livereload import Server
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -16,6 +17,15 @@ import bcrypt
 # --- 1. Configuración Inicial ---
 app = Flask(__name__)
 load_dotenv() # Carga las variables del archivo .env
+
+# --- Filtro personalizado para Jinja2: verificar si un valor es infinito ---
+@app.template_filter('is_inf')
+def is_inf(value):
+    """Filtro para verificar si un valor es infinito"""
+    try:
+        return math.isinf(float(value))
+    except (ValueError, TypeError):
+        return False
 
 # --- CORRECCIÓN DE SEGURIDAD ---
 # ¡MUY IMPORTANTE! Leemos la SECRET_KEY desde las variables de entorno.
@@ -388,7 +398,157 @@ def analisis_vertical():
 @app.route('/analisis-horizontal/')
 @login_required
 def analisis_horizontal():
-    return "Página de Análisis Horizontal - En construcción"
+    periodo_base = request.args.get('periodo_base', type=int)
+    periodo_analisis = request.args.get('periodo_analisis', type=int)
+    periodos = []
+    report_data_base = None
+    report_data_analisis = None
+    analisis_comparativo = None
+    
+    try:
+        with engine.connect() as conn:
+            periodos_query = text("SELECT Anio FROM Periodo ORDER BY Anio DESC")
+            periodos_result = conn.execute(periodos_query).fetchall()
+            periodos = [row[0] for row in periodos_result]
+            
+            # Validación: el período base debe ser menor que el período de análisis
+            if periodo_base and periodo_analisis:
+                if periodo_base >= periodo_analisis:
+                    flash('El período base debe ser menor que el período de análisis.', 'error')
+                    periodo_base = None
+                    periodo_analisis = None
+                else:
+                    # Obtener datos de ambos períodos
+                    report_data_base = get_financial_reports(periodo_base)
+                    report_data_analisis = get_financial_reports(periodo_analisis)
+                    
+                    if not report_data_base:
+                        flash(f'No se encontraron datos para el período base {periodo_base}.', 'error')
+                    elif not report_data_analisis:
+                        flash(f'No se encontraron datos para el período de análisis {periodo_analisis}.', 'error')
+                    else:
+                        # Calcular análisis comparativo
+                        analisis_comparativo = calcular_analisis_horizontal(report_data_base, report_data_analisis)
+    
+    except Exception as e:
+        print(f"Error en la ruta /analisis-horizontal: {e}")
+        flash('Error al conectar con la base de datos.', 'error')
+    
+    return render_template('analisis_horizontal.html',
+                           periodos=periodos,
+                           periodo_base=periodo_base,
+                           periodo_analisis=periodo_analisis,
+                           report_data_base=report_data_base,
+                           report_data_analisis=report_data_analisis,
+                           analisis_comparativo=analisis_comparativo)
+
+
+def calcular_analisis_horizontal(report_data_base, report_data_analisis):
+    """
+    Calcula el análisis horizontal comparando dos períodos.
+    Retorna una estructura similar a report_data pero con valores absolutos y relativos.
+    """
+    analisis = {
+        'Activo': defaultdict(list),
+        'Pasivo': defaultdict(list),
+        'Patrimonio': defaultdict(list),
+        'Ingreso': defaultdict(list),
+        'Costo': defaultdict(list),
+        'Gasto': defaultdict(list),
+        'Totales': defaultdict(lambda: {'base': 0.0, 'analisis': 0.0, 'absoluto': 0.0, 'relativo': 0.0})
+    }
+    
+    # Tipos de cuenta a procesar
+    tipos_cuenta = ['Activo', 'Pasivo', 'Patrimonio', 'Ingreso', 'Costo', 'Gasto']
+    
+    for tipo in tipos_cuenta:
+        if tipo in report_data_base and tipo in report_data_analisis:
+            for subtipo in report_data_base[tipo].keys():
+                if subtipo not in report_data_analisis[tipo]:
+                    continue
+                
+                # Obtener cuentas de ambos períodos
+                cuentas_base = {cuenta['id']: cuenta for cuenta in report_data_base[tipo][subtipo]}
+                cuentas_analisis = {cuenta['id']: cuenta for cuenta in report_data_analisis[tipo][subtipo]}
+                
+                # Procesar todas las cuentas (pueden existir en uno u otro período)
+                todas_las_cuentas = set(cuentas_base.keys()) | set(cuentas_analisis.keys())
+                
+                for cuenta_id in todas_las_cuentas:
+                    monto_base = cuentas_base.get(cuenta_id, {}).get('monto', 0.0)
+                    monto_analisis = cuentas_analisis.get(cuenta_id, {}).get('monto', 0.0)
+                    
+                    # Valor absoluto: período2 - período1
+                    valor_absoluto = monto_analisis - monto_base
+                    
+                    # Valor relativo: ((período2/período1) - 1) * 100
+                    if monto_base != 0:
+                        valor_relativo = ((monto_analisis / monto_base) - 1) * 100
+                    else:
+                        # Si el período base es 0, el valor relativo es 0 o infinito
+                        valor_relativo = 0.0 if monto_analisis == 0 else float('inf')
+                    
+                    # Determinar color según el valor relativo
+                    if valor_relativo < 0:
+                        color_clase = 'valor-negativo'
+                    elif valor_relativo > 0:
+                        color_clase = 'valor-positivo'
+                    else:
+                        color_clase = 'valor-cero'
+                    
+                    cuenta_nombre = cuentas_analisis.get(cuenta_id, cuentas_base.get(cuenta_id, {})).get('nombre', f'Cuenta {cuenta_id}')
+                    
+                    analisis[tipo][subtipo].append({
+                        'id': cuenta_id,
+                        'nombre': cuenta_nombre,
+                        'monto_base': monto_base,
+                        'monto_analisis': monto_analisis,
+                        'absoluto': valor_absoluto,
+                        'relativo': valor_relativo,
+                        'color_clase': color_clase
+                    })
+    
+    # Calcular totales
+    for tipo in tipos_cuenta:
+        if tipo in report_data_base.get('Totales', {}) and tipo in report_data_analisis.get('Totales', {}):
+            total_base = report_data_base['Totales'].get(tipo, 0.0)
+            total_analisis = report_data_analisis['Totales'].get(tipo, 0.0)
+            total_absoluto = total_analisis - total_base
+            if total_base != 0:
+                total_relativo = ((total_analisis / total_base) - 1) * 100
+            else:
+                total_relativo = 0.0 if total_analisis == 0 else float('inf')
+            
+            if total_relativo < 0:
+                color_clase = 'valor-negativo'
+            elif total_relativo > 0:
+                color_clase = 'valor-positivo'
+            else:
+                color_clase = 'valor-cero'
+            
+            analisis['Totales'][tipo] = {
+                'base': total_base,
+                'analisis': total_analisis,
+                'absoluto': total_absoluto,
+                'relativo': total_relativo,
+                'color_clase': color_clase
+            }
+    
+    # Calcular totales principales (Total Activo, Total Pasivo, etc.)
+    if 'Total Activo' in report_data_base['Totales']:
+        total_base = report_data_base['Totales']['Total Activo']
+        total_analisis = report_data_analisis['Totales']['Total Activo']
+        total_absoluto = total_analisis - total_base
+        total_relativo = ((total_analisis / total_base) - 1) * 100 if total_base != 0 else 0.0
+        analisis['Totales']['Total Activo'] = {
+            'base': total_base,
+            'analisis': total_analisis,
+            'absoluto': total_absoluto,
+            'relativo': total_relativo,
+            'color_clase': 'valor-positivo' if total_relativo > 0 else ('valor-negativo' if total_relativo < 0 else 'valor-cero')
+        }
+    
+    return analisis
 
 @app.route('/ratios-financieros/')
 @login_required
@@ -482,41 +642,66 @@ def ingresar_saldos():
         anio = request.form.get('anio')
         fecha_cierre = request.form.get('fecha_cierre')
 
+        # Validación: ambos campos son obligatorios
         if not anio or not fecha_cierre:
-            flash('El Año y la Fecha de Cierre son requeridos.', 'error')
+            flash('El Año y la Fecha de Cierre son requeridos para crear un nuevo período.', 'error')
             return redirect(url_for('ingresar_saldos'))
 
         # Usamos engine.begin() para una transacción automática (commit o rollback)
         try:
             with engine.begin() as conn:
-                # 1. Verificar si el Período (Año) ya existe
+                # Verificar si el período (año) ya existe
                 query_check_periodo = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
                 existe = conn.execute(query_check_periodo, {"anio": anio}).fetchone()
                 
                 if existe:
-                    flash(f'El período para el año {anio} ya existe. No se pueden duplicar.', 'error')
+                    flash(f'El período para el año {anio} ya existe. No se pueden crear períodos duplicados. Los períodos contables son históricos e inmutables.', 'error')
                     return redirect(url_for('ingresar_saldos'))
 
-                # 2. Crear el nuevo Período
+                # Validar que el año sea razonable
+                try:
+                    anio_int = int(anio)
+                    if anio_int < 2000 or anio_int > 2100:
+                        flash('El año debe estar entre 2000 y 2100.', 'error')
+                        return redirect(url_for('ingresar_saldos'))
+                except (ValueError, TypeError):
+                    flash('El año ingresado no es válido. Por favor ingresa un número válido.', 'error')
+                    return redirect(url_for('ingresar_saldos'))
+
+                # CREAR EL NUEVO PERÍODO (NUEVO AÑO CONTABLE)
+                # Los períodos contables son históricos e inmutables - no se pueden editar
+                # Insertar el período
                 query_insert_periodo = text("""
                     INSERT INTO Periodo (Anio, FechaCierre) 
                     VALUES (:anio, :fecha_cierre);
                 """)
                 conn.execute(query_insert_periodo, {"anio": anio, "fecha_cierre": fecha_cierre})
                 
-                # 3. Obtener el PeriodoID que se acaba de crear
-                # Nota: SCOPE_IDENTITY() es específico de SQL Server
-                query_get_new_id = text("SELECT SCOPE_IDENTITY()")
-                periodo_id = conn.execute(query_get_new_id).scalar()
+                # Obtener el PeriodoID que se acaba de crear usando SCOPE_IDENTITY()
+                query_get_new_id = text("SELECT SCOPE_IDENTITY() AS PeriodoID")
+                result = conn.execute(query_get_new_id)
+                row = result.fetchone()
+                
+                if not row or not row[0]:
+                    # Si SCOPE_IDENTITY() falla, intentamos obtener el ID por el año (fallback)
+                    query_fallback = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
+                    result_fallback = conn.execute(query_fallback, {"anio": anio})
+                    row_fallback = result_fallback.fetchone()
+                    if row_fallback and row_fallback[0]:
+                        periodo_id_final = int(row_fallback[0])
+                    else:
+                        raise Exception("No se pudo obtener el nuevo PeriodoID después de crear el período.")
+                else:
+                    periodo_id_final = int(row[0])
+                
+                anio_final = anio
+                print(f"✅ PERÍODO NUEVO CREADO EXITOSAMENTE: Año {anio_final}, PeriodoID: {periodo_id_final}, Fecha Cierre: {fecha_cierre}")
 
-                if not periodo_id:
-                    raise Exception("No se pudo obtener el nuevo PeriodoID.")
-
-                # 4. Obtener TODAS las CuentasID del Catálogo
+                # Obtener TODAS las CuentasID del Catálogo
                 query_get_cuentas = text("SELECT CuentaID FROM CatalogoCuentas")
                 todas_las_cuentas = conn.execute(query_get_cuentas).fetchall()
 
-                # 5. Iterar e insertar cada Saldo
+                # Insertar cada saldo (solo INSERT, no UPDATE - los períodos no se editan)
                 query_insert_saldo = text("""
                     INSERT INTO SaldoCuenta (PeriodoID, CuentaID, Monto) 
                     VALUES (:periodo_id, :cuenta_id, :monto)
@@ -524,41 +709,37 @@ def ingresar_saldos():
                 
                 for cuenta in todas_las_cuentas:
                     cuenta_id = cuenta[0]
-                    # Construimos el 'name' del input (ej: 'monto-1101')
                     form_field_name = f"monto-{cuenta_id}"
-                    
-                    # Obtenemos el valor del formulario, default '0' si no viene
                     monto_str = request.form.get(form_field_name, '0').strip()
                     
                     try:
-                        # Convertimos a Decimal para precisión monetaria
                         monto_decimal = Decimal(monto_str if monto_str else '0.00')
                     except InvalidOperation:
                         monto_decimal = Decimal('0.00')
 
-                    # Insertar el saldo (incluso si es 0)
+                    # Insertar el saldo (solo para nuevos períodos)
                     conn.execute(query_insert_saldo, {
-                        "periodo_id": periodo_id,
+                        "periodo_id": periodo_id_final,
                         "cuenta_id": cuenta_id,
                         "monto": monto_decimal
                     })
-            
-            # Si todo salió bien, la transacción (with engine.begin()) hace COMMIT aquí
-            flash(f'Período {anio} y todos sus saldos fueron guardados exitosamente.', 'success')
-            return redirect(url_for('gestion', anio=anio)) # Redirigir a la gestión de ese año
+
+            # Si todo salió bien, la transacción hace COMMIT aquí
+            flash(f'Período {anio_final} creado exitosamente con todos sus saldos guardados.', 'success')
+            return redirect(url_for('gestion', anio=anio_final))
 
         except Exception as e:
-            # Si algo falló, la transacción hace ROLLBACK aquí
             print(f"Error al ingresar saldos (POST): {e}")
-            flash(f'Error grave al guardar el período. La operación fue revertida. {e}', 'error')
+            flash(f'Error al guardar los saldos. La operación fue revertida. {e}', 'error')
             return redirect(url_for('ingresar_saldos'))
 
 
     # --- Lógica GET (Cuando cargas la página) ---
     cuentas_agrupadas = defaultdict(lambda: defaultdict(list))
+    
     try:
         with engine.connect() as conn:
-            # Obtenemos todas las cuentas ordenadas
+            # Obtener todas las cuentas ordenadas
             query_get = text("""
                 SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta 
                 FROM CatalogoCuentas 
@@ -574,7 +755,8 @@ def ingresar_saldos():
         print(f"Error en ingresar_saldos (GET): {e}")
         flash('Error al cargar el catálogo de cuentas.', 'error')
 
-    return render_template('ingresar_saldos.html', cuentas_agrupadas=cuentas_agrupadas)
+    return render_template('ingresar_saldos.html', 
+                          cuentas_agrupadas=cuentas_agrupadas)
 
 
 # --- 6. Ejecución con LiveReload ---
