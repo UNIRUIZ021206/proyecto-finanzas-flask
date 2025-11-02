@@ -981,7 +981,7 @@ select:focus {
     background: rgba(16, 185, 129, 0.1);
     padding: 4px 8px;
     border-radius: 4px;
-    display: inline-block;
+    /* display: inline-block; <-- ESTA LÍNEA FUE ELIMINADA */
 }
 
 .valor-negativo {
@@ -990,7 +990,7 @@ select:focus {
     background: rgba(239, 68, 68, 0.1);
     padding: 4px 8px;
     border-radius: 4px;
-    display: inline-block;
+    /* display: inline-block; <-- ESTA LÍNEA FUE ELIMINADA */
 }
 
 .valor-cero {
@@ -999,7 +999,7 @@ select:focus {
     background: rgba(107, 114, 128, 0.1);
     padding: 4px 8px;
     border-radius: 4px;
-    display: inline-block;
+    /* display: inline-block; <-- ESTA LÍNEA FUE ELIMINADA */
 }
 
 /* Aplicar estilos a las celdas de la tabla */
@@ -1014,4 +1014,5 @@ select:focus {
 .report-table td.valor-cero strong {
     color: inherit;
 }
+
 

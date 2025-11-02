@@ -1,21 +1,17 @@
 {% extends "base.html" %}
 
-<!-- Sobreescribimos el bloque 'title' -->
 {% block title %}
 <title>Análisis Horizontal - Sistema Financiero</title>
 {% endblock %}
 
-<!-- Sobreescribimos el bloque 'content' con el contenido de esta página -->
 {% block content %}
 
 <div class="container-fluid my-4">
-    <!-- Título y Selectores -->
     <div class="row mb-4">
         <div class="col-12">
             <h2 class="main-title mb-3">Análisis Horizontal</h2>
             <p class="main-subtitle mb-4">Comparación de estados financieros entre dos períodos (Valor Absoluto y Valor Relativo %).</p>
             
-            <!-- Selectores de Períodos -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <form method="GET" action="{{ url_for('analisis_horizontal') }}">
@@ -57,25 +53,22 @@
         </div>
     </div>
 
-    <!-- Mensajes Flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
                 <div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'warning') }} alert-dismissible fade show" role="alert">
                     <i class="fa-solid fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button typebutton" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
-    <!-- Contenedor de Reportes -->
     {% if analisis_comparativo %}
     <div class="row">
         <div class="col-12">
             
-            <!-- ========== BALANCE GENERAL ========== -->
             <div class="card shadow-lg mb-5">
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">
@@ -85,7 +78,6 @@
                 </div>
                 <div class="card-body p-0">
                     
-                    <!-- ACTIVOS -->
                     <div class="table-responsive">
                         <table class="table table-bordered border-primary mb-0">
                             <thead class="table-primary">
@@ -108,13 +100,16 @@
                                         <td class="ps-4">{{ cuenta.nombre }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_base) }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_analisis) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">
-                                            {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">
+                                                {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    <!-- Subtotal del subtipo -->
                                     {% if subtipo in report_data_base.get('Totales', {}) and subtipo in report_data_analisis.get('Totales', {}) %}
                                         {% set subtotal_base = report_data_base.Totales.get(subtipo, 0.0) %}
                                         {% set subtotal_analisis = report_data_analisis.Totales.get(subtipo, 0.0) %}
@@ -131,32 +126,38 @@
                                             <td class="ps-4 fw-bold">Total {{ subtipo }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_base) }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_analisis) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">
-                                                {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</span>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">
+                                                    {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                                </span>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
                                 {% endif %}
-                                <!-- Total Activo -->
                                 <tr class="table-dark">
                                     <td class="fw-bold fs-5">TOTAL ACTIVO</td>
                                     <td class="text-end fw-bold fs-5">{{ "%.2f"|format(analisis_comparativo.Totales.get('Total Activo', {}).get('base', 0.0)) }}</td>
                                     <td class="text-end fw-bold fs-5">{{ "%.2f"|format(analisis_comparativo.Totales.get('Total Activo', {}).get('analisis', 0.0)) }}</td>
-                                    <td class="text-end fw-bold fs-5 {{ analisis_comparativo.Totales.get('Total Activo', {}).get('color_clase', '') }}">
-                                        {{ "%.2f"|format(analisis_comparativo.Totales.get('Total Activo', {}).get('absoluto', 0.0)) }}
+                                    <td class="text-end fw-bold fs-5">
+                                        <span class="{{ analisis_comparativo.Totales.get('Total Activo', {}).get('color_clase', '') }}">
+                                            {{ "%.2f"|format(analisis_comparativo.Totales.get('Total Activo', {}).get('absoluto', 0.0)) }}
+                                        </span>
                                     </td>
-                                    <td class="text-end fw-bold fs-5 {{ analisis_comparativo.Totales.get('Total Activo', {}).get('color_clase', '') }}">
-                                        {% set total_activo = analisis_comparativo.Totales.get('Total Activo', {}) %}
-                                        {% if total_activo.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_activo.get('relativo', 0.0)) }}%{% endif %}
+                                    <td class="text-end fw-bold fs-5">
+                                        <span class="{{ analisis_comparativo.Totales.get('Total Activo', {}).get('color_clase', '') }}">
+                                            {% set total_activo = analisis_comparativo.Totales.get('Total Activo', {}) %}
+                                            {% if total_activo.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_activo.get('relativo', 0.0)) }}%{% endif %}
+                                        </span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- PASIVO Y PATRIMONIO -->
                     <div class="table-responsive">
                         <table class="table table-bordered border-primary mb-0">
                             <thead class="table-primary">
@@ -179,13 +180,16 @@
                                         <td class="ps-4">{{ cuenta.nombre }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_base) }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_analisis) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">
-                                            {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">
+                                                {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    <!-- Subtotal del subtipo -->
                                     {% if subtipo in report_data_base.get('Totales', {}) and subtipo in report_data_analisis.get('Totales', {}) %}
                                         {% set subtotal_base = report_data_base.Totales.get(subtipo, 0.0) %}
                                         {% set subtotal_analisis = report_data_analisis.Totales.get(subtipo, 0.0) %}
@@ -202,24 +206,31 @@
                                             <td class="ps-4 fw-bold">Total {{ subtipo }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_base) }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_analisis) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">
-                                                {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</span>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">
+                                                    {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                                </span>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <!-- Total Pasivo -->
                                 <tr class="table-warning">
                                     <td class="fw-bold">TOTAL PASIVO</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Pasivo', {}).get('base', 0.0)) }}</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Pasivo', {}).get('analisis', 0.0)) }}</td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Pasivo', {}).get('color_clase', '') }}">
-                                        {{ "%.2f"|format(analisis_comparativo.Totales.get('Pasivo', {}).get('absoluto', 0.0)) }}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Pasivo', {}).get('color_clase', '') }}">
+                                            {{ "%.2f"|format(analisis_comparativo.Totales.get('Pasivo', {}).get('absoluto', 0.0)) }}
+                                        </span>
                                     </td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Pasivo', {}).get('color_clase', '') }}">
-                                        {% set total_pasivo = analisis_comparativo.Totales.get('Pasivo', {}) %}
-                                        {% if total_pasivo.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_pasivo.get('relativo', 0.0)) }}%{% endif %}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Pasivo', {}).get('color_clase', '') }}">
+                                            {% set total_pasivo = analisis_comparativo.Totales.get('Pasivo', {}) %}
+                                            {% if total_pasivo.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_pasivo.get('relativo', 0.0)) }}%{% endif %}
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endif %}
@@ -234,13 +245,16 @@
                                         <td class="ps-4">{{ cuenta.nombre }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_base) }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_analisis) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">
-                                            {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">
+                                                {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    <!-- Subtotal del subtipo -->
                                     {% if subtipo in report_data_base.get('Totales', {}) and subtipo in report_data_analisis.get('Totales', {}) %}
                                         {% set subtotal_base = report_data_base.Totales.get(subtipo, 0.0) %}
                                         {% set subtotal_analisis = report_data_analisis.Totales.get(subtipo, 0.0) %}
@@ -257,24 +271,31 @@
                                             <td class="ps-4 fw-bold">Total {{ subtipo }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_base) }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_analisis) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">
-                                                {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</span>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">
+                                                    {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                                </span>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <!-- Total Patrimonio -->
                                 <tr class="table-warning">
                                     <td class="fw-bold">TOTAL PATRIMONIO</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Patrimonio', {}).get('base', 0.0)) }}</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Patrimonio', {}).get('analisis', 0.0)) }}</td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Patrimonio', {}).get('color_clase', '') }}">
-                                        {{ "%.2f"|format(analisis_comparativo.Totales.get('Patrimonio', {}).get('absoluto', 0.0)) }}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Patrimonio', {}).get('color_clase', '') }}">
+                                            {{ "%.2f"|format(analisis_comparativo.Totales.get('Patrimonio', {}).get('absoluto', 0.0)) }}
+                                        </span>
                                     </td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Patrimonio', {}).get('color_clase', '') }}">
-                                        {% set total_patrimonio = analisis_comparativo.Totales.get('Patrimonio', {}) %}
-                                        {% if total_patrimonio.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_patrimonio.get('relativo', 0.0)) }}%{% endif %}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Patrimonio', {}).get('color_clase', '') }}">
+                                            {% set total_patrimonio = analisis_comparativo.Totales.get('Patrimonio', {}) %}
+                                            {% if total_patrimonio.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_patrimonio.get('relativo', 0.0)) }}%{% endif %}
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endif %}
@@ -284,7 +305,6 @@
                 </div>
             </div>
 
-            <!-- ========== ESTADO DE RESULTADOS ========== -->
             <div class="card shadow-lg mb-5">
                 <div class="card-header bg-success text-white">
                     <h3 class="mb-0">
@@ -305,7 +325,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Ingresos -->
                                 {% if 'Ingreso' in analisis_comparativo %}
                                 {% for subtipo, cuentas in analisis_comparativo.Ingreso.items() %}
                                 <tr class="table-info">
@@ -316,13 +335,16 @@
                                         <td class="ps-4">{{ cuenta.nombre }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_base) }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_analisis) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">
-                                            {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">
+                                                {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    <!-- Subtotal del subtipo -->
                                     {% if subtipo in report_data_base.get('Totales', {}) and subtipo in report_data_analisis.get('Totales', {}) %}
                                         {% set subtotal_base = report_data_base.Totales.get(subtipo, 0.0) %}
                                         {% set subtotal_analisis = report_data_analisis.Totales.get(subtipo, 0.0) %}
@@ -339,29 +361,35 @@
                                             <td class="ps-4 fw-bold">Total {{ subtipo }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_base) }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_analisis) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">
-                                                {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</span>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">
+                                                    {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                                </span>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <!-- Total Ingresos -->
                                 <tr class="table-success">
                                     <td class="fw-bold">TOTAL INGRESOS</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Ingreso', {}).get('base', 0.0)) }}</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Ingreso', {}).get('analisis', 0.0)) }}</td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Ingreso', {}).get('color_clase', '') }}">
-                                        {{ "%.2f"|format(analisis_comparativo.Totales.get('Ingreso', {}).get('absoluto', 0.0)) }}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Ingreso', {}).get('color_clase', '') }}">
+                                            {{ "%.2f"|format(analisis_comparativo.Totales.get('Ingreso', {}).get('absoluto', 0.0)) }}
+                                        </span>
                                     </td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Ingreso', {}).get('color_clase', '') }}">
-                                        {% set total_ingreso = analisis_comparativo.Totales.get('Ingreso', {}) %}
-                                        {% if total_ingreso.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_ingreso.get('relativo', 0.0)) }}%{% endif %}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Ingreso', {}).get('color_clase', '') }}">
+                                            {% set total_ingreso = analisis_comparativo.Totales.get('Ingreso', {}) %}
+                                            {% if total_ingreso.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_ingreso.get('relativo', 0.0)) }}%{% endif %}
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endif %}
 
-                                <!-- Costos -->
                                 {% if 'Costo' in analisis_comparativo %}
                                 {% for subtipo, cuentas in analisis_comparativo.Costo.items() %}
                                 <tr class="table-info">
@@ -372,13 +400,16 @@
                                         <td class="ps-4">{{ cuenta.nombre }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_base) }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_analisis) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">
-                                            {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">
+                                                {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    <!-- Subtotal del subtipo -->
                                     {% if subtipo in report_data_base.get('Totales', {}) and subtipo in report_data_analisis.get('Totales', {}) %}
                                         {% set subtotal_base = report_data_base.Totales.get(subtipo, 0.0) %}
                                         {% set subtotal_analisis = report_data_analisis.Totales.get(subtipo, 0.0) %}
@@ -395,29 +426,35 @@
                                             <td class="ps-4 fw-bold">Total {{ subtipo }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_base) }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_analisis) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">
-                                                {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</span>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">
+                                                    {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                                </span>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <!-- Total Costos -->
                                 <tr class="table-danger">
                                     <td class="fw-bold">TOTAL COSTOS</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Costo', {}).get('base', 0.0)) }}</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Costo', {}).get('analisis', 0.0)) }}</td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Costo', {}).get('color_clase', '') }}">
-                                        {{ "%.2f"|format(analisis_comparativo.Totales.get('Costo', {}).get('absoluto', 0.0)) }}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Costo', {}).get('color_clase', '') }}">
+                                            {{ "%.2f"|format(analisis_comparativo.Totales.get('Costo', {}).get('absoluto', 0.0)) }}
+                                        </span>
                                     </td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Costo', {}).get('color_clase', '') }}">
-                                        {% set total_costo = analisis_comparativo.Totales.get('Costo', {}) %}
-                                        {% if total_costo.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_costo.get('relativo', 0.0)) }}%{% endif %}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Costo', {}).get('color_clase', '') }}">
+                                            {% set total_costo = analisis_comparativo.Totales.get('Costo', {}) %}
+                                            {% if total_costo.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_costo.get('relativo', 0.0)) }}%{% endif %}
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endif %}
 
-                                <!-- Gastos -->
                                 {% if 'Gasto' in analisis_comparativo %}
                                 {% for subtipo, cuentas in analisis_comparativo.Gasto.items() %}
                                 <tr class="table-info">
@@ -428,13 +465,16 @@
                                         <td class="ps-4">{{ cuenta.nombre }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_base) }}</td>
                                         <td class="text-end">{{ "%.2f"|format(cuenta.monto_analisis) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</td>
-                                        <td class="text-end {{ cuenta.color_clase }}">
-                                            {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">{{ "%.2f"|format(cuenta.absoluto) }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="{{ cuenta.color_clase }}">
+                                                {% if cuenta.relativo | is_inf %}∞{% else %}{{ "%.2f"|format(cuenta.relativo) }}%{% endif %}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                    <!-- Subtotal del subtipo -->
                                     {% if subtipo in report_data_base.get('Totales', {}) and subtipo in report_data_analisis.get('Totales', {}) %}
                                         {% set subtotal_base = report_data_base.Totales.get(subtipo, 0.0) %}
                                         {% set subtotal_analisis = report_data_analisis.Totales.get(subtipo, 0.0) %}
@@ -451,24 +491,31 @@
                                             <td class="ps-4 fw-bold">Total {{ subtipo }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_base) }}</td>
                                             <td class="text-end fw-bold">{{ "%.2f"|format(subtotal_analisis) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</td>
-                                            <td class="text-end fw-bold {{ subtotal_color }}">
-                                                {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">{{ "%.2f"|format(subtotal_absoluto) }}</span>
+                                            </td>
+                                            <td class="text-end fw-bold">
+                                                <span class="{{ subtotal_color }}">
+                                                    {% if subtotal_relativo | is_inf %}∞{% else %}{{ "%.2f"|format(subtotal_relativo) }}%{% endif %}
+                                                </span>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <!-- Total Gastos -->
                                 <tr class="table-danger">
                                     <td class="fw-bold">TOTAL GASTOS</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Gasto', {}).get('base', 0.0)) }}</td>
                                     <td class="text-end fw-bold">{{ "%.2f"|format(analisis_comparativo.Totales.get('Gasto', {}).get('analisis', 0.0)) }}</td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Gasto', {}).get('color_clase', '') }}">
-                                        {{ "%.2f"|format(analisis_comparativo.Totales.get('Gasto', {}).get('absoluto', 0.0)) }}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Gasto', {}).get('color_clase', '') }}">
+                                            {{ "%.2f"|format(analisis_comparativo.Totales.get('Gasto', {}).get('absoluto', 0.0)) }}
+                                        </span>
                                     </td>
-                                    <td class="text-end fw-bold {{ analisis_comparativo.Totales.get('Gasto', {}).get('color_clase', '') }}">
-                                        {% set total_gasto = analisis_comparativo.Totales.get('Gasto', {}) %}
-                                        {% if total_gasto.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_gasto.get('relativo', 0.0)) }}%{% endif %}
+                                    <td class="text-end fw-bold">
+                                        <span class="{{ analisis_comparativo.Totales.get('Gasto', {}).get('color_clase', '') }}">
+                                            {% set total_gasto = analisis_comparativo.Totales.get('Gasto', {}) %}
+                                            {% if total_gasto.get('relativo', 0) | is_inf %}∞{% else %}{{ "%.2f"|format(total_gasto.get('relativo', 0.0)) }}%{% endif %}
+                                        </span>
                                     </td>
                                 </tr>
                                 {% endif %}
