@@ -2,9 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from sqlalchemy import create_engine, text
 from livereload import Server
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from functools import wraps
 from collections import defaultdict # Para organizar los reportes
+from decimal import Decimal, InvalidOperation # <-- Importación añadida
 
-# --- NUEVO: Integración con Gemini ---
+# --- Integración con Gemini ---
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -13,20 +15,24 @@ import bcrypt
 
 # --- 1. Configuración Inicial ---
 app = Flask(__name__)
-# ¡MUY IMPORTANTE! Flask-Login necesita una 'secret_key' para firmar las cookies de sesión.
-app.config['SECRET_KEY'] = 'esta-es-mi-llave-secreta-y-es-genial'
 load_dotenv() # Carga las variables del archivo .env
 
+# --- CORRECCIÓN DE SEGURIDAD ---
+# ¡MUY IMPORTANTE! Leemos la SECRET_KEY desde las variables de entorno.
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'una-llave-por-defecto-si-no-hay-env')
+
+
 # --- 2. Configuración de la Conexión a SQL Server ---
-# ¡Configuración corregida con tu servidor y BD!
-SERVER_NAME = r'(localdb)\Universidad'
-DATABASE_NAME = 'FinanzaDB' # <-- SIN la 's'
-DRIVER_NAME = 'ODBC Driver 17 for SQL Server'
+# --- CORRECCIÓN DE CONFIGURACIÓN ---
+# Leemos los datos de conexión desde el archivo .env
+SERVER_NAME = os.getenv('SERVER_NAME', r'(localdb)\Universidad')
+DATABASE_NAME = os.getenv('DATABASE_NAME', 'FinanzaDB')
+DRIVER_NAME = os.getenv('DRIVER_NAME', 'ODBC Driver 17 for SQL Server')
 
 connection_string = f"mssql+pyodbc://@{SERVER_NAME}/{DATABASE_NAME}?driver={DRIVER_NAME}&trusted_connection=yes"
 engine = create_engine(connection_string)
 
-# --- NUEVO: Configuración de la API de Gemini ---
+# --- Configuración de la API de Gemini ---
 try:
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     if not GEMINI_API_KEY:
@@ -53,6 +59,7 @@ class User(UserMixin):
 def load_user(user_id):
     try:
         with engine.connect() as conn:
+            # Asumimos que la tabla de usuarios se llama 'Usuarios'
             query = text("SELECT Id_Usuario, Correo, Id_Rol FROM Usuarios WHERE Id_Usuario = :id AND Estado = 1")
             result = conn.execute(query, {"id": int(user_id)}).fetchone()
             if result:
@@ -79,6 +86,7 @@ def login():
 
         try:
             with engine.connect() as conn:
+                # Asumimos que la tabla de usuarios se llama 'Usuarios'
                 query = text("SELECT Id_Usuario, Correo, Contrasena, Id_Rol FROM Usuarios WHERE Correo = :correo AND Estado = 1")
                 result = conn.execute(query, {"correo": correo}).fetchone()
 
@@ -101,6 +109,16 @@ def login():
 
     return render_template('login.html')
 
+# --- Decorador de Administrador ---
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Asumimos que el ID_Rol 1 es el Administrador
+        if not current_user.is_authenticated or current_user.id_rol != 1:
+            flash('No tienes permiso para acceder a esta página.', 'error')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/logout')
 @login_required
@@ -116,13 +134,13 @@ def index():
     """Página de Bienvenida (Index)"""
     return render_template('index.html')
 
-# --- Ruta de Gestión ---
+# --- Ruta de Gestión (Tu nueva función) ---
 
 def get_financial_reports(anio_seleccionado):
     """
     Función de ayuda para buscar en la BD y estructurar los datos
     para el Balance General y el Estado de Resultados.
-    CORREGIDO: Suma montos sin abs() para manejar contra-cuentas.
+    (Esta función SÍ COINCIDÍA con tu esquema)
     """
     print(f"\n--- Iniciando get_financial_reports para el año: {anio_seleccionado} ---") # DEBUG
     
@@ -133,12 +151,12 @@ def get_financial_reports(anio_seleccionado):
         'Ingreso': defaultdict(list),
         'Costo': defaultdict(list),
         'Gasto': defaultdict(list),
-        'Totales': defaultdict(float) # Usamos defaultdict para inicializar en 0.0
+        'Totales': defaultdict(float) 
     }
     
     try:
         with engine.connect() as conn:
-            # 1. Obtener el PeriodoID
+            # 1. Obtener el PeriodoID (Coincide con tu esquema)
             periodo_query = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
             periodo_result = conn.execute(periodo_query, {"anio": anio_seleccionado}).fetchone()
             
@@ -149,14 +167,14 @@ def get_financial_reports(anio_seleccionado):
             periodo_id = periodo_result[0]
             print(f"DEBUG: PeriodoID encontrado: {periodo_id}")
 
-            # 2. Obtener saldos y cuentas
+            # 2. Obtener saldos y cuentas (Coincide con tu esquema)
             query = text("""
                 SELECT 
                     c.CuentaID, c.NombreCuenta, c.TipoCuenta, c.SubTipoCuenta, s.Monto
                 FROM SaldoCuenta s
                 JOIN CatalogoCuentas c ON s.CuentaID = c.CuentaID
                 WHERE s.PeriodoID = :periodo_id
-                ORDER BY c.TipoCuenta, c.SubTipoCuenta, c.CuentaID -- Mejor orden
+                ORDER BY c.TipoCuenta, c.SubTipoCuenta, c.CuentaID
             """)
             
             resultados = conn.execute(query, {"periodo_id": periodo_id}).fetchall()
@@ -164,58 +182,51 @@ def get_financial_reports(anio_seleccionado):
             print(f"DEBUG: Número de saldos encontrados para PeriodoID {periodo_id}: {len(resultados)}")
             if not resultados:
                  print("DEBUG: La consulta de saldos no devolvió resultados.")
-                 return None # <-- Si no hay saldos, retornamos None aquí
+                 return None 
 
-            # 3. Organizar los datos y CALCULAR TOTALES CORRECTAMENTE
+            # 3. Organizar los datos y CALCULAR TOTALES
             for i, row in enumerate(resultados):
-                # Imprimir las primeras 5 filas para verificar datos
-                if i < 5: 
-                    print(f"DEBUG: Fila {i}: CuentaID={row[0]}, Monto={row[4]}, Tipo={row[2]}, SubTipo={row[3]}")
-                
-                cuenta = {'id': row[0], 'nombre': row[1], 'monto': 0.0} # Inicializar monto
+                cuenta = {'id': row[0], 'nombre': row[1], 'monto': 0.0} 
                 tipo = row[2] 
                 subtipo = row[3]
                 
-                # Convertir a float, manejando None
                 monto_actual = float(row[4]) if row[4] is not None else 0.0
                 cuenta['monto'] = monto_actual
 
-                # Añadir la cuenta al diccionario anidado
                 report_data[tipo][subtipo].append(cuenta)
                 
-                # *** CORRECCIÓN CLAVE: Sumar SIN abs() ***
                 report_data['Totales'][tipo] += monto_actual
                 report_data['Totales'][subtipo] += monto_actual
 
-            # Calcular Totales Principales (Ahora serán correctos)
+            # Calcular Totales Principales
             report_data['Totales']['Total Activo'] = report_data['Totales']['Activo']
             report_data['Totales']['Total Pasivo'] = report_data['Totales']['Pasivo']
             report_data['Totales']['Total Patrimonio'] = report_data['Totales']['Patrimonio']
             report_data['Totales']['Total Pasivo y Patrimonio'] = report_data['Totales']['Pasivo'] + report_data['Totales']['Patrimonio']
             
-            # Calcular Utilidades (Ahora serán correctas)
+            # Calcular Utilidades
             total_ingresos = report_data['Totales']['Ingreso']
             total_costos = report_data['Totales']['Costo']
             
             utilidad_bruta = total_ingresos - total_costos
             report_data['Totales']['Utilidad Bruta'] = utilidad_bruta
             
-            # Corregimos para que la utilidad neta tome en cuenta todos los gastos
             utilidad_neta = utilidad_bruta - report_data['Totales']['Gasto']
             report_data['Totales']['Utilidad Neta'] = utilidad_neta
 
 
-            print(f"DEBUG: Datos organizados. Total Activo (CORREGIDO): {report_data['Totales']['Total Activo']}") # DEBUG
-            print(f"DEBUG: Datos organizados. Total Ingresos: {report_data['Totales']['Ingreso']}") # DEBUG
+            print(f"DEBUG: Datos organizados. Total Activo: {report_data['Totales']['Total Activo']}") 
+            print(f"DEBUG: Datos organizados. Total Ingresos: {report_data['Totales']['Ingreso']}") 
             return report_data
             
     except Exception as e:
         print(f"Error EXCEPCIÓN en get_financial_reports: {e}")
-        return None # <-- Si hay error, retornamos None
+        return None 
 
 @app.route('/gestion')
 @login_required
 def gestion():
+    # Esta ruta es un ejemplo, tú la tienes implementada
     anio_seleccionado = request.args.get('anio', type=int)
     periodos = []
     report_data = None
@@ -231,29 +242,25 @@ def gestion():
             
             if anio_seleccionado:
                 report_data = get_financial_reports(anio_seleccionado)
-                # Si report_data es None (por no encontrar PeriodoID o saldos), flasheamos mensaje
                 if not report_data:
                     flash(f'No se encontraron datos de saldos para el año {anio_seleccionado}.', 'error')
 
     except Exception as e:
         print(f"Error en la ruta /gestion: {e}")
         flash('Error al conectar con la base de datos.', 'error')
-
+    
+    # Asumimos que tienes un 'gestion.html'
     return render_template('gestion.html', 
                            periodos=periodos, 
                            anio_seleccionado=anio_seleccionado,
                            report_data=report_data)
 
 
-# --- NUEVO: Función para analizar con Gemini ---
+# --- Función para analizar con Gemini ---
 def analizar_con_gemini(report_data, anio, base_bg, base_er):
-    """
-    Toma los datos del reporte, construye un prompt y obtiene un análisis de Gemini.
-    """
     if not GEMINI_API_KEY:
         return "<p><strong>Análisis no disponible:</strong> La clave de API de Gemini no está configurada en el servidor.</p>"
-
-    # Simplificar los datos para el prompt
+    
     prompt_data = f"Análisis Financiero Vertical para el año {anio}:\n\n"
     prompt_data += f"**Balance General (Base 100% = Total Activos: C$ {base_bg:,.2f})**\n"
     
@@ -261,12 +268,11 @@ def analizar_con_gemini(report_data, anio, base_bg, base_er):
         if tipo in report_data:
             prompt_data += f"\n*{tipo.upper()}*\n"
             for subtipo, cuentas in report_data[tipo].items():
-                # Corregido: 'cuenta' es un diccionario, no un objeto. Usar .get()
                 for c in cuentas:
                     percentage = c.get('percentage', 0.0)
                     prompt_data += f"- {c.get('nombre', 'N/A')}: {percentage:.2f}%\n"
                 total_subtipo_percent = (report_data['Totales'].get(subtipo, 0.0) / base_bg * 100) if base_bg else 0.0
-                prompt_data += f"  - **Total {subtipo}**: {total_subtipo_percent:.2f}%\n"
+                prompt_data += f"   - **Total {subtipo}**: {total_subtipo_percent:.2f}%\n"
 
     prompt_data += f"\n**Estado de Resultados (Base 100% = Ingresos Totales: C$ {base_er:,.2f})**\n"
     
@@ -274,17 +280,15 @@ def analizar_con_gemini(report_data, anio, base_bg, base_er):
         if tipo in report_data:
             prompt_data += f"\n*{tipo.upper()}*\n"
             for subtipo, cuentas in report_data[tipo].items():
-                 # Corregido: 'cuenta' es un diccionario, no un objeto. Usar .get()
                  for c in cuentas:
-                    percentage = c.get('percentage', 0.0)
-                    prompt_data += f"- {c.get('nombre', 'N/A')}: {percentage:.2f}%\n"
+                     percentage = c.get('percentage', 0.0)
+                     prompt_data += f"- {c.get('nombre', 'N/A')}: {percentage:.2f}%\n"
 
     utilidad_bruta_percent = (report_data['Totales'].get('Utilidad Bruta', 0.0) / base_er * 100) if base_er else 0.0
     utilidad_neta_percent = (report_data['Totales'].get('Utilidad Neta', 0.0) / base_er * 100) if base_er else 0.0
     prompt_data += f"\n- **Utilidad Bruta**: {utilidad_bruta_percent:.2f}%\n"
     prompt_data += f"- **Utilidad Neta**: {utilidad_neta_percent:.2f}%\n"
 
-    # El prompt final para la IA
     prompt_completo = f"""
     Eres un asistente de análisis financiero experto. A continuación te presento un análisis vertical simplificado de una empresa.
     Tu tarea es generar un resumen ejecutivo conciso (máximo 3 párrafos) que interprete estos datos.
@@ -303,12 +307,9 @@ def analizar_con_gemini(report_data, anio, base_bg, base_er):
     ---
     """
     try:
-        # --- CORRECCIÓN ---
-        # El modelo 'gemini-pro' está obsoleto en algunas versiones de la API.
-        # Usando el modelo especificado por el usuario.
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash-preview-09-2025') # Modelo actualizado
         response = model.generate_content(prompt_completo)
-        return markdown(response.text) # Convertimos la respuesta a HTML
+        return markdown(response.text) 
     except Exception as e:
         print(f"Error al llamar a la API de Gemini: {e}")
         return f"<p><strong>Error al generar el análisis:</strong> {e}</p>"
@@ -318,39 +319,31 @@ def analizar_con_gemini(report_data, anio, base_bg, base_er):
 @app.route('/analisis-vertical/')
 @login_required
 def analisis_vertical():
-    """Página para el Análisis Vertical."""
-    
     anio_seleccionado = request.args.get('anio', type=int)
     periodos = []
     report_data = None
     base_bg = 0  
     base_er = 0  
-    analisis_ia = None # NUEVO: Variable para el análisis de Gemini
+    analisis_ia = None 
     
     try:
         with engine.connect() as conn:
-            # 1. Obtener períodos
             periodos_query = text("SELECT Anio FROM Periodo ORDER BY Anio DESC")
             periodos_result = conn.execute(periodos_query).fetchall()
             periodos = [row[0] for row in periodos_result]
             
-            # 2. Seleccionar año
             if not anio_seleccionado and periodos:
                 anio_seleccionado = periodos[0]
             
-            # 3. Obtener datos
             if anio_seleccionado:
                 report_data = get_financial_reports(anio_seleccionado)
                 
                 if report_data:
-                    # 4. CALCULAR ANÁLISIS VERTICAL
                     base_bg = report_data['Totales'].get('Total Activo', 0)
                     base_er = report_data['Totales'].get('Ingreso', 0)
-                    print(f"DEBUG AV: Base BG={base_bg}, Base ER={base_er}") # DEBUG Bases
+                    print(f"DEBUG AV: Base BG={base_bg}, Base ER={base_er}")
 
-                    # --- CORREGIDO: Añadida verificación de división por cero ---
                     if base_bg > 0:
-                        # Calcular % para Balance General
                         for tipo in ['Activo', 'Pasivo', 'Patrimonio']:
                             if tipo in report_data:
                                 for subtipo, cuentas in report_data[tipo].items():
@@ -363,7 +356,6 @@ def analisis_vertical():
                         flash('El Total de Activos es cero, no se puede calcular el análisis vertical del Balance.', 'warning')
 
                     if base_er > 0:
-                        # Calcular % para Estado de Resultados
                         for tipo in ['Ingreso', 'Costo', 'Gasto']:
                             if tipo in report_data:
                                 for subtipo, cuentas in report_data[tipo].items():
@@ -375,17 +367,7 @@ def analisis_vertical():
                     else:
                         flash('El Total de Ingresos es cero, no se puede calcular el análisis vertical del E/R.', 'warning')
 
-                    # DEBUG: Imprimir algunos porcentajes calculados (si existen)
-                    try:
-                        if report_data.get('Activo', {}).get('Activo Corriente', []):
-                            print(f"DEBUG AV: % Caja = {report_data['Activo']['Activo Corriente'][0].get('percentage')}")
-                    except (IndexError, KeyError) as e:
-                        print(f"DEBUG AV: No se pudo imprimir el porcentaje de Caja. {e}")
-
-                    # 5. OBTENER ANÁLISIS DE IA
                     analisis_ia = analizar_con_gemini(report_data, anio_seleccionado, base_bg, base_er)
-
-                # Si get_financial_reports devolvió None, flasheamos mensaje
                 else:
                     flash(f'No se encontraron datos de saldos para el año {anio_seleccionado}.', 'error')
 
@@ -393,14 +375,14 @@ def analisis_vertical():
         print(f"Error en la ruta /analisis-vertical: {e}")
         flash('Error al conectar con la base de datos.', 'error')
 
-    # Pasamos siempre las variables a la plantilla, aunque report_data sea None
+    # Asumimos que tienes un 'analisis_vertical.html'
     return render_template('analisis_vertical.html', 
                            periodos=periodos, 
                            anio_seleccionado=anio_seleccionado,
                            report_data=report_data,
                            base_bg=base_bg, 
                            base_er=base_er,
-                           analisis_ia=analisis_ia) # NUEVO: Pasamos el análisis a la plantilla
+                           analisis_ia=analisis_ia) 
 
 
 @app.route('/analisis-horizontal/')
@@ -417,6 +399,182 @@ def ratios_financieros():
 @login_required
 def origen_aplicacion():
     return "Página de Origen y Aplicación - En construcción"
+
+# --- RUTA DE CATÁLOGO DE CUENTAS (CORREGIDA PARA TU ESQUEMA) ---
+
+@app.route('/catalogo-cuentas/', methods=['GET', 'POST'])
+@login_required
+@admin_required # ¡Protegemos la ruta!
+def catalogo_cuentas():
+
+    if request.method == 'POST':
+        
+        # --- CORRECCIÓN DE COHERENCIA DE DATOS ---
+        # Leemos los campos que coinciden con tu tabla 'CatalogoCuentas'
+        # El formulario enviará 'cuenta_id' (ej: '1101')
+        cuenta_id_form = request.form.get('cuenta_id')
+        nombre = request.form.get('nombre_cuenta')
+        tipo_cuenta = request.form.get('tipo_cuenta')
+        subtipo_cuenta = request.form.get('subtipo_cuenta')
+
+        try:
+            with engine.connect() as conn:
+                if not cuenta_id_form or not nombre or not tipo_cuenta or not subtipo_cuenta:
+                    flash('Todos los campos son requeridos.', 'error')
+                else:
+                    # 1. Verificar que el CuentaID no esté duplicado
+                    query_check = text("SELECT CuentaID FROM CatalogoCuentas WHERE CuentaID = :cuenta_id")
+                    existe = conn.execute(query_check, {"cuenta_id": cuenta_id_form}).fetchone()
+
+                    if existe:
+                        flash(f'El ID de cuenta {cuenta_id_form} ya existe.', 'error')
+                    else:
+                        # 2. Insertar la nueva cuenta
+                        # Las columnas coinciden con tu esquema: CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta
+                        query_insert = text("""
+                            INSERT INTO CatalogoCuentas (CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta)
+                            VALUES (:cuenta_id, :nombre, :tipo_cuenta, :subtipo_cuenta)
+                        """)
+                        conn.execute(query_insert, {
+                            "cuenta_id": cuenta_id_form,
+                            "nombre": nombre,
+                            "tipo_cuenta": tipo_cuenta,
+                            "subtipo_cuenta": subtipo_cuenta
+                        })
+                        conn.commit()
+                        flash('Cuenta agregada exitosamente.', 'success')
+                
+                return redirect(url_for('catalogo_cuentas'))
+
+        except Exception as e:
+            print(f"Error en catalogo_cuentas (POST): {e}")
+            flash(f'Error al guardar la cuenta: {e}', 'error')
+            return redirect(url_for('catalogo_cuentas'))
+
+    # --- Lógica GET (Cuando cargas la página) ---
+    cuentas_list = []
+    try:
+        with engine.connect() as conn:
+            # Leemos las columnas que coinciden con tu esquema
+            query_get = text("""
+                SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta 
+                FROM CatalogoCuentas 
+                ORDER BY CuentaID
+            """)
+            cuentas_list = conn.execute(query_get).fetchall()
+
+    except Exception as e:
+        print(f"Error en catalogo_cuentas (GET): {e}")
+        flash(f'Error al cargar las cuentas: {e}', 'error')
+
+    return render_template('catalogo_cuentas.html', cuentas=cuentas_list)
+
+
+# --- NUEVA RUTA: INGRESAR SALDOS ---
+
+@app.route('/ingresar-saldos/', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def ingresar_saldos():
+    
+    # --- Lógica POST (Cuando envías el formulario) ---
+    if request.method == 'POST':
+        anio = request.form.get('anio')
+        fecha_cierre = request.form.get('fecha_cierre')
+
+        if not anio or not fecha_cierre:
+            flash('El Año y la Fecha de Cierre son requeridos.', 'error')
+            return redirect(url_for('ingresar_saldos'))
+
+        # Usamos engine.begin() para una transacción automática (commit o rollback)
+        try:
+            with engine.begin() as conn:
+                # 1. Verificar si el Período (Año) ya existe
+                query_check_periodo = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
+                existe = conn.execute(query_check_periodo, {"anio": anio}).fetchone()
+                
+                if existe:
+                    flash(f'El período para el año {anio} ya existe. No se pueden duplicar.', 'error')
+                    return redirect(url_for('ingresar_saldos'))
+
+                # 2. Crear el nuevo Período
+                query_insert_periodo = text("""
+                    INSERT INTO Periodo (Anio, FechaCierre) 
+                    VALUES (:anio, :fecha_cierre);
+                """)
+                conn.execute(query_insert_periodo, {"anio": anio, "fecha_cierre": fecha_cierre})
+                
+                # 3. Obtener el PeriodoID que se acaba de crear
+                # Nota: SCOPE_IDENTITY() es específico de SQL Server
+                query_get_new_id = text("SELECT SCOPE_IDENTITY()")
+                periodo_id = conn.execute(query_get_new_id).scalar()
+
+                if not periodo_id:
+                    raise Exception("No se pudo obtener el nuevo PeriodoID.")
+
+                # 4. Obtener TODAS las CuentasID del Catálogo
+                query_get_cuentas = text("SELECT CuentaID FROM CatalogoCuentas")
+                todas_las_cuentas = conn.execute(query_get_cuentas).fetchall()
+
+                # 5. Iterar e insertar cada Saldo
+                query_insert_saldo = text("""
+                    INSERT INTO SaldoCuenta (PeriodoID, CuentaID, Monto) 
+                    VALUES (:periodo_id, :cuenta_id, :monto)
+                """)
+                
+                for cuenta in todas_las_cuentas:
+                    cuenta_id = cuenta[0]
+                    # Construimos el 'name' del input (ej: 'monto-1101')
+                    form_field_name = f"monto-{cuenta_id}"
+                    
+                    # Obtenemos el valor del formulario, default '0' si no viene
+                    monto_str = request.form.get(form_field_name, '0').strip()
+                    
+                    try:
+                        # Convertimos a Decimal para precisión monetaria
+                        monto_decimal = Decimal(monto_str if monto_str else '0.00')
+                    except InvalidOperation:
+                        monto_decimal = Decimal('0.00')
+
+                    # Insertar el saldo (incluso si es 0)
+                    conn.execute(query_insert_saldo, {
+                        "periodo_id": periodo_id,
+                        "cuenta_id": cuenta_id,
+                        "monto": monto_decimal
+                    })
+            
+            # Si todo salió bien, la transacción (with engine.begin()) hace COMMIT aquí
+            flash(f'Período {anio} y todos sus saldos fueron guardados exitosamente.', 'success')
+            return redirect(url_for('gestion', anio=anio)) # Redirigir a la gestión de ese año
+
+        except Exception as e:
+            # Si algo falló, la transacción hace ROLLBACK aquí
+            print(f"Error al ingresar saldos (POST): {e}")
+            flash(f'Error grave al guardar el período. La operación fue revertida. {e}', 'error')
+            return redirect(url_for('ingresar_saldos'))
+
+
+    # --- Lógica GET (Cuando cargas la página) ---
+    cuentas_agrupadas = defaultdict(lambda: defaultdict(list))
+    try:
+        with engine.connect() as conn:
+            # Obtenemos todas las cuentas ordenadas
+            query_get = text("""
+                SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta 
+                FROM CatalogoCuentas 
+                ORDER BY TipoCuenta, SubTipoCuenta, CuentaID
+            """)
+            cuentas = conn.execute(query_get).fetchall()
+            
+            # Agrupamos las cuentas para el template
+            for cuenta in cuentas:
+                cuentas_agrupadas[cuenta.TipoCuenta][cuenta.SubTipoCuenta].append(cuenta)
+
+    except Exception as e:
+        print(f"Error en ingresar_saldos (GET): {e}")
+        flash('Error al cargar el catálogo de cuentas.', 'error')
+
+    return render_template('ingresar_saldos.html', cuentas_agrupadas=cuentas_agrupadas)
 
 
 # --- 6. Ejecución con LiveReload ---

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar Saldos de Período</title>
+    
+    <!-- Estilos compartidos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Estilo específico para esta página -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='saldos.css') }}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header y Nav (similar a otras páginas) -->
+    <header>
+        <h1><i class="fa-solid fa-chart-line"></i> Sistema de Análisis Financiero</h1>
+    </header>
+
+    <nav>
+        <a href="{{ url_for('index') }}">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('analisis_vertical') }}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Análisis Vertical</span>
+        </a>
+        <a href="{{ url_for('analisis_horizontal') }}">
+            <i class="fa-solid fa-chart-bar"></i>
+            <span>Análisis Horizontal</span>
+        </a>
+        <a href="{{ url_for('ratios_financieros') }}">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Ratios Financieros</span>
+        </a>
+        <a href="{{ url_for('origen_aplicacion') }}">
+            <i class="fa-solid fa-right-left"></i>
+            <span>Origen y Aplicación</span>
+        </a>
+
+        {% if current_user.id_rol == 1 %}
+        <a href="{{ url_for('catalogo_cuentas') }}">
+            <i class="fa-solid fa-book"></i>
+            <span>Catálogo</span>
+        </a>
+        <!-- Marcamos esta página como activa -->
+        <a href="{{ url_for('ingresar_saldos') }}" class="active">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Ingresar Saldos</span>
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for('logout') }}" class="logout-button">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Cerrar Sesión</span>
+        </a>
+    </nav>
+
+    <main>
+        <h2 class="main-title">Ingresar Saldos de Nuevo Período</h2>
+        <p class="main-subtitle">Completa los saldos para todas las cuentas del nuevo período.</p>
+
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('ingresar_saldos') }}">
+            <!-- Sección 1: Datos del Período -->
+            <div class="card" style="margin-bottom: 30px;">
+                <h3>Datos del Período</h3>
+                <div class="form-grid-periodo">
+                    <div>
+                        <label for="anio">Año del Período</label>
+                        <input type="number" id="anio" name="anio" placeholder="Ej: 2024" required>
+                    </div>
+                    <div>
+                        <label for="fecha_cierre">Fecha de Cierre</label>
+                        <input type="date" id="fecha_cierre" name="fecha_cierre" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Saldos de Cuentas -->
+            <h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Saldos de Cuentas</h2>
+            
+            <!-- Iteramos sobre los tipos principales (Activo, Pasivo, etc.) -->
+            {% for tipo, subtipos in cuentas_agrupadas.items() %}
+                <div class="account-group card">
+                    <h3>{{ tipo }}</h3>
+                    
+                    <!-- Iteramos sobre los subtipos (Activo Corriente, etc.) -->
+                    {% for subtipo, cuentas in subtipos.items() %}
+                        <h4>{{ subtipo }}</h4>
+                        <div class="account-list">
+                            
+                            <!-- Iteramos sobre las cuentas finales -->
+                            {% for cuenta in cuentas %}
+                            <div class="account-input">
+                                <label for="monto-{{ cuenta.CuentaID }}">
+                                    ({{ cuenta.CuentaID }}) {{ cuenta.NombreCuenta }}
+                                </label>
+                                <!-- El 'name' es dinámico y crucial para el backend -->
+                                <input type="number" 
+                                       id="monto-{{ cuenta.CuentaID }}" 
+                                       name="monto-{{ cuenta.CuentaID }}" 
+                                       step="0.01" 
+                                       placeholder="C$ 0.00"
+                                       value="0.00">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <!-- Botón de Envío Fijo -->
+            <div class="submit-wrapper">
+                <button type="submit" class="btn-submit-saldos">
+                    <i class="fa-solid fa-save"></i> Guardar Período Completo
+                </button>
+            </div>
+        </form>
+
+    </main>
+
+    <footer>
+        <p>Proyecto desarrollado con Flask y SQL Server.</p>
+    </footer>
+
+</body>
+</html>
