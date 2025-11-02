@@ -193,10 +193,7 @@ footer {
 }
 
 
-/* =========================================
-REGLAS RESPONSIVAS (Media Queries)
-=========================================
-*/
+
 
 /* Para tablets y teléfonos grandes */
 @media (max-width: 768px) {
@@ -247,3 +244,186 @@ REGLAS RESPONSIVAS (Media Queries)
         font-size: 1.3em;
     }
 }
+.report-selector {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 74, 153, 0.08);
+    border: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+.report-selector label {
+    font-weight: 600;
+    margin-right: 15px;
+    font-size: 1.1em;
+}
+
+.report-selector select {
+    font-size: 1.1em;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Contenedor para poner reportes uno al lado del otro */
+.reports-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+    gap: 30px;
+}
+
+.report-wrapper {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 74, 153, 0.08);
+    border: 1px solid var(--border-color);
+    padding: 25px;
+}
+
+.report-wrapper h3 {
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--text-dark);
+    border-bottom: 2px solid var(--light-gray-bg);
+    padding-bottom: 15px;
+    margin-top: 0;
+}
+
+/* Estilo de la tabla del reporte */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.report-table td, .report-table th {
+    padding: 10px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.report-table .monto {
+    text-align: right;
+    font-family: 'Consolas', 'Menlo', monospace; /* Fuente monoespaciada para números */
+}
+
+/* Encabezados de grupo (ej. ACTIVO) */
+.report-table .header-group th {
+    background-color: var(--primary-blue-dark);
+    color: var(--white);
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+/* Sub-encabezados (ej. Activo Corriente) */
+.report-table .sub-header td {
+    font-weight: 600;
+    color: var(--primary-blue);
+    background-color: var(--light-gray-bg);
+    padding-left: 20px;
+}
+
+/* Sub-totales (ej. Total Activo Corriente) */
+.report-table .sub-total td {
+    font-weight: 600;
+    background-color: #f9fafb;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Totales (ej. TOTAL ACTIVO) */
+.report-table .grand-total td {
+    font-weight: 700;
+    font-size: 1.05em;
+    background-color: #f0f1f3;
+    border-top: 2px solid #ccc;
+    color: var(--text-dark);
+}
+
+.report-table .final-total td {
+    background-color: #e0e5eb;
+    font-size: 1.1em;
+}
+
+/* Mensajes de Flash (errores) */
+.flash-messages {
+    width: 100%;
+}
+.flash-error {
+    background-color: #b91c1c;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+.flash-success {
+    background-color: #047857;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+
+
+/* --- Responsividad para la página de gestión --- */
+@media (max-width: 900px) {
+    .reports-container {
+        /* Pone los reportes uno encima del otro */
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+
+
+/* Estilos para la columna de Monto */
+.report-table .col-monto {
+    text-align: right;
+    width: 30%;
+    font-family: 'Inter', sans-serif; /* Asegura que los números usen la fuente */
+}
+
+
+.report-table .col-percent {
+    text-align: right;
+    width: 20%;
+    font-weight: 600; /* Hacemos el porcentaje más notable */
+    color: var(--primary-blue); /* Usamos el color primario */
+}
+
+/* Alineamos los encabezados de las nuevas columnas */
+.report-table th.col-monto,
+.report-table th.col-percent {
+    text-align: right;
+}
+
+/* Fila de Subtotal */
+.report-table .subtotal-row td {
+    font-weight: 600;
+    color: var(--text-dark);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Fila de Total (diferente de Subtotal) */
+.report-table .total-row td {
+    font-weight: 700;
+    font-size: 1.05em;
+    color: var(--text-dark);
+    background-color: var(--light-gray-bg);
+    border-top: 2px solid var(--border-color);
+}
+
+/* Footer de la tabla (Total Final) */
+.report-table .total-footer td {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--primary-blue-dark);
+    background-color: #e6f0ff; /* Un azul muy claro */
+    border-top: 2px solid var(--primary-blue);
+}
+

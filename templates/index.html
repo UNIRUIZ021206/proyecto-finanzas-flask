@@ -1,95 +1,48 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sistema Financiero</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
-        <h1><i class="fa-solid fa-chart-line"></i> Sistema de Análisis Financiero</h1>
-    </header>
+{% block title %}
+<title>Dashboard - Sistema Financiero</title>
+{% endblock %}
 
-    <nav>
-        <a href="{{ url_for('index') }}" class="active">
-            <i class="fa-solid fa-house"></i>
-            <span>Dashboard</span>
+{% block content %}
+    <h2 class="main-title">¡Bienvenido, {{ current_user.correo }}!</h2>
+    <p class="main-subtitle">Selecciona un análisis para comenzar.</p>
+
+    <div class="dashboard-cards">
+        <a href="{{ url_for('gestion') }}" class="card">
+            <div class="card-icon-wrapper" style="background: linear-gradient(45deg, #10B981, #34D399);">
+                <i class="fa-solid fa-file-invoice-dollar card-icon"></i>
+            </div>
+            <h3>Gestión de Reportes</h3>
+            <p>Ver Balances y E/R. Agregar cuentas y crear nuevos períodos.</p>
         </a>
-        <a href="{{ url_for('analisis_vertical') }}">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Análisis Vertical</span>
+        <a href="{{ url_for('analisis_vertical') }}" class="card">
+            <div class="card-icon-wrapper">
+                <i class="fa-solid fa-chart-pie card-icon"></i>
+            </div>
+            <h3>Análisis Vertical</h3>
+            <p>Desglosa la estructura porcentual de los estados financieros.</p>
         </a>
-        <a href="{{ url_for('analisis_horizontal') }}">
-            <i class="fa-solid fa-chart-bar"></i>
-            <span>Análisis Horizontal</span>
+        <a href="{{ url_for('analisis_horizontal') }}" class="card">
+            <div class="card-icon-wrapper">
+                <i class="fa-solid fa-chart-bar card-icon"></i>
+            </div>
+            <h3>Análisis Horizontal</h3>
+            <p>Compara las variaciones en las cuentas entre diferentes períodos.</p>
         </a>
-        <a href="{{ url_for('ratios_financieros') }}">
-            <i class="fa-solid fa-calculator"></i>
-            <span>Ratios Financieros</span>
+        <a href="{{ url_for('ratios_financieros') }}" class="card">
+            <div class="card-icon-wrapper">
+                <i class="fa-solid fa-calculator card-icon"></i>
+            </div>
+            <h3>Ratios Financieros</h3>
+            <p>Calcula indicadores de liquidez, solvencia, rentabilidad y gestión.</p>
         </a>
-        <a href="{{ url_for('origen_aplicacion') }}">
-            <i class="fa-solid fa-right-left"></i>
-            <span>Origen y Aplicación</span>
+        <a href="{{ url_for('origen_aplicacion') }}" class="card">
+            <div class="card-icon-wrapper">
+                <i class="fa-solid fa-right-left card-icon"></i>
+            </div>
+            <h3>Origen y Aplicación</h3>
+            <p>Analiza de dónde provinieron los fondos y en qué se utilizaron.</p>
         </a>
-        <a href="{{ url_for('logout') }}" class="logout-button">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Cerrar Sesión</span>
-        </a>
-    </nav>
-
-    <main>
-        <h2 class="main-title">¡Bienvenido, {{ current_user.correo }}!</h2>
-        <p class="main-subtitle">Selecciona un análisis para comenzar.</p>
-
-        <div class="dashboard-cards">
-            
-            <a href="{{ url_for('analisis_vertical') }}" class="card">
-                <div class="card-icon-wrapper">
-                    <i class="fa-solid fa-chart-pie card-icon"></i>
-                </div>
-                <h3>Análisis Vertical</h3>
-                <p>Desglosa la estructura porcentual de los estados financieros.</p>
-            </a>
-
-            <a href="{{ url_for('analisis_horizontal') }}" class="card">
-                <div class="card-icon-wrapper">
-                    <i class="fa-solid fa-chart-bar card-icon"></i>
-                </div>
-                <h3>Análisis Horizontal</h3>
-                <p>Compara las variaciones en las cuentas entre diferentes períodos.</p>
-            </a>
-
-            <a href="{{ url_for('ratios_financieros') }}" class="card">
-                <div class="card-icon-wrapper">
-                    <i class="fa-solid fa-calculator card-icon"></i>
-                </div>
-                <h3>Ratios Financieros</h3>
-                <p>Calcula indicadores de liquidez, solvencia, rentabilidad y gestión.</p>
-            </a>
-
-            <a href="{{ url_for('origen_aplicacion') }}" class="card">
-                <div class="card-icon-wrapper">
-                    <i class="fa-solid fa-right-left card-icon"></i>
-                </div>
-                <h3>Origen y Aplicación</h3>
-                <p>Analiza de dónde provinieron los fondos y en qué se utilizaron.</p>
-            </a>
-
-        </div>
-    </main>
-
-    <footer>
-        <p>Proyecto desarrollado con Flask y SQL Server.</p>
-    </footer>
-
-</body>
-</html>
+    </div>
+{% endblock %}

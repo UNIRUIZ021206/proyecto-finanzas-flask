@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Reportes - Sistema Financiero</title>
+    
+    <!-- Enlazamos el archivo de estilo principal -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Íconos de FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-chart-line"></i> Sistema de Análisis Financiero</h1>
+    </header>
+
+    <!-- Copiamos la barra de navegación de index.html -->
+    <nav>
+        <a href="{{ url_for('index') }}">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('analisis_vertical') }}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Análisis Vertical</span>
+        </a>
+        <a href="{{ url_for('analisis_horizontal') }}">
+            <i class="fa-solid fa-chart-bar"></i>
+            <span>Análisis Horizontal</span>
+        </a>
+        <a href="{{ url_for('ratios_financieros') }}">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Ratios Financieros</span>
+        </a>
+        <a href="{{ url_for('origen_aplicacion') }}">
+            <i class="fa-solid fa-right-left"></i>
+            <span>Origen y Aplicación</span>
+        </a>
+        <!-- ¡Marcamos esta página como activa! -->
+        <a href="{{ url_for('gestion') }}" class="active">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Gestión de Reportes</span>
+        </a>
+        <a href="{{ url_for('logout') }}" class="logout-button">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Cerrar Sesión</span>
+        </a>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main>
+        <h2 class="main-title">Gestión de Reportes Financieros</h2>
+        
+        <!-- Menú para seleccionar el año -->
+        <div class="report-selector">
+            <form method="GET" action="{{ url_for('gestion') }}">
+                <label for="anio">Seleccionar Período:</label>
+                <select name="anio" id="anio" onchange="this.form.submit()">
+                    {% for anio in periodos %}
+                        <option value="{{ anio }}" {% if anio == anio_seleccionado %}selected{% endif %}>
+                            Año {{ anio }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <noscript><button type="submit">Cargar</button></noscript>
+            </form>
+        </div>
+
+        <!-- Mensajes de Flash (errores) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages" style="margin-top: 20px;">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Contenedor de los dos reportes -->
+        <div class="reports-container">
+
+            <!-- Columna del Balance General -->
+            <div class="report-wrapper">
+                <h3>Balance General al {{ anio_seleccionado }}</h3>
+                
+                {% if report_data %}
+                <table class="report-table">
+                    <!-- === ACTIVOS === -->
+                    <tr class="header-group"><th colspan="2">ACTIVO</th></tr>
+                    
+                    {% for subtipo, cuentas in report_data.Activo.items() %}
+                        <tr class="sub-header"><td colspan="2">{{ subtipo }}</td></tr>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>{{ cuenta.nombre }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="sub-total">
+                            <td>Total {{ subtipo }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="grand-total">
+                        <td>TOTAL ACTIVO</td>
+                        <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Activo']) }}</td>
+                    </tr>
+                    
+                    <!-- === PASIVO Y PATRIMONIO === -->
+                    <tr class="header-group"><th colspan="2">PASIVO Y PATRIMONIO</th></tr>
+                    
+                    <!-- Pasivos -->
+                    {% for subtipo, cuentas in report_data.Pasivo.items() %}
+                        <tr class="sub-header"><td colspan="2">{{ subtipo }}</td></tr>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>{{ cuenta.nombre }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="sub-total">
+                            <td>Total {{ subtipo }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="sub-total grand-total">
+                        <td>Total Pasivo</td>
+                        <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Pasivo']) }}</td>
+                    </tr>
+
+                    <!-- Patrimonio -->
+                    {% for subtipo, cuentas in report_data.Patrimonio.items() %}
+                        <tr class="sub-header"><td colspan="2">{{ subtipo }}</td></tr>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>{{ cuenta.nombre }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="sub-total">
+                            <td>Total {{ subtipo }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="sub-total grand-total">
+                        <td>Total Patrimonio</td>
+                        <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Patrimonio']) }}</td>
+                    </tr>
+                    
+                    <!-- Total -->
+                    <tr class="grand-total final-total">
+                        <td>TOTAL PASIVO Y PATRIMONIO</td>
+                        <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Pasivo y Patrimonio']) }}</td>
+                    </tr>
+                </table>
+                {% else %}
+                    <p>No hay datos de balance para mostrar.</p>
+                {% endif %}
+            </div>
+
+            <!-- Columna del Estado de Resultados -->
+            <div class="report-wrapper">
+                <h3>Estado de Resultados al {{ anio_seleccionado }}</h3>
+                
+                {% if report_data %}
+                <table class="report-table">
+                    <!-- === INGRESOS === -->
+                    {% for subtipo, cuentas in report_data.Ingreso.items() %}
+                        <tr class="sub-header"><td colspan="2">{{ subtipo }}</td></tr>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>{{ cuenta.nombre }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="sub-total">
+                            <td>Total {{ subtipo }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
+                        </tr>
+                    {% endfor %}
+                    
+                    <!-- === COSTOS === -->
+                    {% for subtipo, cuentas in report_data.Costo.items() %}
+                        <tr class="sub-header"><td colspan="2">{{ subtipo }}</td></tr>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>{{ cuenta.nombre }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="sub-total">
+                            <td>Total {{ subtipo }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    <!-- === UTILIDAD BRUTA === -->
+                    <tr class="grand-total">
+                        <td>UTILIDAD BRUTA</td>
+                        <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Utilidad Bruta']) }}</td>
+                    </tr>
+
+                    <!-- === GASTOS === -->
+                    {% for subtipo, cuentas in report_data.Gasto.items() %}
+                        <tr class="sub-header"><td colspan="2">{{ subtipo }}</td></tr>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>{{ cuenta.nombre }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="sub-total">
+                            <td>Total {{ subtipo }}</td>
+                            <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
+                        </tr>
+                    {% endfor %}
+                    
+                    <!-- === UTILIDAD NETA === -->
+                    <tr class="grand-total final-total">
+                        <td>UTILIDAD NETA DEL EJERCICIO</td>
+                        <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Utilidad Neta']) }}</td>
+                    </tr>
+                </table>
+                {% else %}
+                    <p>No hay datos de resultados para mostrar.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Aquí es donde pondremos los formularios para agregar cuentas y períodos en el futuro -->
+        <div class="management-forms" style="margin-top: 40px;">
+            <h2 class="main-title">Gestión del Catálogo</h2>
+            <p class="main-subtitle">Próximamente: formularios para agregar nuevas cuentas y períodos.</p>
+            <!-- (Formularios irán aquí) -->
+        </div>
+
+    </main>
+
+    <footer>
+        <p>Proyecto desarrollado con Flask y SQL Server.</p>
+    </footer>
+
+</body>
+</html>

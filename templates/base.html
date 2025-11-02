@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% block title %}
+    <title>Sistema de Análisis Financiero</title>
+    {% endblock %}
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-chart-line"></i> Sistema de Análisis Financiero</h1>
+    </header>
+
+    <nav>
+        <!-- Usamos request.endpoint para saber qué ruta está activa -->
+        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+            <i class="fa-solid fa-house"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('gestion') }}" class="{{ 'active' if request.endpoint == 'gestion' else '' }}">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Gestión de Reportes</span>
+        </a>
+        <a href="{{ url_for('analisis_vertical') }}" class="{{ 'active' if request.endpoint == 'analisis_vertical' else '' }}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Análisis Vertical</span>
+        </a>
+        <a href="{{ url_for('analisis_horizontal') }}" class="{{ 'active' if request.endpoint == 'analisis_horizontal' else '' }}">
+            <i class="fa-solid fa-chart-bar"></i>
+            <span>Análisis Horizontal</span>
+        </a>
+        <a href="{{ url_for('ratios_financieros') }}" class="{{ 'active' if request.endpoint == 'ratios_financieros' else '' }}">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Ratios Financieros</span>
+        </a>
+        <a href="{{ url_for('origen_aplicacion') }}" class="{{ 'active' if request.endpoint == 'origen_aplicacion' else '' }}">
+            <i class="fa-solid fa-right-left"></i>
+            <span>Origen y Aplicación</span>
+        </a>
+        <a href="{{ url_for('logout') }}" class="logout-button">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Cerrar Sesión</span>
+        </a>
+    </nav>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer>
+        <p>Proyecto desarrollado con Flask y SQL Server.</p>
+    </footer>
+
+</body>
+</html>
