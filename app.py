@@ -60,8 +60,9 @@ login_manager.login_message_category = 'error'
 
 # --- 4. Modelo de Usuario (para Flask-Login) ---
 class User(UserMixin):
-    def __init__(self, id, correo, id_rol):
+    def __init__(self, id,nombre, correo, id_rol):
         self.id = id
+        self.nombre = nombre
         self.correo = correo
         self.id_rol = id_rol
 
@@ -70,10 +71,10 @@ def load_user(user_id):
     try:
         with engine.connect() as conn:
             # Asumimos que la tabla de usuarios se llama 'Usuarios'
-            query = text("SELECT Id_Usuario, Correo, Id_Rol FROM Usuarios WHERE Id_Usuario = :id AND Estado = 1")
+            query = text("SELECT Id_Usuario,Nombre, Correo, Id_Rol FROM Usuarios WHERE Id_Usuario = :id AND Estado = 1")
             result = conn.execute(query, {"id": int(user_id)}).fetchone()
             if result:
-                return User(id=result[0], correo=result[1], id_rol=result[2])
+                return User(id=result[0], nombre=result[1], correo=result[2], id_rol=result[3])
     except Exception as e:
         print(f"Error en user_loader: {e}")
         return None
