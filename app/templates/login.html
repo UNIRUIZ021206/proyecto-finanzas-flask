@@ -11,7 +11,7 @@
 
     <div class="login-wrapper">
         <div class="login-card">
-            <form method="POST" action="{{ url_for('login') }}">
+            <form method="POST" action="{{ url_for('auth.login') }}">
                 <h1>Login</h1>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -38,7 +38,7 @@
                 <div style="text-align: center; margin-top: 20px;">
                     <p style="color: #666; font-size: 14px;">
                         ¿No tienes una cuenta? 
-                        <a href="{{ url_for('register') }}" style="color: #4CAF50; text-decoration: none; font-weight: 600;">
+                        <a href="{{ url_for('auth.register') }}" style="color: #4CAF50; text-decoration: none; font-weight: 600;">
                             Regístrate aquí
                         </a>
                     </p>

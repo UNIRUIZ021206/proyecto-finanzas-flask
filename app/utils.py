@@ -188,25 +188,129 @@ def calcular_analisis_horizontal(report_data_base, report_data_analisis):
     
     tipos_cuenta = ['Activo', 'Pasivo', 'Patrimonio', 'Ingreso', 'Costo', 'Gasto']
     
-    for tipo in tipos_cuenta:
-        # ... (Copia aquí el resto de tu función calcular_analisis_horizontal) ...
-        # (Es muy larga, pero solo necesitas copiarla y pegarla aquí)
-        # Asegúrate de que toda la lógica de esa función esté aquí.
-        pass # Placeholder para tu lógica
+    # Crear diccionarios para búsqueda rápida de cuentas
+    def crear_diccionario_cuentas(report_data):
+        diccionario = {}
+        for tipo in tipos_cuenta:
+            for subtipo, cuentas in report_data[tipo].items():
+                for cuenta in cuentas:
+                    key = f"{tipo}_{subtipo}_{cuenta['id']}"
+                    diccionario[key] = cuenta
+        return diccionario
     
-    # Ejemplo de la lógica (debes copiar la tuya completa)
-    if 'Total Activo' in report_data_base['Totales']:
-        total_base = report_data_base['Totales']['Total Activo']
-        total_analisis = report_data_analisis['Totales']['Total Activo']
-        total_absoluto = total_analisis - total_base
-        total_relativo = ((total_analisis / total_base) - 1) * 100 if total_base != 0 else 0.0
-        analisis['Totales']['Total Activo'] = {
-            'base': total_base, 'analisis': total_analisis,
-            'absoluto': total_absoluto, 'relativo': total_relativo,
-            'color_clase': 'valor-positivo' if total_relativo > 0 else ('valor-negativo' if total_relativo < 0 else 'valor-cero')
+    dict_base = crear_diccionario_cuentas(report_data_base)
+    dict_analisis = crear_diccionario_cuentas(report_data_analisis)
+    
+    # Procesar cada tipo de cuenta
+    for tipo in tipos_cuenta:
+        # Obtener todos los subtipos únicos de ambos períodos
+        subtipos_base = set(report_data_base[tipo].keys())
+        subtipos_analisis = set(report_data_analisis[tipo].keys())
+        subtipos_todos = subtipos_base | subtipos_analisis
+        
+        for subtipo in subtipos_todos:
+            cuentas_base = report_data_base[tipo].get(subtipo, [])
+            cuentas_analisis = report_data_analisis[tipo].get(subtipo, [])
+            
+            # Crear diccionario de cuentas por ID para comparación
+            dict_cuentas_base = {c['id']: c for c in cuentas_base}
+            dict_cuentas_analisis = {c['id']: c for c in cuentas_analisis}
+            ids_todos = set(dict_cuentas_base.keys()) | set(dict_cuentas_analisis.keys())
+            
+            for cuenta_id in ids_todos:
+                cuenta_base = dict_cuentas_base.get(cuenta_id, {'id': cuenta_id, 'nombre': '', 'monto': 0.0})
+                cuenta_analisis = dict_cuentas_analisis.get(cuenta_id, {'id': cuenta_id, 'nombre': '', 'monto': 0.0})
+                
+                monto_base = cuenta_base.get('monto', 0.0)
+                monto_analisis = cuenta_analisis.get('monto', 0.0)
+                nombre = cuenta_analisis.get('nombre') or cuenta_base.get('nombre', '')
+                
+                absoluto = monto_analisis - monto_base
+                relativo = ((monto_analisis / monto_base) - 1) * 100 if monto_base != 0 else (float('inf') if monto_analisis > 0 else 0.0)
+                
+                # Determinar color
+                if relativo > 0:
+                    color_clase = 'valor-positivo'
+                elif relativo < 0:
+                    color_clase = 'valor-negativo'
+                else:
+                    color_clase = 'valor-cero'
+                
+                cuenta_comparativa = {
+                    'nombre': nombre,
+                    'monto_base': monto_base,
+                    'monto_analisis': monto_analisis,
+                    'absoluto': absoluto,
+                    'relativo': relativo,
+                    'color_clase': color_clase
+                }
+                
+                analisis[tipo][subtipo].append(cuenta_comparativa)
+    
+    # Calcular totales
+    totales_keys = ['Total Activo', 'Total Pasivo', 'Total Patrimonio', 'Total Pasivo y Patrimonio',
+                    'Ingreso', 'Costo', 'Gasto', 'Utilidad Bruta', 'Utilidad Neta']
+    
+    for key in totales_keys:
+        if key in report_data_base['Totales'] and key in report_data_analisis['Totales']:
+            total_base = report_data_base['Totales'][key]
+            total_analisis = report_data_analisis['Totales'][key]
+            total_absoluto = total_analisis - total_base
+            total_relativo = ((total_analisis / total_base) - 1) * 100 if total_base != 0 else 0.0
+            
+            if total_relativo > 0:
+                color_clase = 'valor-positivo'
+            elif total_relativo < 0:
+                color_clase = 'valor-negativo'
+            else:
+                color_clase = 'valor-cero'
+            
+            analisis['Totales'][key] = {
+                'base': total_base,
+                'analisis': total_analisis,
+                'absoluto': total_absoluto,
+                'relativo': total_relativo,
+                'color_clase': color_clase
+            }
+        elif key in report_data_base['Totales']:
+            # Solo existe en base
+            analisis['Totales'][key] = {
+                'base': report_data_base['Totales'][key],
+                'analisis': 0.0,
+                'absoluto': -report_data_base['Totales'][key],
+                'relativo': -100.0,
+                'color_clase': 'valor-negativo'
+            }
+        elif key in report_data_analisis['Totales']:
+            # Solo existe en análisis
+            analisis['Totales'][key] = {
+                'base': 0.0,
+                'analisis': report_data_analisis['Totales'][key],
+                'absoluto': report_data_analisis['Totales'][key],
+                'relativo': float('inf'),
+                'color_clase': 'valor-positivo'
+            }
+    
+    # Totales especiales para Pasivo y Patrimonio
+    if 'Pasivo' in report_data_base['Totales'] and 'Pasivo' in report_data_analisis['Totales']:
+        analisis['Totales']['Pasivo'] = {
+            'base': report_data_base['Totales']['Pasivo'],
+            'analisis': report_data_analisis['Totales']['Pasivo'],
+            'absoluto': report_data_analisis['Totales']['Pasivo'] - report_data_base['Totales']['Pasivo'],
+            'relativo': ((report_data_analisis['Totales']['Pasivo'] / report_data_base['Totales']['Pasivo']) - 1) * 100 if report_data_base['Totales']['Pasivo'] != 0 else 0.0,
+            'color_clase': 'valor-positivo' if report_data_analisis['Totales']['Pasivo'] > report_data_base['Totales']['Pasivo'] else ('valor-negativo' if report_data_analisis['Totales']['Pasivo'] < report_data_base['Totales']['Pasivo'] else 'valor-cero')
+        }
+    
+    if 'Patrimonio' in report_data_base['Totales'] and 'Patrimonio' in report_data_analisis['Totales']:
+        analisis['Totales']['Patrimonio'] = {
+            'base': report_data_base['Totales']['Patrimonio'],
+            'analisis': report_data_analisis['Totales']['Patrimonio'],
+            'absoluto': report_data_analisis['Totales']['Patrimonio'] - report_data_base['Totales']['Patrimonio'],
+            'relativo': ((report_data_analisis['Totales']['Patrimonio'] / report_data_base['Totales']['Patrimonio']) - 1) * 100 if report_data_base['Totales']['Patrimonio'] != 0 else 0.0,
+            'color_clase': 'valor-positivo' if report_data_analisis['Totales']['Patrimonio'] > report_data_base['Totales']['Patrimonio'] else ('valor-negativo' if report_data_analisis['Totales']['Patrimonio'] < report_data_base['Totales']['Patrimonio'] else 'valor-cero')
         }
         
-    return analisis # Asegúrate de que tu lógica copiada retorne 'analisis'
+    return analisis
 
 # --- Función para analizar con Gemini ---
 def analizar_con_gemini(report_data, anio, base_bg, base_er):

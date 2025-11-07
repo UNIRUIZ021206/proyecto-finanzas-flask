@@ -17,7 +17,7 @@
     
     <!-- Menú Desplegable de Períodos -->
     <div class="report-selector">
-        <form method="GET" action="{{ url_for('analisis_vertical') }}">
+        <form method="GET" action="{{ url_for('analysis.analisis_vertical') }}">
             <label for="anio">Seleccionar Período:</label>
             <select name="anio" id="anio" onchange="this.form.submit()">
                 {% if not periodos %}

@@ -28,60 +28,60 @@
             {% set rol_nombre = get_rol_name(current_user.id_rol) %}
             {% if rol_nombre and (rol_nombre == 'Cliente' or rol_nombre == 'cliente') %}
             <!-- === NAVEGACIÓN PARA CLIENTES/INVERSORES === -->
-            <a href="{{ url_for('dashboard_cliente') }}" class="{{ 'active' if request.endpoint == 'dashboard_cliente' else '' }}">
+            <a href="{{ url_for('main.dashboard_cliente') }}" class="{{ 'active' if request.endpoint == 'main.dashboard_cliente' else '' }}">
                 <i class="fa-solid fa-grid-2"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{{ url_for('analisis_vertical') }}" class="{{ 'active' if request.endpoint == 'analisis_vertical' else '' }}">
+            <a href="{{ url_for('analysis.analisis_vertical') }}" class="{{ 'active' if request.endpoint == 'analysis.analisis_vertical' else '' }}">
                 <i class="fa-solid fa-chart-simple"></i>
                 <span>Análisis Vertical</span>
             </a>
-            <a href="{{ url_for('analisis_horizontal') }}" class="{{ 'active' if request.endpoint == 'analisis_horizontal' else '' }}">
+            <a href="{{ url_for('analysis.analisis_horizontal') }}" class="{{ 'active' if request.endpoint == 'analysis.analisis_horizontal' else '' }}">
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Análisis Horizontal</span>
             </a>
-            <a href="{{ url_for('ratios_financieros') }}" class="{{ 'active' if request.endpoint == 'ratios_financieros' else '' }}">
+            <a href="{{ url_for('analysis.ratios_financieros') }}" class="{{ 'active' if request.endpoint == 'analysis.ratios_financieros' else '' }}">
                 <i class="fa-solid fa-percent"></i>
                 <span>Ratios Financieros</span>
             </a>
-            <a href="{{ url_for('origen_aplicacion') }}" class="{{ 'active' if request.endpoint == 'origen_aplicacion' else '' }}">
+            <a href="{{ url_for('analysis.origen_aplicacion') }}" class="{{ 'active' if request.endpoint == 'analysis.origen_aplicacion' else '' }}">
                 <i class="fa-solid fa-arrows-rotate"></i>
                 <span>Origen y Aplicación</span>
             </a>
             {% else %}
             <!-- === NAVEGACIÓN PARA ADMINISTRADORES === -->
-            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+            <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' else '' }}">
                 <i class="fa-solid fa-grid-2"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{{ url_for('gestion') }}" class="{{ 'active' if request.endpoint == 'gestion' else '' }}">
+            <a href="{{ url_for('admin.gestion') }}" class="{{ 'active' if request.endpoint == 'admin.gestion' else '' }}">
                 <i class="fa-solid fa-file-lines"></i>
                 <span>Gestión de Reportes</span>
             </a>
-            <a href="{{ url_for('analisis_vertical') }}" class="{{ 'active' if request.endpoint == 'analisis_vertical' else '' }}">
+            <a href="{{ url_for('analysis.analisis_vertical') }}" class="{{ 'active' if request.endpoint == 'analysis.analisis_vertical' else '' }}">
                 <i class="fa-solid fa-chart-simple"></i>
                 <span>Análisis Vertical</span>
             </a>
-            <a href="{{ url_for('analisis_horizontal') }}" class="{{ 'active' if request.endpoint == 'analisis_horizontal' else '' }}">
+            <a href="{{ url_for('analysis.analisis_horizontal') }}" class="{{ 'active' if request.endpoint == 'analysis.analisis_horizontal' else '' }}">
                 <i class="fa-solid fa-chart-column"></i>
                 <span>Análisis Horizontal</span>
             </a>
-            <a href="{{ url_for('ratios_financieros') }}" class="{{ 'active' if request.endpoint == 'ratios_financieros' else '' }}">
+            <a href="{{ url_for('analysis.ratios_financieros') }}" class="{{ 'active' if request.endpoint == 'analysis.ratios_financieros' else '' }}">
                 <i class="fa-solid fa-percent"></i>
                 <span>Ratios Financieros</span>
             </a>
-            <a href="{{ url_for('origen_aplicacion') }}" class="{{ 'active' if request.endpoint == 'origen_aplicacion' else '' }}">
+            <a href="{{ url_for('analysis.origen_aplicacion') }}" class="{{ 'active' if request.endpoint == 'analysis.origen_aplicacion' else '' }}">
                 <i class="fa-solid fa-arrows-rotate"></i>
                 <span>Origen y Aplicación</span>
             </a>
             
             <!-- === ENLACES EXCLUSIVOS DE ADMINISTRADOR === -->
             {% if current_user.is_authenticated and is_user_admin(current_user.id) %}
-            <a href="{{ url_for('catalogo_cuentas') }}" class="{{ 'active' if request.endpoint == 'catalogo_cuentas' else '' }}">
+            <a href="{{ url_for('admin.catalogo_cuentas') }}" class="{{ 'active' if request.endpoint == 'admin.catalogo_cuentas' else '' }}">
                 <i class="fa-solid fa-book-open-reader"></i>
                 <span>Catálogo</span>
             </a>
-            <a href="{{ url_for('ingresar_saldos') }}" class="{{ 'active' if request.endpoint == 'ingresar_saldos' else '' }}">
+            <a href="{{ url_for('admin.ingresar_saldos') }}" class="{{ 'active' if request.endpoint == 'admin.ingresar_saldos' else '' }}">
                 <i class="fa-solid fa-circle-dollar-to-slot"></i>
                 <span>Ingresar Saldos</span>
             </a>
@@ -89,7 +89,7 @@
             {% endif %}
         {% endif %}
         
-        <a href="{{ url_for('logout') }}" class="logout-button">
+        <a href="{{ url_for('auth.logout') }}" class="logout-button">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
             <span>Cerrar Sesión</span>
         </a>

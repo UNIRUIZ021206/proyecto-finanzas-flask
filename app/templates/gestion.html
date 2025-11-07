@@ -9,7 +9,7 @@
 
 <!-- Menú para seleccionar el año -->
 <div class="report-selector">
-            <form method="GET" action="{{ url_for('gestion') }}">
+            <form method="GET" action="{{ url_for('admin.gestion') }}">
                 <label for="anio">Seleccionar Período:</label>
                 <select name="anio" id="anio" onchange="this.form.submit()">
                     {% for anio in periodos %}

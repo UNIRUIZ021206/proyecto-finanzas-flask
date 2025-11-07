@@ -19,7 +19,7 @@
     {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('catalogo_cuentas') }}" class="card" style="margin-bottom: 30px;">
+<form method="POST" action="{{ url_for('admin.catalogo_cuentas') }}" class="card" style="margin-bottom: 30px;">
     <h3>Añadir Nueva Cuenta</h3>
     <div class="form-grid">
         <input type="text" name="cuenta_id" placeholder="Código (ej: 1101)" required>
