@@ -2,10 +2,10 @@
 
 {% block title %}
 <title>Catálogo de Cuentas</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='catalogo.css') }}">
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='catalogo.css') }}">
 <h2 class="main-title">Gestión del Catálogo de Cuentas</h2>
 <p class="main-subtitle">Añade o edita las cuentas contables del sistema.</p>
 

@@ -2,10 +2,10 @@
 
 {% block title %}
 <title>Ingresar Saldos de Período</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='saldos.css') }}">
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='saldos.css') }}">
 <h2 class="main-title">Crear Nuevo Período Contable</h2>
 <p class="main-subtitle">Crea un nuevo período contable (año) con sus saldos iniciales. Los períodos contables son históricos y no pueden modificarse una vez creados.</p>
 

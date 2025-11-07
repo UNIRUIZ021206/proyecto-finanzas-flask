@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            <form method="POST" action="{{ url_for('register') }}">
+                <h1>Registro</h1>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <div class="input-box">
+                    <input type="text" name="nombre" placeholder="Nombre completo" required>
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="input-box">
+                    <input type="email" name="correo" placeholder="Correo electrónico" required>
+                    <i class="fa-solid fa-envelope-open"></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" name="contrasena" placeholder="Contraseña (mínimo 6 caracteres)" required>
+                    <i class="fa-solid fa-lock-keyhole"></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" name="contrasena_confirm" placeholder="Confirmar contraseña" required>
+                    <i class="fa-solid fa-lock-keyhole"></i>
+                </div>
+
+                <button type="submit" class="btn-login"><span>Registrarse</span></button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: #666; font-size: 14px;">
+                        ¿Ya tienes una cuenta? 
+                        <a href="{{ url_for('login') }}" style="color: #4CAF50; text-decoration: none; font-weight: 600;">
+                            Inicia sesión aquí
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Dashboard Inversor - Sistema Financiero</title>
+{% endblock %}
+
+{% block content %}
+<h2 class="main-title">¡Bienvenido, {{ current_user.nombre }}!</h2>
+<p class="main-subtitle">Como inversor, aquí puedes analizar el rendimiento financiero de la empresa.</p>
+
+<div class="dashboard-cards">
+    
+    <a href="{{ url_for('analisis_vertical') }}" class="card">
+        <div class="card-icon-wrapper">
+            <i class="fa-solid fa-chart-simple card-icon"></i>
+        </div>
+        <h3>Análisis Vertical</h3>
+        <p>Analiza la estructura porcentual de los estados financieros para entender la composición de activos, pasivos e ingresos.</p>
+    </a>
+
+    <a href="{{ url_for('analisis_horizontal') }}" class="card">
+        <div class="card-icon-wrapper">
+            <i class="fa-solid fa-chart-column card-icon"></i>
+        </div>
+        <h3>Análisis Horizontal</h3>
+        <p>Compara la evolución de las cuentas entre diferentes períodos para identificar tendencias y cambios significativos.</p>
+    </a>
+
+    <a href="{{ url_for('ratios_financieros') }}" class="card">
+        <div class="card-icon-wrapper">
+            <i class="fa-solid fa-percent card-icon"></i>
+        </div>
+        <h3>Ratios Financieros</h3>
+        <p>Evalúa indicadores clave de liquidez, solvencia, rentabilidad y eficiencia operativa.</p>
+    </a>
+
+    <a href="{{ url_for('origen_aplicacion') }}" class="card">
+        <div class="card-icon-wrapper">
+            <i class="fa-solid fa-arrows-rotate card-icon"></i>
+        </div>
+        <h3>Origen y Aplicación de Fondos</h3>
+        <p>Comprende de dónde provinieron los recursos y cómo se utilizaron durante el período.</p>
+    </a>
+
+</div>
+
+{% if periodos %}
+<div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+    <h3 style="color: #333; margin-bottom: 15px;">
+        <i class="fa-solid fa-calendar"></i> Períodos Disponibles
+    </h3>
+    <p style="color: #666; margin-bottom: 10px;">La empresa tiene información financiera para los siguientes años:</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        {% for periodo in periodos %}
+        <span style="background: #4CAF50; color: white; padding: 8px 16px; border-radius: 5px; font-weight: 600;">
+            {{ periodo }}
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+    <h3 style="margin-bottom: 15px;">
+        <i class="fa-solid fa-lightbulb"></i> Información para Inversores
+    </h3>
+    <p style="margin-bottom: 10px; line-height: 1.6;">
+        Este dashboard te proporciona acceso a información financiera clave para tomar decisiones informadas. 
+        Utiliza los análisis disponibles para evaluar la salud financiera, rentabilidad y crecimiento de la empresa.
+    </p>
+    <ul style="margin-top: 15px; padding-left: 20px; line-height: 1.8;">
+        <li><strong>Análisis Vertical:</strong> Entiende qué porcentaje representa cada cuenta respecto al total.</li>
+        <li><strong>Análisis Horizontal:</strong> Observa cómo han cambiado las cuentas a lo largo del tiempo.</li>
+        <li><strong>Ratios Financieros:</strong> Evalúa métricas estándar de la industria para comparar con otras empresas.</li>
+        <li><strong>Origen y Aplicación:</strong> Analiza el flujo de efectivo y la gestión de recursos.</li>
+    </ul>
+</div>
+
+{% endblock %}
+
