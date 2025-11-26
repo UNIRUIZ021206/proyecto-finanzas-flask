@@ -35,6 +35,12 @@ def login():
 
                 if result:
                     hash_bd_bytes = result[3]
+                    
+                    # --- FIX PARA POSTGRESQL (Convertir memoryview a bytes) ---
+                    if isinstance(hash_bd_bytes, memoryview):
+                        hash_bd_bytes = bytes(hash_bd_bytes)
+                    # ----------------------------------------------------------
+                    
                     contrasena_form_bytes = contrasena_form.encode('utf-8')
 
                     if bcrypt.checkpw(contrasena_form_bytes, hash_bd_bytes):
