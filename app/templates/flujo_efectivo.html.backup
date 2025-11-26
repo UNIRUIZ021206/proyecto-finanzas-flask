@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Estado de Flujo de Efectivo - Global Motors</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid my-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="main-title mb-3">Estado de Flujo de Efectivo</h2>
+            <p class="main-subtitle mb-4">Análisis completo del flujo de efectivo clasificado por Operación, Inversión y
+                Financiamiento, mostrando cuenta por cuenta las diferencias entre períodos.</p>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('analysis.flujo_efectivo') }}">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label for="periodo_inicio" class="form-label fw-bold">Período de Inicio:</label>
+                                <select name="periodo_inicio" id="periodo_inicio" class="form-select">
+                                    <option value="">-- Selecciona --</option>
+                                    {% for anio in periodos %}
+                                    <option value="{{ anio }}" {% if anio==periodo_inicio %}selected{% endif %}>
+                                        Año {{ anio }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="periodo_fin" class="form-label fw-bold">Período de Fin:</label>
+                                <select name="periodo_fin" id="periodo_fin" class="form-select">
+                                    <option value="">-- Selecciona --</option>
+                                    {% for anio in periodos %}
+                                    <option value="{{ anio }}" {% if anio==periodo_fin %}selected{% endif %}>
+                                        Año {{ anio }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100"
+                                    style="background: linear-gradient(135deg, #8B1A1A 0%, #6B1515 100%); border: none; padding: 10px;">
+                                    <i class="fa-solid fa-calculator me-2"></i> Calcular
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-info-circle"></i>
+                                    <strong>Nota:</strong> El Estado de Flujo de Efectivo clasifica todas las cuentas en
+                                    tres categorías: Operación, Inversión y Financiamiento. El período de inicio debe
+                                    ser menor que el período de fin.
+                                </small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if flujo_data and flujo_data.exito %}
+    <!-- Sección de Exportar a Excel -->
+    <div class="export-section"
+        style="margin-top: 20px; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #8B1A1A 0%, #6B1515 100%); border-radius: 16px; box-shadow: 0 4px 16px rgba(139, 26, 26, 0.4); border: 1px solid rgba(139, 26, 26, 0.3);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h3 style="color: white; margin: 0 0 8px 0; font-size: 1.3em;">
+                    <i class="fa-solid fa-file-excel"></i> Exportar Estado de Flujo de Efectivo a Excel
+                </h3>
+                <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 0.95em;">
+                    Descarga el Estado de Flujo de Efectivo completo en un archivo Excel
+                </p>
+            </div>
+            <a href="#" class="btn-export-excel"
+                style="padding: 12px 24px; background: white; color: #8B1A1A; border: none; border-radius: 12px; font-size: 1em; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+                <i class="fa-solid fa-download"></i> Exportar
+            </a>
+        </div>
+    </div>
+
+    <!-- Estado de Flujo de Efectivo - OPERACIÓN -->
+    <div class="card shadow-lg mb-5" style="background: var(--bg-card); border: 1px solid var(--border-light);">
+        <div class="card-header"
+            style="background: linear-gradient(135deg, #198754 0%, #157347 100%); color: white; border: none;">
+            <h3 class="mb-0">
+                <i class="fa-solid fa-briefcase me-2"></i>
+                Actividades de Operación
+            </h3>
+            <small class="d-block mt-2">Período: Año {{ periodo_inicio }} al Año {{ periodo_fin }}</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered border-success mb-0" style="background-color: white !important;">
+                    <thead class="table-success">
+                        <tr>
+                            <th style="width: 60%; color: white !important;">Concepto</th>
+                            <th class="text-end" style="color: white !important; width: 20%;">Entrada</th>
+                            <th class="text-end" style="color: white !important; width: 20%;">Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody style="background-color: white !important;">
+                        <!-- Utilidad Neta -->
+                        <tr style="background-color: white !important;">
+                            <td
+                                style="color: #000000 !important; font-weight: 600; background-color: white !important;">
+                                Utilidad Neta
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if flujo_data.Operacion.utilidad_neta >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Operacion.utilidad_neta) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if flujo_data.Operacion.utilidad_neta < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Operacion.utilidad_neta) }} {% else %} - {% endif %} </td>
+                        </tr>
+
+                        <!-- Depreciación -->
+                        {% if flujo_data.Operacion.depreciacion > 0 %}
+                        <tr style="background-color: white !important;">
+                            <td class="ps-4"
+                                style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                Depreciación
+                            </td>
+                            <td class="text-end"
+                                style="color: #198754 !important; font-weight: 600; background-color: white !important;">
+                                C$ {{ "%.2f"|format(flujo_data.Operacion.depreciacion) }}
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                -</td>
+                        </tr>
+                        {% endif %}
+
+                        <!-- Suma (Utilidad Neta + Depreciación) -->
+                        {% set suma_utilidad_depreciacion = flujo_data.Operacion.utilidad_neta +
+                        flujo_data.Operacion.depreciacion %}
+                        <tr style="background-color: #f8f9fa !important;">
+                            <td class="fw-bold"
+                                style="color: #000000 !important; background-color: #f8f9fa !important;">
+                                Suma
+                            </td>
+                            <td class="text-end fw-bold"
+                                style="color: #000000 !important; background-color: #f8f9fa !important;">
+                                {% if suma_utilidad_depreciacion >= 0 %}
+                                C$ {{ "%.2f"|format(suma_utilidad_depreciacion) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold"
+                                style="color: #000000 !important; background-color: #f8f9fa !important;">
+                                {% if suma_utilidad_depreciacion < 0 %} C$ {{ "%.2f"
+                                    |format(-suma_utilidad_depreciacion) }} {% else %} - {% endif %} </td>
+                        </tr>
+
+                        <!-- Cambios en Capital de Trabajo -->
+                        {% if flujo_data.Operacion.cambios_capital_trabajo %}
+                        {% for cuenta in flujo_data.Operacion.cambios_capital_trabajo %}
+                        <tr style="background-color: white !important;">
+                            <td class="ps-4"
+                                style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                {% if cuenta.tipo == 'Pasivo' %}
+                                {# Para PASIVOS: efecto positivo = aumento, efecto negativo = disminución #}
+                                {% if cuenta.efecto_efectivo > 0 %}
+                                Aumento de {{ cuenta.nombre }}
+                                {% else %}
+                                Disminución de {{ cuenta.nombre }}
+                                {% endif %}
+                                {% else %}
+                                {# Para ACTIVOS: efecto negativo = aumento, efecto positivo = disminución #}
+                                {% if cuenta.efecto_efectivo < 0 %} Aumento de {{ cuenta.nombre }} {% else %}
+                                    Disminución de {{ cuenta.nombre }} {% endif %} {% endif %} </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo > 0 %}
+                                C$ {{ "%.2f"|format(cuenta.efecto_efectivo) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo < 0 %} C$ {{ "%.2f" |format(-cuenta.efecto_efectivo) }} {%
+                                    else %} - {% endif %} </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </tbody>
+                    <tfoot class="table-dark" style="background-color: #212529 !important;">
+                        <tr style="background-color: #212529 !important;">
+                            <td class="fw-bold fs-5"
+                                style="color: white !important; background-color: #212529 !important;">
+                                FNE de Actividades de Operación
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Operacion >= 0 %}#198754{% else %}#dc3545{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Operacion >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Operacion) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Operacion < 0 %}#dc3545{% else %}#212529{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Operacion < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Totales.Operacion) }} {% else %} - {% endif %} </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado de Flujo de Efectivo - INVERSIÓN -->
+    <div class="card shadow-lg mb-5" style="background: var(--bg-card); border: 1px solid var(--border-light);">
+        <div class="card-header"
+            style="background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%); color: #000; border: none;">
+            <h3 class="mb-0">
+                <i class="fa-solid fa-chart-line me-2"></i>
+                Actividades de Inversión
+            </h3>
+            <small class="d-block mt-2">Período: Año {{ periodo_inicio }} al Año {{ periodo_fin }}</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered border-warning mb-0" style="background-color: white !important;">
+                    <thead class="table-warning">
+                        <tr>
+                            <th style="width: 60%; color: #000 !important;">Concepto</th>
+                            <th class="text-end" style="color: #000 !important; width: 20%;">Entrada</th>
+                            <th class="text-end" style="color: #000 !important; width: 20%;">Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody style="background-color: white !important;">
+                        {% if flujo_data.Inversion %}
+                        {% for cuenta in flujo_data.Inversion %}
+                        <tr style="background-color: white !important;">
+                            <td class="ps-4"
+                                style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo < 0 %} Compra de {{ cuenta.nombre }} {% else %} Venta de {{
+                                    cuenta.nombre }} {% endif %} </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo > 0 %}
+                                C$ {{ "%.2f"|format(cuenta.efecto_efectivo) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo < 0 %} C$ {{ "%.2f" |format(-cuenta.efecto_efectivo) }} {%
+                                    else %} - {% endif %} </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr style="background-color: white !important;">
+                            <td colspan="3" class="text-center"
+                                style="color: #000000 !important; background-color: white !important;">No hay
+                                actividades de inversión</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                    <tfoot class="table-dark" style="background-color: #212529 !important;">
+                        <tr style="background-color: #212529 !important;">
+                            <td class="fw-bold fs-5"
+                                style="color: white !important; background-color: #212529 !important;">
+                                FNE de Actividades de Inversión
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Inversion >= 0 %}#198754{% else %}#dc3545{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Inversion >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Inversion) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Inversion < 0 %}#dc3545{% else %}#212529{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Inversion < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Totales.Inversion) }} {% else %} - {% endif %} </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado de Flujo de Efectivo - FINANCIAMIENTO -->
+    <div class="card shadow-lg mb-5" style="background: var(--bg-card); border: 1px solid var(--border-light);">
+        <div class="card-header"
+            style="background: linear-gradient(135deg, #dc3545 0%, #bb2d3b 100%); color: white; border: none;">
+            <h3 class="mb-0">
+                <i class="fa-solid fa-hand-holding-dollar me-2"></i>
+                Actividades de Financiamiento
+            </h3>
+            <small class="d-block mt-2">Período: Año {{ periodo_inicio }} al Año {{ periodo_fin }}</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered border-danger mb-0" style="background-color: white !important;">
+                    <thead class="table-danger">
+                        <tr>
+                            <th style="width: 60%; color: white !important;">Concepto</th>
+                            <th class="text-end" style="color: white !important; width: 20%;">Entrada</th>
+                            <th class="text-end" style="color: white !important; width: 20%;">Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody style="background-color: white !important;">
+                        {% if flujo_data.Financiamiento %}
+                        {% for cuenta in flujo_data.Financiamiento %}
+                        <tr style="background-color: white !important;">
+                            <td class="ps-4"
+                                style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo > 0 %}
+                                Aumento de {{ cuenta.nombre }}
+                                {% else %}
+                                Disminución de {{ cuenta.nombre }}
+                                {% endif %}
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo > 0 %}
+                                C$ {{ "%.2f"|format(cuenta.efecto_efectivo) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end" style="color: #000000 !important; background-color: white !important;">
+                                {% if cuenta.efecto_efectivo < 0 %} C$ {{ "%.2f" |format(-cuenta.efecto_efectivo) }} {%
+                                    else %} - {% endif %} </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr style="background-color: white !important;">
+                            <td colspan="3" class="text-center"
+                                style="color: #000000 !important; background-color: white !important;">No hay
+                                actividades de financiamiento</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                    <tfoot class="table-dark" style="background-color: #212529 !important;">
+                        <tr style="background-color: #212529 !important;">
+                            <td class="fw-bold fs-5"
+                                style="color: white !important; background-color: #212529 !important;">
+                                FNE de Actividades de Financiamiento
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Financiamiento >= 0 %}#198754{% else %}#dc3545{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Financiamiento >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Financiamiento) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Financiamiento < 0 %}#dc3545{% else %}#212529{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Financiamiento < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Totales.Financiamiento) }} {% else %} - {% endif %} </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen Total - Flujo Neto de Efectivo -->
+    <div class="card shadow-lg mb-5" style="background: var(--bg-card); border: 1px solid var(--border-light);">
+        <div class="card-header"
+            style="background: linear-gradient(135deg, #8B1A1A 0%, #6B1515 100%); color: white; border: none;">
+            <h3 class="mb-0">
+                <i class="fa-solid fa-calculator me-2"></i>
+                Flujo Neto de Efectivo
+            </h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0"
+                    style="background-color: white !important; color: #000000 !important;">
+                    <thead style="background-color: #8B1A1A !important;">
+                        <tr>
+                            <th style="width: 60%; color: white !important;">Concepto</th>
+                            <th class="text-end" style="color: white !important; width: 20%;">Entrada</th>
+                            <th class="text-end" style="color: white !important; width: 20%;">Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody style="background-color: white !important;">
+                        <tr style="background-color: #f8f9fa !important;">
+                            <td
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                FNE de Actividades de Operación
+                            </td>
+                            <td class="text-end"
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                {% if flujo_data.Totales.Operacion >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Operacion) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end"
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                {% if flujo_data.Totales.Operacion < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Totales.Operacion) }} {% else %} - {% endif %} </td>
+                        </tr>
+                        <tr style="background-color: #f8f9fa !important;">
+                            <td
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                FNE de Actividades de Inversión
+                            </td>
+                            <td class="text-end"
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                {% if flujo_data.Totales.Inversion >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Inversion) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end"
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                {% if flujo_data.Totales.Inversion < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Totales.Inversion) }} {% else %} - {% endif %} </td>
+                        </tr>
+                        <tr style="background-color: #f8f9fa !important;">
+                            <td
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                FNE de Actividades de Financiamiento
+                            </td>
+                            <td class="text-end"
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                {% if flujo_data.Totales.Financiamiento >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Financiamiento) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end"
+                                style="color: #000000 !important; font-weight: 700; font-size: 1.1em; background-color: #f8f9fa !important;">
+                                {% if flujo_data.Totales.Financiamiento < 0 %} C$ {{ "%.2f"
+                                    |format(-flujo_data.Totales.Financiamiento) }} {% else %} - {% endif %} </td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="table-dark" style="background-color: #212529 !important;">
+                        <tr style="background-color: #212529 !important;">
+                            <td class="fw-bold fs-5"
+                                style="color: white !important; background-color: #212529 !important;">
+                                FLUJO NETO DE EFECTIVO
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Total >= 0 %}#198754{% else %}#dc3545{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Total >= 0 %}
+                                C$ {{ "%.2f"|format(flujo_data.Totales.Total) }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold fs-5"
+                                style="color: {% if flujo_data.Totales.Total < 0 %}#dc3545{% else %}#212529{% endif %} !important; background-color: #212529 !important;">
+                                {% if flujo_data.Totales.Total < 0 %} C$ {{ "%.2f" |format(-flujo_data.Totales.Total) }}
+                                    {% else %} - {% endif %} </td>
+            </div>
+
+            {% endblock %}

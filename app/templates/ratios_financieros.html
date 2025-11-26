@@ -1,0 +1,784 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Ratios Financieros - Sistema Financiero</title>
+{% endblock %}
+
+{% block content %}
+
+<!-- Estilos copiados y adaptados del Dashboard para consistencia -->
+<style>
+    .investor-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-light);
+    }
+
+    .investor-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .investor-hero h1 {
+        font-size: 2.5em;
+        font-weight: 800;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+        background: linear-gradient(90deg, #fff, #cbd5e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .investor-hero p {
+        font-size: 1.2em;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+        color: var(--text-secondary);
+    }
+
+    .year-selector {
+        background: var(--bg-card);
+        padding: 24px 28px;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+        flex-wrap: wrap;
+        border: 1px solid var(--border-light);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .year-selector::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--secondary), var(--accent), var(--secondary));
+        opacity: 0.5;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 0.95em;
+    }
+
+    .form-select {
+        padding: 12px 16px;
+        font-size: 1em;
+        font-weight: 500;
+        border: 1px solid var(--border-medium);
+        border-radius: 12px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+    }
+
+    .btn-calculate {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 48px;
+        /* Match select height approximately */
+    }
+
+    .btn-calculate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .section-title-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .section-title-bar h3 {
+        font-size: 1.5em;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .section-title-bar i {
+        color: var(--accent);
+        font-size: 1.4em;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .kpi-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-top: 4px solid;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-light);
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .kpi-card.optimo {
+        border-top-color: var(--success);
+    }
+
+    .kpi-card.alto {
+        border-top-color: var(--warning);
+    }
+
+    .kpi-card.bajo {
+        border-top-color: var(--error);
+    }
+
+    .kpi-card.neutral {
+        border-top-color: var(--text-tertiary);
+    }
+
+    .kpi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-card.optimo .kpi-icon {
+        background: linear-gradient(135deg, var(--success), #059669);
+    }
+
+    .kpi-card.alto .kpi-icon {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+    }
+
+    .kpi-card.bajo .kpi-icon {
+        background: linear-gradient(135deg, var(--error), #dc2626);
+    }
+
+    .kpi-card.neutral .kpi-icon {
+        background: linear-gradient(135deg, var(--bg-tertiary), #475569);
+    }
+
+    .kpi-status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .kpi-card.optimo .kpi-status-badge {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+    }
+
+    .kpi-card.alto .kpi-status-badge {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+    }
+
+    .kpi-card.bajo .kpi-status-badge {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+    }
+
+    .kpi-card.neutral .kpi-status-badge {
+        background: rgba(148, 163, 184, 0.15);
+        color: #cbd5e1;
+    }
+
+    .kpi-value {
+        font-size: 2em;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .kpi-label {
+        color: var(--text-secondary);
+        font-size: 1em;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .kpi-formula {
+        background: var(--bg-tertiary);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.85em;
+        color: var(--text-tertiary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .kpi-details {
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-light);
+        font-size: 0.9em;
+        color: var(--text-secondary);
+    }
+
+    .kpi-details span {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .export-section {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .export-info h3 {
+        color: white;
+        margin: 0 0 4px 0;
+        font-size: 1.2em;
+    }
+
+    .export-info p {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+        font-size: 0.9em;
+    }
+
+    .btn-export {
+        background: white;
+        color: var(--accent);
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background: #f8fafc;
+        color: var(--accent-dark);
+    }
+
+    /* Dupont specific */
+    .dupont-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .dupont-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--border-light);
+        text-align: center;
+    }
+
+    .dupont-header {
+        font-size: 1.2em;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+    }
+
+    .dupont-roe {
+        font-size: 2.5em;
+        font-weight: 800;
+        color: var(--accent);
+        margin-bottom: 8px;
+    }
+
+    .dupont-factors {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    .dupont-factor-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-secondary);
+    }
+
+    .dupont-factor-row:last-child {
+        border-bottom: none;
+    }
+
+    .dupont-factor-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .investor-hero {
+            padding: 24px;
+        }
+
+        .investor-hero h1 {
+            font-size: 1.8em;
+        }
+
+        .year-selector {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .export-section {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="investor-hero">
+    <h1>Ratios Financieros</h1>
+    <p>Análisis de indicadores financieros para evaluar la situación económica de la empresa.</p>
+</div>
+
+<div class="year-selector">
+    <form method="GET" action="{{ url_for('analysis.ratios_financieros') }}" style="display: contents;">
+        <div class="form-group">
+            <label for="anio"><i class="fa-solid fa-calendar-days me-2"></i>Año de Análisis</label>
+            <select name="anio" id="anio" class="form-select" required>
+                <option value="">-- Selecciona --</option>
+                {% for anio in periodos %}
+                <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}>
+                    Año {{ anio }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="anio_anterior"><i class="fa-solid fa-clock-rotate-left me-2"></i>Año Anterior (Opcional)</label>
+            <select name="anio_anterior" id="anio_anterior" class="form-select">
+                <option value="">-- Selecciona --</option>
+                {% for anio in periodos %}
+                <option value="{{ anio }}" {% if anio==anio_anterior %}selected{% endif %}>
+                    Año {{ anio }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn-calculate">
+            <i class="fa-solid fa-calculator"></i> Calcular
+        </button>
+    </form>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'warning') }} alert-dismissible fade show mb-4"
+    role="alert">
+    <i
+        class="fa-solid fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+{% if ratios_data %}
+
+<!-- Botón de Exportar a Excel -->
+<div class="export-section">
+    <div class="export-info">
+        <h3><i class="fa-solid fa-file-excel me-2"></i>Exportar Análisis</h3>
+        <p>Descarga todos los indicadores en formato Excel</p>
+    </div>
+    <a href="{{ url_for('analysis.exportar_excel', tipo='ratios', anio=anio_seleccionado) }}" class="btn-export">
+        <i class="fa-solid fa-download me-2"></i> Descargar
+    </a>
+</div>
+
+<!-- Sección de Análisis con IA -->
+<div id="ai-analysis-container" class="mb-5">
+    <div class="card shadow-sm border-0" style="background: var(--bg-card); border-radius: 16px;">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h5 class="text-muted">Generando análisis financiero inteligente con Gemini AI...</h5>
+        </div>
+    </div>
+</div>
+
+<!-- 1. RAZONES DE LIQUIDEZ -->
+{% if ratios_data.Liquidez %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-coins"></i>
+    <h3>Razones de Liquidez</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Liquidez.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
+        </div>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}
+            {% if ratio_info.get('unidad') %}<small style="font-size: 0.5em;">{{ ratio_info.unidad }}</small>{% endif %}
+            {% else %}
+            N/A
+            {% endif %}
+        </div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.get('inventarios') is not none %}
+            <span><strong>Inventarios:</strong> C$ {{ "%.2f"|format(ratio_info.inventarios) }}</span>
+            {% endif %}
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- 2. RAZONES DE ACTIVIDADES -->
+{% if ratios_data.Actividades %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-chart-line"></i>
+    <h3>Razones de Actividades</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Actividades.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-rotate"></i>
+            </div>
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
+        </div>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}
+            {% if ratio_info.get('unidad') %}<small style="font-size: 0.5em;">{{ ratio_info.unidad }}</small>{% endif %}
+            {% else %}
+            N/A
+            {% endif %}
+        </div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- 3. RAZONES DE ENDEUDAMIENTO -->
+{% if ratios_data.Endeudamiento %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-scale-balanced"></i>
+    <h3>Razones de Endeudamiento</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Endeudamiento.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
+        </div>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}
+            {% if ratio_info.get('porcentaje') %}<small style="font-size: 0.5em;">%</small>{% endif %}
+            {% else %}
+            N/A
+            {% endif %}
+        </div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- 4. RAZONES DE RENTABILIDAD -->
+{% if ratios_data.Rentabilidad %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-chart-pie"></i>
+    <h3>Razones de Rentabilidad</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Rentabilidad.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-money-bill-trend-up"></i>
+            </div>
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
+        </div>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}<small style="font-size: 0.5em;">%</small>
+            {% else %}
+            N/A
+            {% endif %}
+        </div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- 5. ANÁLISIS DUPONT -->
+{% if dupont_data %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-sitemap"></i>
+    <h3>Análisis DuPont (3 Factores)</h3>
+</div>
+<div class="dupont-container mb-5">
+    <!-- Año Actual -->
+    <div class="dupont-card">
+        <div class="dupont-header">Año {{ anio_seleccionado }}</div>
+        {% set datos_act = dupont_data[anio_seleccionado|string] %}
+        <div class="dupont-roe">{{ "%.2f"|format(datos_act.roe * 100) }}%</div>
+        <div style="color: var(--text-secondary);">ROE (Retorno sobre Capital)</div>
+        <div class="dupont-factors">
+            <div class="dupont-factor-row">
+                <span>Margen Neto</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.margen_neto * 100) }}%</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Rotación Activos</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.rotacion_activos) }}</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Multiplicador</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.multiplicador) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Año Anterior -->
+    <div class="dupont-card">
+        <div class="dupont-header">Año {{ anio_seleccionado - 1 }}</div>
+        {% set anio_ant_str = (anio_seleccionado - 1)|string %}
+        {% if dupont_data[anio_ant_str] %}
+        {% set datos_ant = dupont_data[anio_ant_str] %}
+        <div class="dupont-roe" style="color: var(--text-tertiary);">{{ "%.2f"|format(datos_ant.roe * 100) }}%</div>
+        <div style="color: var(--text-secondary);">ROE (Retorno sobre Capital)</div>
+        <div class="dupont-factors">
+            <div class="dupont-factor-row">
+                <span>Margen Neto</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.margen_neto * 100) }}%</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Rotación Activos</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.rotacion_activos) }}</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Multiplicador</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.multiplicador) }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="py-5 text-muted">
+            <i class="fa-solid fa-info-circle fa-2x mb-3"></i>
+            <p>Sin datos históricos</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Variación -->
+    <div class="dupont-card">
+        <div class="dupont-header">Análisis de Variación</div>
+        <div style="margin-bottom: 20px;">
+            <div style="font-size: 0.9em; color: var(--text-secondary);">Cambio en ROE</div>
+            <div class="dupont-roe"
+                style="color: {% if '-' in dupont_data.variaciones.cambio_roe %}var(--error){% else %}var(--success){% endif %};">
+                {{ dupont_data.variaciones.cambio_roe }}
+            </div>
+        </div>
+        <div style="background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: 12px; text-align: left;">
+            <div style="color: var(--accent); font-weight: 700; margin-bottom: 8px;">
+                <i class="fa-solid fa-magnifying-glass-chart me-2"></i>Factor Determinante:
+            </div>
+            <p style="margin: 0; color: var(--text-primary); font-size: 0.95em;">
+                {{ dupont_data.variaciones.factor_determinante }}
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info mt-4" role="alert">
+    <i class="fa-solid fa-info-circle me-2"></i>
+    No hay datos disponibles. Por favor, selecciona un año para calcular los ratios financieros.
+</div>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const aiContainer = document.getElementById('ai-analysis-container');
+        if (aiContainer) {
+            const anio = "{{ anio_seleccionado }}";
+            if (anio && anio !== "None") {
+                fetch(`{{ url_for('analysis.api_ratios_ia', anio=0) }}`.replace('0', anio))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.html) {
+                            aiContainer.innerHTML = `
+                                <div class="card shadow-lg mb-4 border-0" style="background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-light);">
+                                    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%); border-radius: 16px 16px 0 0;">
+                                        <h3 class="mb-0" style="font-size: 1.2em;"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h3>
+                                    </div>
+                                    <div class="card-body" style="color: var(--text-primary);">
+                                        <div class="ai-content">
+                                            ${data.html}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            aiContainer.innerHTML = `
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                    No se pudo generar el análisis por IA en este momento.
+                                    ${data.error ? '<br><small>' + data.error + '</small>' : ''}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AI analysis:', error);
+                        aiContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fa-solid fa-circle-xmark me-2"></i>
+                                Error al conectar con el servicio de IA.
+                            </div>
+                        `;
+                    });
+            }
+        }
+    });
+</script>
+
+{% endblock %}

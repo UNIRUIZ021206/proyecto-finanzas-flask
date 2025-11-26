@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
+
 <body>
 
     <div class="login-wrapper">
@@ -15,13 +17,13 @@
                 <h1>Login</h1>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="flash-messages">
-                        {% for category, message in messages %}
-                            <div class="flash-{{ category }}">{{ message }}</div>
-                        {% endfor %}
-                        </div>
-                    {% endif %}
+                {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% endwith %}
 
                 <div class="input-box">
@@ -34,11 +36,12 @@
                 </div>
 
                 <button type="submit" class="btn-login"><span>Iniciar Sesión</span></button>
-                
+
                 <div style="text-align: center; margin-top: 20px;">
-                    <p style="color: #666; font-size: 14px;">
-                        ¿No tienes una cuenta? 
-                        <a href="{{ url_for('auth.register') }}" style="color: #4CAF50; text-decoration: none; font-weight: 600;">
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        ¿No tienes una cuenta?
+                        <a href="{{ url_for('auth.register') }}"
+                            style="color: var(--accent); text-decoration: none; font-weight: 600;">
                             Regístrate aquí
                         </a>
                     </p>
@@ -48,4 +51,5 @@
     </div>
 
 </body>
+
 </html>

@@ -1,80 +1,1348 @@
 {% extends "base.html" %}
 
 {% block title %}
-<title>Dashboard Inversor - Sistema Financiero</title>
+<title>Dashboard Inversor - Global Motors</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .investor-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-light);
+    }
+
+    .investor-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .investor-hero h1 {
+        font-size: 2.5em;
+        font-weight: 800;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+        background: linear-gradient(90deg, #fff, #cbd5e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .investor-hero p {
+        font-size: 1.2em;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+        color: var(--text-secondary);
+    }
+
+    .year-selector {
+        background: var(--bg-card);
+        padding: 24px 28px;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        border: 1px solid var(--border-light);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .year-selector::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--secondary), var(--accent), var(--secondary));
+        opacity: 0.5;
+    }
+
+    .year-selector:hover::before {
+        opacity: 1;
+    }
+
+    .year-selector label {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 1.05em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .year-selector label i {
+        color: var(--secondary);
+        font-size: 1.2em;
+    }
+
+    .year-select-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .year-select-wrapper::after {
+        content: '\f078';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--text-tertiary);
+        font-size: 0.9em;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .year-select-wrapper:focus-within::after {
+        transform: translateY(-50%) rotate(180deg);
+        color: var(--accent);
+    }
+
+    .year-selector select {
+        padding: 14px 48px 14px 20px;
+        font-size: 1.05em;
+        font-weight: 600;
+        border: 1px solid var(--border-medium);
+        border-radius: 12px;
+        background: var(--bg-secondary);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        color: var(--text-primary);
+        min-width: 180px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .year-selector select:hover {
+        border-color: var(--secondary);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .year-selector select:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+    }
+
+    .year-selector select option {
+        padding: 12px 16px;
+        font-weight: 500;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .year-selector select option:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .year-selector select option:checked {
+        background: var(--secondary);
+        color: white;
+        font-weight: 700;
+    }
+
+    .year-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 25px;
+        color: var(--accent);
+        font-weight: 600;
+        font-size: 0.95em;
+        margin-left: auto;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .year-status:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        background: rgba(59, 130, 246, 0.15);
+    }
+
+    .year-status i {
+        font-size: 1.1em;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .kpi-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-top: 4px solid;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-light);
+        backdrop-filter: blur(10px);
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+
+    .kpi-card:hover::before {
+        transform: translateX(100%);
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .kpi-card.primary {
+        border-top-color: var(--accent);
+    }
+
+    .kpi-card.success {
+        border-top-color: var(--success);
+    }
+
+    .kpi-card.warning {
+        border-top-color: var(--warning);
+    }
+
+    .kpi-card.danger {
+        border-top-color: var(--error);
+    }
+
+    .kpi-card.purple {
+        border-top-color: #8b5cf6;
+    }
+
+    .kpi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .kpi-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8em;
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-card.primary .kpi-icon {
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    }
+
+    .kpi-card.success .kpi-icon {
+        background: linear-gradient(135deg, var(--success), #059669);
+    }
+
+    .kpi-card.warning .kpi-icon {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+    }
+
+    .kpi-card.danger .kpi-icon {
+        background: linear-gradient(135deg, var(--error), #dc2626);
+    }
+
+    .kpi-card.purple .kpi-icon {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+
+    .kpi-value {
+        font-size: 2.2em;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+    }
+
+    .kpi-label {
+        color: var(--text-secondary);
+        font-size: 0.95em;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+
+    .kpi-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .kpi-trend.positive {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+    }
+
+    .kpi-trend.negative {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+    }
+
+    .kpi-trend.neutral {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+    }
+
+    .investment-highlights {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .highlight-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .highlight-card:hover {
+        border-color: var(--secondary);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .highlight-card h3 {
+        font-size: 1.2em;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .highlight-card h3 i {
+        color: var(--secondary);
+    }
+
+    .highlight-card p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .chart-container {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 24px;
+        border: 1px solid var(--border-light);
+        backdrop-filter: blur(10px);
+    }
+
+    .chart-title {
+        font-size: 1.3em;
+        font-weight: 700;
+        margin-bottom: 24px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .chart-title i {
+        color: var(--accent);
+    }
+
+    .progress-bar-container {
+        margin-bottom: 24px;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .progress-bar {
+        height: 32px;
+        background: var(--bg-tertiary);
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 16px;
+        transition: width 1s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 0.9em;
+        position: relative;
+        overflow: hidden;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        margin-top: 40px;
+        box-shadow: var(--shadow-colored);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .cta-section h2 {
+        font-size: 2em;
+        font-weight: 800;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-section p {
+        font-size: 1.1em;
+        opacity: 0.95;
+        margin-bottom: 24px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background: white;
+        color: var(--secondary);
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1em;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        background: #f8fafc;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--text-tertiary);
+    }
+
+    .no-data i {
+        font-size: 5em;
+        margin-bottom: 24px;
+        opacity: 0.5;
+    }
+
+    .no-data h3 {
+        font-size: 1.5em;
+        margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-visual {
+            padding: 0;
+        }
+
+        .investor-hero {
+            padding: 24px 20px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+        }
+
+        .investor-hero h1 {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .investor-hero p {
+            font-size: 1em;
+        }
+
+        .year-selector {
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .year-selector label {
+            font-size: 0.95em;
+        }
+
+        .year-select-wrapper {
+            width: 100%;
+        }
+
+        .year-selector select {
+            width: 100%;
+            min-width: auto;
+        }
+
+        .year-status {
+            margin-left: 0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .kpi-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            padding: 20px;
+        }
+
+        .kpi-value {
+            font-size: 1.8em;
+        }
+
+        .kpi-label {
+            font-size: 0.85em;
+        }
+
+        .investment-highlights {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .highlight-card {
+            padding: 20px;
+        }
+
+        .chart-container {
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-size: 1.1em;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 28px;
+        }
+
+        .cta-section {
+            padding: 24px 20px;
+            margin-top: 24px;
+        }
+
+        .cta-section h2 {
+            font-size: 1.5em;
+        }
+
+        .cta-section p {
+            font-size: 1em;
+        }
+
+        .cta-button {
+            padding: 14px 24px;
+            font-size: 1em;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .investor-hero {
+            padding: 20px 16px;
+        }
+
+        .investor-hero h1 {
+            font-size: 1.3em;
+        }
+
+        .investor-hero p {
+            font-size: 0.9em;
+        }
+
+        .year-selector {
+            padding: 12px 16px;
+        }
+
+        .kpi-card {
+            padding: 16px;
+        }
+
+        .kpi-value {
+            font-size: 1.6em;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.5em;
+        }
+
+        .chart-container {
+            padding: 16px;
+        }
+
+        .progress-label {
+            font-size: 0.85em;
+        }
+
+        .progress-bar {
+            height: 24px;
+            font-size: 0.85em;
+        }
+    }
+
+    /* New styles for chart section */
+    .chart-section {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-light);
+        backdrop-filter: blur(10px);
+    }
+
+    .custom-select-wrapper {
+        position: relative;
+        user-select: none;
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 20px;
+    }
+
+    .custom-select {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .custom-select-trigger {
+        position: relative;
+        display: block;
+        padding: 12px 16px;
+        font-size: 1em;
+        font-weight: 500;
+        color: var(--text-primary);
+        line-height: 1.5;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-medium);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .custom-select-trigger:after {
+        position: absolute;
+        display: block;
+        content: '';
+        width: 10px;
+        height: 10px;
+        top: 50%;
+        right: 15px;
+        margin-top: -3px;
+        border-bottom: 2px solid var(--text-tertiary);
+        border-right: 2px solid var(--text-tertiary);
+        transform: rotate(45deg) translateY(-50%);
+        transition: all 0.3s ease-in-out;
+        transform-origin: 50% 0;
+    }
+
+    .custom-select.open .custom-select-trigger:after {
+        margin-top: 3px;
+        transform: rotate(-135deg) translateY(-50%);
+    }
+
+    .custom-options {
+        position: absolute;
+        display: block;
+        top: 100%;
+        left: 0;
+        right: 0;
+        min-width: 100%;
+        margin: 8px 0;
+        border: 1px solid var(--border-medium);
+        border-radius: 12px;
+        box-sizing: border-box;
+        box-shadow: var(--shadow-lg);
+        background: var(--bg-card);
+        transition: all 0.3s;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(-10px);
+        z-index: 100;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .custom-select.open .custom-options {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+        transform: translateY(0);
+    }
+
+    .custom-option {
+        position: relative;
+        display: block;
+        padding: 10px 16px;
+        font-size: 0.95em;
+        font-weight: 500;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .custom-option:last-of-type {
+        border-bottom: none;
+    }
+
+    .custom-option:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    .custom-option.selected {
+        background: var(--secondary);
+        color: white;
+    }
+
+    .chart-container-wrapper {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<h2 class="main-title">¡Bienvenido, {{ current_user.nombre }}!</h2>
-<p class="main-subtitle">Como inversor, aquí puedes analizar el rendimiento financiero de la empresa.</p>
 
-<div class="dashboard-cards">
-    
-    <a href="{{ url_for('analysis.analisis_vertical') }}" class="card">
-        <div class="card-icon-wrapper">
-            <i class="fa-solid fa-chart-simple card-icon"></i>
-        </div>
-        <h3>Análisis Vertical</h3>
-        <p>Analiza la estructura porcentual de los estados financieros para entender la composición de activos, pasivos e ingresos.</p>
-    </a>
-
-    <a href="{{ url_for('analysis.analisis_horizontal') }}" class="card">
-        <div class="card-icon-wrapper">
-            <i class="fa-solid fa-chart-column card-icon"></i>
-        </div>
-        <h3>Análisis Horizontal</h3>
-        <p>Compara la evolución de las cuentas entre diferentes períodos para identificar tendencias y cambios significativos.</p>
-    </a>
-
-    <a href="{{ url_for('analysis.ratios_financieros') }}" class="card">
-        <div class="card-icon-wrapper">
-            <i class="fa-solid fa-percent card-icon"></i>
-        </div>
-        <h3>Ratios Financieros</h3>
-        <p>Evalúa indicadores clave de liquidez, solvencia, rentabilidad y eficiencia operativa.</p>
-    </a>
-
-    <a href="{{ url_for('analysis.origen_aplicacion') }}" class="card">
-        <div class="card-icon-wrapper">
-            <i class="fa-solid fa-arrows-rotate card-icon"></i>
-        </div>
-        <h3>Origen y Aplicación de Fondos</h3>
-        <p>Comprende de dónde provinieron los recursos y cómo se utilizaron durante el período.</p>
-    </a>
-
-</div>
-
-{% if periodos %}
-<div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-    <h3 style="color: #333; margin-bottom: 15px;">
-        <i class="fa-solid fa-calendar"></i> Períodos Disponibles
-    </h3>
-    <p style="color: #666; margin-bottom: 10px;">La empresa tiene información financiera para los siguientes años:</p>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-        {% for periodo in periodos %}
-        <span style="background: #4CAF50; color: white; padding: 8px 16px; border-radius: 5px; font-weight: 600;">
-            {{ periodo }}
-        </span>
-        {% endfor %}
+<div class="dashboard-visual">
+    <!-- Hero Section para Inversores -->
+    <div class="investor-hero">
+        <h1><i class="fa-solid fa-chart-line"></i> Global Motors - Tienda Online</h1>
+        <p>Análisis financiero completo para tomar decisiones informadas</p>
     </div>
-</div>
-{% endif %}
 
-<div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
-    <h3 style="margin-bottom: 15px;">
-        <i class="fa-solid fa-lightbulb"></i> Información para Inversores
-    </h3>
-    <p style="margin-bottom: 10px; line-height: 1.6;">
-        Este dashboard te proporciona acceso a información financiera clave para tomar decisiones informadas. 
-        Utiliza los análisis disponibles para evaluar la salud financiera, rentabilidad y crecimiento de la empresa.
-    </p>
-    <ul style="margin-top: 15px; padding-left: 20px; line-height: 1.8;">
-        <li><strong>Análisis Vertical:</strong> Entiende qué porcentaje representa cada cuenta respecto al total.</li>
-        <li><strong>Análisis Horizontal:</strong> Observa cómo han cambiado las cuentas a lo largo del tiempo.</li>
-        <li><strong>Ratios Financieros:</strong> Evalúa métricas estándar de la industria para comparar con otras empresas.</li>
-        <li><strong>Origen y Aplicación:</strong> Analiza el flujo de efectivo y la gestión de recursos.</li>
-    </ul>
+    <!-- Información de la Empresa -->
+    <div class="company-info-section"
+        style="background: var(--bg-card); border-radius: 16px; padding: 28px; margin-bottom: 32px; box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+            <div>
+                <h3
+                    style="color: var(--secondary-light); font-size: 1.4em; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-building"></i> Información de la Empresa
+                </h3>
+                <div style="color: var(--text-primary); margin-bottom: 12px;">
+                    <strong style="color: var(--secondary);">Nombre:</strong> Global Motors
+                </div>
+                <div style="color: var(--text-secondary); line-height: 1.8;">
+                    <div style="margin-bottom: 8px;">
+                        <i class="fa-solid fa-map-marker-alt" style="color: var(--secondary); margin-right: 8px;"></i>
+                        <strong>Dirección:</strong> 4PXF+938, 5ta. Calle SO, Managua 11012, Nicaragua
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <i class="fa-solid fa-map-pin" style="color: var(--secondary); margin-right: 8px;"></i>
+                        <strong>Código Plus:</strong> 4PXF+938
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <i class="fa-solid fa-location-dot" style="color: var(--secondary); margin-right: 8px;"></i>
+                        <strong>Coordenadas GPS:</strong> 12.14847, -86.27724
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <i class="fa-solid fa-city" style="color: var(--secondary); margin-right: 8px;"></i>
+                        <strong>Ciudad:</strong> Managua, Nicaragua
+                    </div>
+                    <div>
+                        <i class="fa-solid fa-store" style="color: var(--secondary); margin-right: 8px;"></i>
+                        <strong>Barrio:</strong> Jardines De Santa Clara (Código Postal: 11012)
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3
+                    style="color: var(--secondary-light); font-size: 1.4em; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-map"></i> Ubicación en el Mapa
+                </h3>
+                <div style="border-radius: 12px; overflow: hidden; border: 2px solid var(--border-light);">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.5!2d-86.27724!3d12.14847!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDA4JzU0LjUiTiA4NsKwMTYnMzguMCJX!5e0!3m2!1ses!2s!4v1234567890!5m2!1ses!2s&q=12.14847%2C-86.27724"
+                        width="100%" height="250" style="border:0; display: block;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade" title="Ubicación de Global Motors">
+                    </iframe>
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=12.14847%2C-86.27724" target="_blank"
+                        style="padding: 10px 20px; background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(139, 26, 26, 0.3);">
+                        <i class="fa-solid fa-directions"></i> Cómo llegar
+                    </a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=12.14847%2C-86.27724" target="_blank"
+                        style="padding: 10px 20px; background: var(--bg-tertiary); color: var(--secondary-light); border: 1px solid var(--secondary); border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <i class="fa-solid fa-map-location-dot"></i> Ver en Maps
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Año Moderno -->
+    <div class="year-selector">
+        <label for="anio-selector">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Período Financiero</span>
+        </label>
+        <form method="GET" action="{{ url_for('main.dashboard_cliente') }}" style="display: inline-block;">
+            <div class="year-select-wrapper">
+                <select name="anio" id="anio-selector" onchange="this.form.submit()">
+                    {% for anio in periodos %}
+                    <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}>
+                        Año {{ anio }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+        {% if anio_seleccionado %}
+        <div class="year-status">
+            <i class="fa-solid fa-check-circle"></i>
+            <span>Vista del año {{ anio_seleccionado }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- NUEVO: Gráfico de Variación de Cuentas -->
+    <div class="chart-section">
+        <h3
+            style="color: var(--secondary-light); font-size: 1.4em; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-chart-line"></i> Análisis de Variación de Cuentas
+        </h3>
+
+        <div class="account-selector">
+            <label
+                style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 600;">Seleccionar
+                Cuentas para Comparar:</label>
+            <div class="custom-select-wrapper">
+                <div class="custom-select">
+                    <div class="custom-select-trigger">Seleccionar cuentas...</div>
+                    <div class="custom-options" id="account-options">
+                        <!-- Options populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container-wrapper">
+            <canvas id="accountVariationChart"></canvas>
+        </div>
+    </div>
+
+    {% if report_data and anio_seleccionado and kpis %}
+    <!-- KPIs Principales para Inversores -->
+    <div class="kpi-grid">
+        <div class="kpi-card success">
+            <div class="kpi-header">
+                <div>
+                    <div class="kpi-value">C$ {{ "{:,.2f}".format(kpis.ventas) }}</div>
+                    <div class="kpi-label">Ingresos Totales</div>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+            {% if crecimiento and crecimiento.ventas %}
+            <div class="kpi-trend {% if crecimiento.ventas > 0 %}positive{% else %}negative{% endif %}">
+                <i class="fa-solid fa-arrow-{% if crecimiento.ventas > 0 %}up{% else %}down{% endif %}"></i>
+                <span>{{ "{:.1f}%".format(crecimiento.ventas|abs) }} vs año anterior</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="kpi-card primary">
+            <div class="kpi-header">
+                <div>
+                    <div class="kpi-value">C$ {{ "{:,.2f}".format(kpis.utilidad_neta) }}</div>
+                    <div class="kpi-label">Utilidad Neta</div>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+            </div>
+            {% if crecimiento and crecimiento.utilidad %}
+            <div class="kpi-trend {% if crecimiento.utilidad > 0 %}positive{% else %}negative{% endif %}">
+                <i class="fa-solid fa-arrow-{% if crecimiento.utilidad > 0 %}up{% else %}down{% endif %}"></i>
+                <span>{{ "{:.1f}%".format(crecimiento.utilidad|abs) }} vs año anterior</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="kpi-card purple">
+            <div class="kpi-header">
+                <div>
+                    <div class="kpi-value">C$ {{ "{:,.2f}".format(kpis.activos_totales) }}</div>
+                    <div class="kpi-label">Activos Totales</div>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+            </div>
+            {% if crecimiento and crecimiento.activos %}
+            <div class="kpi-trend {% if crecimiento.activos > 0 %}positive{% else %}negative{% endif %}">
+                <i class="fa-solid fa-arrow-{% if crecimiento.activos > 0 %}up{% else %}down{% endif %}"></i>
+                <span>{{ "{:.1f}%".format(crecimiento.activos|abs) }} vs año anterior</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Ratios Clave -->
+    <div class="investment-highlights">
+        <div class="highlight-card">
+            <h3><i class="fa-solid fa-percent"></i> Rentabilidad</h3>
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-secondary);">Margen Neto:</span>
+                    <strong style="color: var(--text-primary);">{{ "{:.1f}%".format(kpis.margen_utilidad_neta)
+                        }}</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"
+                        style="width: {{ kpis.margen_utilidad_neta }}%; background: var(--success);"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; margin-top: 15px;">
+                    <span style="color: var(--text-secondary);">ROE (Retorno s/Patrimonio):</span>
+                    <strong style="color: var(--text-primary);">{{ "{:.1f}%".format(kpis.roe) }}</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ kpis.roe }}%; background: var(--accent);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight-card">
+            <h3><i class="fa-solid fa-scale-balanced"></i> Solvencia y Liquidez</h3>
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-secondary);">Razón Circulante:</span>
+                    <strong style="color: var(--text-primary);">{{ "{:.2f}".format(kpis.razon_circulante) }}</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"
+                        style="width: {{ [kpis.razon_circulante * 33, 100]|min }}%; background: {% if kpis.razon_circulante > 1.5 %}var(--success){% elif kpis.razon_circulante > 1 %}var(--warning){% else %}var(--error){% endif %};">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; margin-top: 15px;">
+                    <span style="color: var(--text-secondary);">Endeudamiento:</span>
+                    <strong style="color: var(--text-primary);">{{ "{:.1f}%".format(kpis.razon_endeudamiento)
+                        }}</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"
+                        style="width: {{ kpis.razon_endeudamiento }}%; background: {% if kpis.razon_endeudamiento < 50 %}var(--success){% else %}var(--warning){% endif %};">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos y Visualizaciones -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fa-solid fa-balance-scale"></i> Estructura del Balance
+                </div>
+
+                {% set total_activo = kpis.activos_totales %}
+                {% set total_pasivo = report_data.Totales.get('Total Pasivo', 0.0) %}
+                {% set total_patrimonio = kpis.patrimonio %}
+
+                {% if total_activo > 0 %}
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Activos</span>
+                        <span>{{ "%.1f"|format((total_activo / total_activo) * 100) }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"
+                            style="width: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%);">
+                            C$ {{ "{:,.0f}".format(total_activo) }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if total_pasivo > 0 %}
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Pasivos</span>
+                        <span>{{ "%.1f"|format((total_pasivo / total_activo) * 100) }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"
+                            style="width: {{ (total_pasivo / total_activo) * 100 }}%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);">
+                            {% if (total_pasivo / total_activo) * 100 > 15 %}C$ {{ "{:,.0f}".format(total_pasivo) }}{%
+                            endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if total_patrimonio > 0 %}
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Patrimonio</span>
+                        <span>{{ "%.1f"|format((total_patrimonio / total_activo) * 100) }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"
+                            style="width: {{ (total_patrimonio / total_activo) * 100 }}%; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);">
+                            {% if (total_patrimonio / total_activo) * 100 > 15 %}C$ {{
+                            "{:,.0f}".format(total_patrimonio) }}{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fa-solid fa-chart-pie"></i> Indicadores Clave de Inversión
+                </div>
+
+                {% if kpis.razon_circulante > 0 %}
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Liquidez (Razón Circulante)</span>
+                        <span>{{ "%.2f"|format(kpis.razon_circulante) }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        {% set liquidez_percent = (kpis.razon_circulante / 2.0) * 100 %}
+                        {% if liquidez_percent > 100 %} {% set liquidez_percent = 100 %} {% endif %}
+                        <div class="progress-fill"
+                            style="width: {{ liquidez_percent }}%; background: {% if kpis.razon_circulante >= 1.5 %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #d97706 100%){% endif %};">
+                            {% if liquidez_percent > 20 %}{{ "%.2f"|format(kpis.razon_circulante) }}{% endif %}
+                        </div>
+                    </div>
+                    <small style="color: var(--text-tertiary);">Óptimo: 1.5 - 2.0</small>
+                </div>
+                {% endif %}
+
+                {% if kpis.margen_utilidad_neta > 0 %}
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Margen de Utilidad Neta</span>
+                        <span>{{ "%.1f"|format(kpis.margen_utilidad_neta) }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        {% set margen_percent = (kpis.margen_utilidad_neta / 10.0) * 100 %}
+                        {% if margen_percent > 100 %} {% set margen_percent = 100 %} {% endif %}
+                        <div class="progress-fill"
+                            style="width: {{ margen_percent }}%; background: {% if kpis.margen_utilidad_neta >= 5 %}linear-gradient(90deg, #10b981 0%, #059669 100%){% elif kpis.margen_utilidad_neta >= 2 %}linear-gradient(90deg, #f59e0b 0%, #d97706 100%){% else %}linear-gradient(90deg, #ef4444 0%, #dc2626 100%){% endif %};">
+                            {% if margen_percent > 15 %}{{ "%.1f"|format(kpis.margen_utilidad_neta) }}%{% endif %}
+                        </div>
+                    </div>
+                    <small style="color: var(--text-tertiary);">Óptimo: 5% - 10%</small>
+                </div>
+                {% endif %}
+
+                {% if kpis.razon_endeudamiento > 0 %}
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Endeudamiento</span>
+                        <span>{{ "%.1f"|format(kpis.razon_endeudamiento) }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        {% set endeudamiento_percent = kpis.razon_endeudamiento %}
+                        {% if endeudamiento_percent > 100 %} {% set endeudamiento_percent = 100 %} {% endif %}
+                        <div class="progress-fill"
+                            style="width: {{ endeudamiento_percent }}%; background: {% if kpis.razon_endeudamiento <= 50 %}linear-gradient(90deg, #10b981 0%, #059669 100%){% elif kpis.razon_endeudamiento <= 70 %}linear-gradient(90deg, #f59e0b 0%, #d97706 100%){% else %}linear-gradient(90deg, #ef4444 0%, #dc2626 100%){% endif %};">
+                            {% if endeudamiento_percent > 10 %}{{ "%.1f"|format(kpis.razon_endeudamiento) }}%{% endif %}
+                        </div>
+                    </div>
+                    <small style="color: var(--text-tertiary);">Óptimo: 30% - 50%</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-section">
+        <h2><i class="fa-solid fa-rocket"></i> ¿Listo para Invertir?</h2>
+        <p>Esta empresa presenta indicadores financieros sólidos y una trayectoria de crecimiento constante.</p>
+        <a href="{{ url_for('analysis.ratios_financieros') }}" class="cta-button">
+            Ver Análisis Completo <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+    {% else %}
+    <div class="no-data">
+        <i class="fa-solid fa-chart-pie"></i>
+        <h3>No hay datos financieros disponibles</h3>
+        <p>Selecciona un período válido para ver el análisis.</p>
+    </div>
+    {% endif %}
+
 </div>
 
+<script>
+    // Script para el gráfico de variación de cuentas
+    document.addEventListener('DOMContentLoaded', function () {
+        const customSelect = document.querySelector('.custom-select');
+        const customSelectTrigger = document.querySelector('.custom-select-trigger');
+        const customOptions = document.getElementById('account-options');
+        const ctx = document.getElementById('accountVariationChart').getContext('2d');
+        let chart = null;
+        let selectedAccounts = [];
+
+        // Toggle select dropdown
+        customSelectTrigger.addEventListener('click', function () {
+            customSelect.classList.toggle('open');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!customSelect.contains(e.target)) {
+                customSelect.classList.remove('open');
+            }
+        });
+
+        // Fetch all accounts
+        fetch('{{ url_for("main.all_accounts") }}')
+            .then(response => response.json())
+            .then(accounts => {
+                if (accounts.error) {
+                    console.error('Error fetching accounts:', accounts.error);
+                    return;
+                }
+
+                accounts.forEach(account => {
+                    const option = document.createElement('div');
+                    option.className = 'custom-option';
+                    option.dataset.value = account.id;
+                    option.textContent = `${account.id} - ${account.name} (${account.type})`;
+
+                    option.addEventListener('click', function (e) {
+                        e.stopPropagation(); // Prevent closing dropdown
+                        this.classList.toggle('selected');
+                        const accountId = this.dataset.value;
+
+                        if (this.classList.contains('selected')) {
+                            selectedAccounts.push(accountId);
+                        } else {
+                            selectedAccounts = selectedAccounts.filter(id => id !== accountId);
+                        }
+
+                        updateTriggerText();
+                        updateChart();
+                    });
+
+                    customOptions.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+
+        function updateTriggerText() {
+            if (selectedAccounts.length === 0) {
+                customSelectTrigger.textContent = 'Seleccionar cuentas...';
+            } else {
+                customSelectTrigger.textContent = `${selectedAccounts.length} cuenta(s) seleccionada(s)`;
+            }
+        }
+
+        function updateChart() {
+            if (selectedAccounts.length === 0) {
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                return;
+            }
+
+            // Fetch history for selected accounts
+            const params = new URLSearchParams();
+            selectedAccounts.forEach(id => params.append('account_ids[]', id));
+
+            fetch(`{{ url_for("main.account_history") }}?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching history:', data.error);
+                        return;
+                    }
+
+                    if (chart) {
+                        chart.destroy();
+                    }
+
+                    const datasets = Object.keys(data.datasets).map((name, index) => {
+                        const colors = [
+                            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+                            '#ec4899', '#6366f1', '#14b8a6', '#f97316', '#06b6d4'
+                        ];
+                        const color = colors[index % colors.length];
+
+                        return {
+                            label: name,
+                            data: data.datasets[name],
+                            borderColor: color,
+                            backgroundColor: color + '20', // Transparent version
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        };
+                    });
+
+                    chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.years,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        color: '#94a3b8'
+                                    }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#94a3b8'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.1)'
+                                    },
+                                    ticks: {
+                                        color: '#94a3b8'
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+</script>
 {% endblock %}
-

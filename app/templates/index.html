@@ -5,11 +5,134 @@
 {% endblock %}
 
 {% block content %}
+{% if current_user.is_authenticated %}
+{% if is_user_admin(current_user.id) %}
+<!-- Vista de Administrador con Guías -->
+<div class="admin-dashboard">
+    <h2 class="main-title">¡Bienvenido, {{ current_user.nombre }}!</h2>
+    <p class="main-subtitle">Panel de Administración - Guía Rápida</p>
+    
+    <!-- Guías para No Expertos -->
+    <div class="admin-guides">
+        <div class="guide-card">
+            <div class="guide-icon">
+                <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <h3>¿Qué hacer primero?</h3>
+            <p><strong>Paso 1:</strong> Revisa los reportes financieros en "Gestión de Reportes"</p>
+            <p><strong>Paso 2:</strong> Si necesitas agregar datos, ve a "Ingresar Saldos"</p>
+            <p><strong>Paso 3:</strong> Gestiona los usuarios y sus permisos en "Gestión de Usuarios"</p>
+        </div>
+        
+        <div class="guide-card">
+            <div class="guide-icon">
+                <i class="fa-solid fa-question-circle"></i>
+            </div>
+            <h3>¿No entiendes algo?</h3>
+            <p>Usa el <strong>Chatbot de IA</strong> en la esquina inferior derecha. Puede ayudarte a entender:</p>
+            <ul>
+                <li>Qué significan los números en los reportes</li>
+                <li>Cómo interpretar los análisis financieros</li>
+                <li>Qué acciones tomar según los resultados</li>
+            </ul>
+        </div>
+        
+        <div class="guide-card">
+            <div class="guide-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <h3>Análisis con IA</h3>
+            <p>Todos los análisis incluyen <strong>insights automáticos</strong> generados por IA que te ayudan a:</p>
+            <ul>
+                <li>Identificar puntos importantes rápidamente</li>
+                <li>Entender qué significan los números</li>
+                <li>Saber en qué enfocarte</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Acciones Rápidas -->
+    <div class="quick-actions">
+        <h3 class="section-title">Acciones Rápidas</h3>
+        <div class="dashboard-cards">
+            <a href="{{ url_for('admin.gestion') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-file-lines card-icon"></i>
+                </div>
+                <h3>Gestión de Reportes</h3>
+                <p>Ver y revisar los estados financieros</p>
+            </a>
+            
+            <a href="{{ url_for('admin.gestion_usuarios') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-users-gear card-icon"></i>
+                </div>
+                <h3>Gestión de Usuarios</h3>
+                <p>Cambiar permisos y roles de usuarios</p>
+            </a>
+            
+            <a href="{{ url_for('admin.ingresar_saldos') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-circle-dollar-to-slot card-icon"></i>
+                </div>
+                <h3>Ingresar Saldos</h3>
+                <p>Agregar nuevos datos financieros</p>
+            </a>
+            
+            <a href="{{ url_for('admin.catalogo_cuentas') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-book-open-reader card-icon"></i>
+                </div>
+                <h3>Catálogo de Cuentas</h3>
+                <p>Administrar las cuentas contables</p>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Análisis Disponibles -->
+    <div class="analysis-section">
+        <h3 class="section-title">Análisis Financieros</h3>
+        <div class="dashboard-cards">
+            <a href="{{ url_for('analysis.analisis_vertical') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-chart-simple card-icon"></i>
+                </div>
+                <h3>Análisis Vertical</h3>
+                <p>Ver qué porcentaje representa cada cuenta</p>
+            </a>
+
+            <a href="{{ url_for('analysis.analisis_horizontal') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-chart-column card-icon"></i>
+                </div>
+                <h3>Análisis Horizontal</h3>
+                <p>Comparar cambios entre períodos</p>
+            </a>
+
+            <a href="{{ url_for('analysis.ratios_financieros') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-percent card-icon"></i>
+                </div>
+                <h3>Ratios Financieros</h3>
+                <p>Indicadores clave de salud financiera</p>
+            </a>
+
+            <a href="{{ url_for('analysis.origen_aplicacion') }}" class="card">
+                <div class="card-icon-wrapper">
+                    <i class="fa-solid fa-arrows-rotate card-icon"></i>
+                </div>
+                <h3>Origen y Aplicación</h3>
+                <p>De dónde vino el dinero y a dónde fue</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Vista Normal para No Administradores (usuarios no admin pero autenticados) -->
 <h2 class="main-title">¡Bienvenido, {{ current_user.nombre }}!</h2>
 <p class="main-subtitle">Selecciona un análisis para comenzar.</p>
 
 <div class="dashboard-cards">
-    
     <a href="{{ url_for('analysis.analisis_vertical') }}" class="card">
         <div class="card-icon-wrapper">
             <i class="fa-solid fa-chart-simple card-icon"></i>
@@ -41,7 +164,17 @@
         <h3>Origen y Aplicación</h3>
         <p>Analiza de dónde provinieron los fondos y en qué se utilizaron.</p>
     </a>
-
 </div>
+{% endif %}
+{% else %}
+<!-- Usuario no autenticado -->
+<div style="text-align: center; padding: 40px;">
+    <h2 class="main-title">Bienvenido al Sistema de Análisis Financiero</h2>
+    <p class="main-subtitle">Por favor, inicia sesión para acceder a los análisis.</p>
+    <a href="{{ url_for('auth.login') }}" style="display: inline-block; margin-top: 20px; padding: 15px 30px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+        <i class="fa-solid fa-sign-in-alt"></i> Iniciar Sesión
+    </a>
+</div>
+{% endif %}
 {% endblock %}
 

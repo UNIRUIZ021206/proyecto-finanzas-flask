@@ -6,12 +6,8 @@ from sqlalchemy import text
 # Importamos las extensiones, modelos y utils
 from .extensions import engine, login_manager
 from .models import User
-from .utils import (
-    get_rol_name_by_id, 
-    is_user_role, 
-    is_admin, 
-    is_inf
-)
+# Solo importamos lo que no causa dependencias circulares o es seguro
+from .utils import is_inf
 
 def create_app():
     """Crea y configura la instancia de la aplicación Flask."""
@@ -74,16 +70,25 @@ def create_app():
 
     @app.template_filter('get_rol_name')
     def get_rol_name_filter(id_rol):
+        from .utils import get_rol_name_by_id
         return get_rol_name_by_id(id_rol) # Llama a la función de utils
 
     # --- 6. Registrar Context Processors ---
     @app.context_processor
     def inject_roles():
         """Inyecta funciones útiles en el contexto de todos los templates"""
+        # Importar aquí para evitar problemas de importación circular
+        from .utils import (
+            is_user_role, 
+            get_rol_name_by_id, 
+            is_admin, 
+            is_super_admin
+        )
         return dict(
             check_user_role=is_user_role,
             get_rol_name=get_rol_name_by_id,
-            is_user_admin=is_admin
+            is_user_admin=is_admin,
+            is_user_super_admin=is_super_admin
         )
 
     return app

@@ -10,13 +10,13 @@
 <p class="main-subtitle">Añade o edita las cuentas contables del sistema.</p>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="flash-{{ category }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="flash-{{ category }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
 {% endwith %}
 
 <form method="POST" action="{{ url_for('admin.catalogo_cuentas') }}" class="card" style="margin-bottom: 30px;">
@@ -24,8 +24,8 @@
     <div class="form-grid">
         <input type="text" name="cuenta_id" placeholder="Código (ej: 1101)" required>
         <input type="text" name="nombre_cuenta" placeholder="Nombre (ej: Caja General)" required>
-        
-        <select name="tipo_cuenta" required>
+
+        <select name="tipo_cuenta" id="tipo_cuenta" required>
             <option value="" disabled selected>Tipo de Cuenta...</option>
             <option value="Activo">Activo</option>
             <option value="Pasivo">Pasivo</option>
@@ -34,46 +34,358 @@
             <option value="Costo">Costo</option>
             <option value="Gasto">Gasto</option>
         </select>
-        
-        <select name="subtipo_cuenta" required>
+
+        <select name="subtipo_cuenta" id="subtipo_cuenta" required>
             <option value="" disabled selected>SubTipo de Cuenta...</option>
-            <optgroup label="Balance General">
+            <!-- Subtipos de Activo -->
+            <optgroup label="Activo">
                 <option value="Activo Corriente">Activo Corriente</option>
                 <option value="Activo No Corriente">Activo No Corriente</option>
+            </optgroup>
+            <!-- Subtipos de Pasivo -->
+            <optgroup label="Pasivo">
                 <option value="Pasivo Corriente">Pasivo Corriente</option>
                 <option value="Pasivo No Corriente">Pasivo No Corriente</option>
-                <option value="Patrimonio">Patrimonio</option>
             </optgroup>
-            <optgroup label="Estado de Resultados">
-                <option value="Ingreso">Ingreso</option>
-                <option value="Costo">Costo</option>
-                <option value="Gasto">Gasto</option>
+            <!-- Subtipos de Patrimonio -->
+            <optgroup label="Patrimonio">
+                <option value="Capital">Capital</option>
+                <option value="Reservas">Reservas</option>
+                <option value="Resultados Acumulados">Resultados Acumulados</option>
+            </optgroup>
+            <!-- Subtipos de Ingreso -->
+            <optgroup label="Ingreso">
+                <option value="Ingresos Operacionales">Ingresos Operacionales</option>
+                <option value="Ingresos No Operacionales">Ingresos No Operacionales</option>
+            </optgroup>
+            <!-- Subtipos de Costo -->
+            <optgroup label="Costo">
+                <option value="Costo de Ventas">Costo de Ventas</option>
+                <option value="Costo de Producción">Costo de Producción</option>
+            </optgroup>
+            <!-- Subtipos de Gasto -->
+            <optgroup label="Gasto">
+                <option value="Gastos Operacionales">Gastos Operacionales</option>
+                <option value="Gastos Administrativos">Gastos Administrativos</option>
+                <option value="Gastos de Ventas">Gastos de Ventas</option>
+                <option value="Gastos Financieros">Gastos Financieros</option>
             </optgroup>
         </select>
-        
-        <button type="submit">Agregar Cuenta</button>
     </div>
+    <button type="submit" class="btn-submit">Agregar Cuenta</button>
 </form>
 
-<h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Cuentas Existentes</h2>
-<table class="cuentas-tabla">
-    <thead>
-        <tr>
-            <th>Código</th>
-            <th>Nombre de Cuenta</th>
-            <th>Tipo de Cuenta</th>
-            <th>SubTipo de Cuenta</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for cuenta in cuentas %}
-        <tr>
-            <td>{{ cuenta[0] }}</td> <td>{{ cuenta[1] }}</td> <td>{{ cuenta[2] }}</td> <td>{{ cuenta[3] }}</td> </tr>
-        {% else %}
-        <tr>
-            <td colspan="4" style="text-align: center;">No hay cuentas registradas.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="card">
+    <h3>Cuentas Existentes</h3>
+    <table class="cuentas-tabla">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre de Cuenta</th>
+                <th>Tipo de Cuenta</th>
+                <th>SubTipo de Cuenta</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuenta in cuentas %}
+            <tr>
+                <td>{{ cuenta[0] }}</td>
+                <td>{{ cuenta[1] }}</td>
+                <td>{{ cuenta[2] }}</td>
+                <td>{{ cuenta[3] }}</td>
+                <td>
+                    <button class="btn-edit"
+                        onclick="openEditModal('{{ cuenta[0] }}', '{{ cuenta[1] }}', '{{ cuenta[2] }}', '{{ cuenta[3] }}')">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center;">No hay cuentas registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Script para filtrar subtipos basados en el tipo seleccionado (Formulario Agregar)
+    document.getElementById('tipo_cuenta').addEventListener('change', function () {
+        const tipoSeleccionado = this.value;
+        const subtipoSelect = document.getElementById('subtipo_cuenta');
+        const optgroups = subtipoSelect.querySelectorAll('optgroup');
+
+        optgroups.forEach(optgroup => {
+            if (optgroup.label === tipoSeleccionado || tipoSeleccionado === '') {
+                optgroup.style.display = '';
+            } else {
+                optgroup.style.display = 'none';
+            }
+        });
+
+        subtipoSelect.value = '';
+    });
+
+    // Modal de Edición
+    function openEditModal(id, nombre, tipo, subtipo) {
+        document.getElementById('edit_cuenta_id').value = id;
+        document.getElementById('edit_nombre_cuenta').value = nombre;
+        document.getElementById('edit_tipo_cuenta').value = tipo;
+
+        // Trigger change event to filter subtypes
+        const tipoSelect = document.getElementById('edit_tipo_cuenta');
+        const event = new Event('change');
+        tipoSelect.dispatchEvent(event);
+
+        document.getElementById('edit_subtipo_cuenta').value = subtipo;
+
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Close modal if clicked outside
+    window.onclick = function (event) {
+        const modal = document.getElementById('editModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Script para el modal de edición
+    document.getElementById('edit_tipo_cuenta').addEventListener('change', function () {
+        const tipoSeleccionado = this.value;
+        const subtipoSelect = document.getElementById('edit_subtipo_cuenta');
+        const optgroups = subtipoSelect.querySelectorAll('optgroup');
+
+        optgroups.forEach(optgroup => {
+            if (optgroup.label === tipoSeleccionado || tipoSeleccionado === '') {
+                optgroup.style.display = '';
+            } else {
+                optgroup.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3>Editar Cuenta</h3>
+        <form method="POST" action="{{ url_for('admin.editar_cuenta') }}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Código</label>
+                    <input type="text" name="cuenta_id" id="edit_cuenta_id" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre_cuenta" id="edit_nombre_cuenta" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select name="tipo_cuenta" id="edit_tipo_cuenta" required>
+                        <option value="Activo">Activo</option>
+                        <option value="Pasivo">Pasivo</option>
+                        <option value="Patrimonio">Patrimonio</option>
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Costo">Costo</option>
+                        <option value="Gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subtipo</label>
+                    <select name="subtipo_cuenta" id="edit_subtipo_cuenta" required>
+                        <!-- Subtipos de Activo -->
+                        <optgroup label="Activo">
+                            <option value="Activo Corriente">Activo Corriente</option>
+                            <option value="Activo No Corriente">Activo No Corriente</option>
+                        </optgroup>
+                        <!-- Subtipos de Pasivo -->
+                        <optgroup label="Pasivo">
+                            <option value="Pasivo Corriente">Pasivo Corriente</option>
+                            <option value="Pasivo No Corriente">Pasivo No Corriente</option>
+                        </optgroup>
+                        <!-- Subtipos de Patrimonio -->
+                        <optgroup label="Patrimonio">
+                            <option value="Capital">Capital</option>
+                            <option value="Reservas">Reservas</option>
+                            <option value="Resultados Acumulados">Resultados Acumulados</option>
+                        </optgroup>
+                        <!-- Subtipos de Ingreso -->
+                        <optgroup label="Ingreso">
+                            <option value="Ingresos Operacionales">Ingresos Operacionales</option>
+                            <option value="Ingresos No Operacionales">Ingresos No Operacionales</option>
+                        </optgroup>
+                        <!-- Subtipos de Costo -->
+                        <optgroup label="Costo">
+                            <option value="Costo de Ventas">Costo de Ventas</option>
+                            <option value="Costo de Producción">Costo de Producción</option>
+                        </optgroup>
+                        <!-- Subtipos de Gasto -->
+                        <optgroup label="Gasto">
+                            <option value="Gastos Operacionales">Gastos Operacionales</option>
+                            <option value="Gastos Administrativos">Gastos Administrativos</option>
+                            <option value="Gastos de Ventas">Gastos de Ventas</option>
+                            <option value="Gastos Financieros">Gastos Financieros</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Actualizar Cuenta</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Modal Styles - Premium Dark Theme */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        background: var(--bg-card, #1e293b);
+        margin: 5% auto;
+        padding: 32px;
+        border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
+        width: 90%;
+        max-width: 600px;
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        color: var(--text-primary, #f8fafc);
+        position: relative;
+    }
+
+    .modal-content h3 {
+        margin-top: 0;
+        margin-bottom: 24px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary, #fff);
+        border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
+        padding-bottom: 16px;
+    }
+
+    .close {
+        color: var(--text-tertiary, #94a3b8);
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s;
+        line-height: 1;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: var(--secondary, #dc2626);
+        text-decoration: none;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        margin-bottom: 0;
+        /* Handled by grid gap */
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-secondary, #cbd5e1);
+        font-size: 0.9em;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--bg-secondary, #0f172a);
+        border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.2));
+        border-radius: 10px;
+        color: var(--text-primary, #fff);
+        font-size: 1em;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--accent, #3b82f6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-group input[readonly] {
+        background: rgba(0, 0, 0, 0.2);
+        border-color: var(--border-dark, rgba(255, 255, 255, 0.05));
+        color: var(--text-tertiary, #94a3b8);
+        cursor: not-allowed;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--secondary, #dc2626) 0%, var(--secondary-dark, #991b1b) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 24px;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-edit {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--accent, #3b82f6);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-edit:hover {
+        background: var(--accent, #3b82f6);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+</style>
+
 {% endblock %}

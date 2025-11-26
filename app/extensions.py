@@ -3,7 +3,13 @@ import os
 from sqlalchemy import create_engine
 from flask_login import LoginManager
 from dotenv import load_dotenv
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:
+    print("ADVERTENCIA: google.generativeai no instalado. Funcionalidades IA deshabilitadas.")
+    class MockGenAI:
+        def configure(self, api_key): pass
+    genai = MockGenAI()
 
 # Carga las variables de entorno ANTES que todo
 load_dotenv()

@@ -1,8 +1,7 @@
-/* Estilos específicos para la página de Catálogo de Cuentas */
+/* Estilos específicos para la página de Catálogo de Cuentas - Premium Dark Theme */
 
 .form-grid {
     display: grid;
-    /* Columnas automáticas que se adaptan */
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
     margin-bottom: 20px;
@@ -12,87 +11,105 @@
 .form-grid select {
     width: 100%;
     padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
     font-size: 1em;
     font-family: 'Inter', sans-serif;
-    /* Aseguramos que se vea bien en fondos claros */
-    background-color: var(--white);
-    color: var(--text-dark);
-    box-sizing: border-box; /* Importante para que el padding no afecte el ancho */
+    background-color: var(--bg-secondary, #1e293b);
+    color: var(--text-primary, #f8fafc);
+    box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
-/* Estilo para el 'placeholder' del select */
-.form-grid select:invalid {
-    color: var(--text-light);
+.form-grid input:focus,
+.form-grid select:focus {
+    outline: none;
+    border-color: var(--accent, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .form-grid button {
-    background-color: var(--primary-blue);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
     border: none;
     padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 1em;
     font-weight: 600;
-    transition: background-color 0.3s ease;
-
-    /* --- CAMBIO --- 
-       Hacemos que el botón ocupe todo el ancho 
-       si los otros campos se acomodan en 2 columnas */
-    grid-column: 1 / -1; 
+    transition: all 0.3s ease;
+    grid-column: 1 / -1;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* En pantallas más grandes, el botón vuelve a su tamaño */
+.form-grid button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
 @media (min-width: 680px) {
     .form-grid button {
-        grid-column: auto; /* Comportamiento normal */
+        grid-column: auto;
     }
 }
 
-
 .cuentas-tabla {
     width: 100%;
-    border-collapse: collapse;
-    background-color: var(--white);
-    border-radius: 12px;
-    overflow: hidden; /* Para que respete el borde redondeado */
-    box-shadow: 0 8px 20px rgba(0, 74, 153, 0.08);
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--bg-card, #1e293b);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light, rgba(255, 255, 255, 0.05));
 }
 
 .cuentas-tabla th,
 .cuentas-tabla td {
-    padding: 15px;
+    padding: 16px 20px;
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.05));
+    color: var(--text-primary, #f8fafc);
 }
 
 .cuentas-tabla th {
-    /* Fondo más claro que el body */
-    background-color: #f9fafb; 
+    background-color: var(--bg-secondary, #0f172a);
     font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary, #94a3b8);
 }
 
-/* Quitar el borde de la última fila */
 .cuentas-tabla tr:last-child td {
     border-bottom: none;
 }
 
-/* Mensajes Flash (ya que no están en login.css) */
-.flash-error {
-    background-color: #b91c1c;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    margin-bottom: 15px;
+.cuentas-tabla tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
 }
+
+/* Mensajes Flash */
+.flash-error {
+    background: rgba(220, 38, 38, 0.1);
+    color: #fca5a5;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .flash-success {
-    background-color: #047857;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    margin-bottom: 15px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }

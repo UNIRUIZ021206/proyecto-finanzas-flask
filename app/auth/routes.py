@@ -64,23 +64,85 @@ def register():
         return redirect(url_for('main.index'))
 
     if request.method == 'POST':
-        # ... (Copia tu lógica de registro aquí) ...
-        nombre = request.form.get('nombre')
-        correo = request.form.get('correo')
-        contrasena = request.form.get('contrasena')
-        contrasena_confirm = request.form.get('contrasena_confirm')
+        # Obtener datos del formulario
+        nombre = request.form.get('nombre', '').strip()
+        correo = request.form.get('correo', '').strip().lower()
+        contrasena = request.form.get('contrasena', '')
+        contrasena_confirm = request.form.get('contrasena_confirm', '')
 
-        # ... (tus validaciones) ...
+        # Validaciones básicas
+        if not nombre:
+            flash('El nombre es requerido.', 'error')
+            return render_template('register.html')
+        
+        if not correo:
+            flash('El correo electrónico es requerido.', 'error')
+            return render_template('register.html')
+        
+        if not contrasena:
+            flash('La contraseña es requerida.', 'error')
+            return render_template('register.html')
+        
+        # Validar longitud mínima de contraseña
+        if len(contrasena) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres.', 'error')
+            return render_template('register.html')
+        
+        # Validar que las contraseñas coincidan
+        if contrasena != contrasena_confirm:
+            flash('Las contraseñas no coinciden.', 'error')
+            return render_template('register.html')
+        
+        # Validar formato de correo básico
+        if '@' not in correo or '.' not in correo:
+            flash('Por favor, ingresa un correo electrónico válido.', 'error')
+            return render_template('register.html')
 
         try:
+            # Verificar si el correo ya existe (antes de iniciar la transacción)
+            with engine.connect() as conn:
+                check_email = text("SELECT Id_Usuario FROM Usuarios WHERE Correo = :correo")
+                email_existente = conn.execute(check_email, {"correo": correo}).fetchone()
+                
+                if email_existente:
+                    flash('Este correo electrónico ya está registrado. Por favor, usa otro o inicia sesión.', 'error')
+                    return render_template('register.html')
+            
+            # Obtener el ID del rol Cliente (antes de iniciar la transacción)
+            id_rol_cliente = get_rol_id_by_name('Cliente')
+            
+            # Si no se encuentra el rol 'Cliente', intentar con 'cliente' (minúsculas)
+            if not id_rol_cliente:
+                id_rol_cliente = get_rol_id_by_name('cliente')
+            
+            # Si aún no se encuentra, buscar cualquier rol activo como fallback
+            if not id_rol_cliente:
+                with engine.connect() as conn:
+                    fallback_rol = text("SELECT TOP 1 Id_Rol FROM Roles WHERE Estado = 1 ORDER BY Id_Rol")
+                    rol_result = conn.execute(fallback_rol).fetchone()
+                    if rol_result:
+                        id_rol_cliente = rol_result[0]
+                    else:
+                        flash('Error: No se encontró ningún rol disponible en el sistema.', 'error')
+                        return render_template('register.html')
+            
+            # Hash de la contraseña con bcrypt
+            contrasena_bytes = contrasena.encode('utf-8')
+            hash_contrasena = bcrypt.hashpw(contrasena_bytes, bcrypt.gensalt())
+            
+            # Insertar el nuevo usuario (dentro de una transacción)
             with engine.begin() as conn:
-                # ... (tu lógica de checkeo de email) ...
-                # ... (tu lógica de hash) ...
+                insert_usuario = text("""
+                    INSERT INTO Usuarios (Nombre, Correo, Contrasena, Id_Rol, Estado)
+                    VALUES (:nombre, :correo, :contrasena, :id_rol, 1)
+                """)
                 
-                id_rol_cliente = get_rol_id_by_name('Cliente')
-                # ... (tu lógica de fallback 'cliente') ...
-                
-                # ... (tu lógica de INSERT) ...
+                conn.execute(insert_usuario, {
+                    "nombre": nombre,
+                    "correo": correo,
+                    "contrasena": hash_contrasena,
+                    "id_rol": id_rol_cliente
+                })
                 
             flash('Registro exitoso. Por favor, inicia sesión.', 'success')
             # ¡IMPORTANTE! Actualizar a la ruta del blueprint
@@ -88,7 +150,7 @@ def register():
 
         except Exception as e:
             print(f"Error en registro: {e}")
-            flash(f'Error al registrar usuario: {e}', 'error')
+            flash(f'Error al registrar usuario: {str(e)}', 'error')
 
     return render_template('register.html')
 

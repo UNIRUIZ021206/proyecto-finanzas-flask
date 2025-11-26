@@ -18,14 +18,12 @@ admin_bp = Blueprint('admin', __name__)
 @login_required
 @admin_required
 def gestion():
-    # ... (Copia tu lógica de la ruta /gestion aquí) ...
     anio_seleccionado = request.args.get('anio', type=int)
     periodos = []
     report_data = None
     
     try:
         with engine.connect() as conn:
-            # ... (tu lógica para obtener periodos) ...
             periodos_query = text("SELECT Anio FROM Periodo ORDER BY Anio DESC")
             periodos_result = conn.execute(periodos_query).fetchall()
             periodos = [row[0] for row in periodos_result]
@@ -52,23 +50,27 @@ def gestion():
 @admin_required
 def catalogo_cuentas():
     if request.method == 'POST':
-        # ... (Copia tu lógica POST de /catalogo-cuentas aquí) ...
+        nombre = request.form.get('nombre')
+        tipo = request.form.get('tipo')
+        subtipo = request.form.get('subtipo')
+        
         try:
-            with engine.connect() as conn:
-                # ... (tu lógica de validación e INSERT) ...
+            with engine.begin() as conn:
+                conn.execute(
+                    text("INSERT INTO CatalogoCuentas (NombreCuenta, TipoCuenta, SubTipoCuenta) VALUES (:nombre, :tipo, :subtipo)"),
+                    {"nombre": nombre, "tipo": tipo, "subtipo": subtipo}
+                )
                 flash('Cuenta agregada exitosamente.', 'success')
         except Exception as e:
             print(f"Error en catalogo_cuentas (POST): {e}")
             flash(f'Error al guardar la cuenta: {e}', 'error')
         
-        # ¡IMPORTANTE! Actualizar a la ruta del blueprint
         return redirect(url_for('admin.catalogo_cuentas'))
 
     # --- Lógica GET ---
     cuentas_list = []
     try:
         with engine.connect() as conn:
-            # ... (Tu lógica GET para seleccionar cuentas) ...
             query_get = text("SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta FROM CatalogoCuentas ORDER BY CuentaID")
             cuentas_list = conn.execute(query_get).fetchall()
     except Exception as e:
@@ -83,31 +85,155 @@ def catalogo_cuentas():
 @admin_required
 def ingresar_saldos():
     if request.method == 'POST':
-        # ... (Copia tu lógica POST de /ingresar-saldos aquí) ...
+        anio = request.form.get('anio')
+        
         try:
             with engine.begin() as conn:
-                # ... (toda tu lógica de transacción, INSERT de período e INSERT de saldos) ...
-                pass
-            flash(f'Período creado exitosamente con todos sus saldos guardados.', 'success')
-            anio_final = request.form.get('anio')
-            # ¡IMPORTANTE! Actualizar a la ruta del blueprint
-            return redirect(url_for('admin.gestion', anio=anio_final))
+                # Verificar si el periodo existe, si no crearlo
+                periodo_query = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
+                periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone()
+                
+                if not periodo_result:
+                    conn.execute(text("INSERT INTO Periodo (Anio) VALUES (:anio)"), {"anio": anio})
+                    periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone()
+                
+                periodo_id = periodo_result[0]
+                
+                # Procesar saldos
+                for key, value in request.form.items():
+                    if key.startswith('saldo_'):
+                        cuenta_id = key.split('_')[1]
+                        monto = value
+                        if monto:
+                            # Insertar o actualizar saldo
+                            conn.execute(text("""
+                                MERGE SaldoCuenta AS target
+                                USING (SELECT :cuenta_id AS CuentaID, :periodo_id AS PeriodoID) AS source
+                                ON (target.CuentaID = source.CuentaID AND target.PeriodoID = source.PeriodoID)
+                                WHEN MATCHED THEN
+                                    UPDATE SET Monto = :monto
+                                WHEN NOT MATCHED THEN
+                                    INSERT (CuentaID, PeriodoID, Monto) VALUES (:cuenta_id, :periodo_id, :monto);
+                            """), {"cuenta_id": cuenta_id, "periodo_id": periodo_id, "monto": monto})
+
+            flash(f'Saldos guardados exitosamente para el año {anio}.', 'success')
+            return redirect(url_for('admin.gestion', anio=anio))
 
         except Exception as e:
             print(f"Error al ingresar saldos (POST): {e}")
-            flash(f'Error al guardar los saldos. La operación fue revertida. {e}', 'error')
-            # ¡IMPORTANTE! Actualizar a la ruta del blueprint
+            flash(f'Error al guardar los saldos: {e}', 'error')
             return redirect(url_for('admin.ingresar_saldos'))
 
     # --- Lógica GET ---
     cuentas_agrupadas = defaultdict(lambda: defaultdict(list))
     try:
         with engine.connect() as conn:
-            # ... (Tu lógica GET para agrupar cuentas) ...
-            pass
+            query = text("SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta FROM CatalogoCuentas ORDER BY TipoCuenta, SubTipoCuenta, NombreCuenta")
+            cuentas = conn.execute(query).fetchall()
+            
+            for cuenta in cuentas:
+                cuentas_agrupadas[cuenta.TipoCuenta][cuenta.SubTipoCuenta].append(cuenta)
+                
     except Exception as e:
         print(f"Error en ingresar_saldos (GET): {e}")
         flash('Error al cargar el catálogo de cuentas.', 'error')
 
     return render_template('ingresar_saldos.html', 
                            cuentas_agrupadas=cuentas_agrupadas)
+
+@admin_bp.route('/gestion-usuarios')
+@login_required
+@admin_required
+def gestion_usuarios():
+    users = []
+    roles = []
+    try:
+        with engine.connect() as conn:
+            # Fetch users with their roles
+            query_users = text("""
+                SELECT u.Id_Usuario, u.Nombre, u.Correo, r.Nombre as Rol, u.Estado, u.Id_Rol
+                FROM Usuarios u
+                JOIN Roles r ON u.Id_Rol = r.Id_Rol
+                ORDER BY u.Nombre
+            """)
+            users = conn.execute(query_users).fetchall()
+            
+            # Fetch all available roles for the dropdown/modal
+            query_roles = text("SELECT Id_Rol, Nombre FROM Roles WHERE Estado = 1")
+            roles = conn.execute(query_roles).fetchall()
+            
+    except Exception as e:
+        print(f"Error en gestion_usuarios: {e}")
+        flash('Error al cargar usuarios.', 'error')
+        
+    return render_template('gestion_usuarios.html', users=users, roles=roles)
+
+@admin_bp.route('/update-user-role', methods=['POST'])
+@login_required
+@admin_required
+def update_user_role():
+    user_id = request.form.get('user_id')
+    new_role_id = request.form.get('role_id')
+    
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text("UPDATE Usuarios SET Id_Rol = :role_id WHERE Id_Usuario = :user_id"),
+                {"role_id": new_role_id, "user_id": user_id}
+            )
+        flash('Rol de usuario actualizado correctamente.', 'success')
+    except Exception as e:
+        print(f"Error updating user role: {e}")
+        flash('Error al actualizar el rol.', 'error')
+        
+    return redirect(url_for('admin.gestion_usuarios'))
+
+@admin_bp.route('/toggle-user-status', methods=['POST'])
+@login_required
+@admin_required
+def toggle_user_status():
+    user_id = request.form.get('user_id')
+    
+    try:
+        with engine.begin() as conn:
+            # Get current status
+            current_status = conn.execute(
+                text("SELECT Estado FROM Usuarios WHERE Id_Usuario = :id"),
+                {"id": user_id}
+            ).scalar()
+            
+            new_status = 0 if current_status == 1 else 1
+            
+            conn.execute(
+                text("UPDATE Usuarios SET Estado = :status WHERE Id_Usuario = :id"),
+                {"status": new_status, "id": user_id}
+            )
+            
+        flash('Estado de usuario actualizado correctamente.', 'success')
+    except Exception as e:
+        print(f"Error updating user status: {e}")
+        flash('Error al actualizar el estado.', 'error')
+        
+    return redirect(url_for('admin.gestion_usuarios'))
+
+@admin_bp.route('/catalogo-cuentas/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_cuenta():
+    cuenta_id = request.form.get('cuenta_id')
+    nombre = request.form.get('nombre_cuenta')
+    tipo = request.form.get('tipo_cuenta')
+    subtipo = request.form.get('subtipo_cuenta')
+    
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text("UPDATE CatalogoCuentas SET NombreCuenta = :nombre, TipoCuenta = :tipo, SubTipoCuenta = :subtipo WHERE CuentaID = :id"),
+                {"nombre": nombre, "tipo": tipo, "subtipo": subtipo, "id": cuenta_id}
+            )
+            flash('Cuenta actualizada exitosamente.', 'success')
+    except Exception as e:
+        print(f"Error en editar_cuenta: {e}")
+        flash(f'Error al actualizar la cuenta: {e}', 'error')
+    
+    return redirect(url_for('admin.catalogo_cuentas'))

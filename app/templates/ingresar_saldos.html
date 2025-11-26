@@ -7,37 +7,32 @@
 
 {% block content %}
 <h2 class="main-title">Crear Nuevo Período Contable</h2>
-<p class="main-subtitle">Crea un nuevo período contable (año) con sus saldos iniciales. Los períodos contables son históricos y no pueden modificarse una vez creados.</p>
+<p class="main-subtitle">Crea un nuevo período contable (año) con sus saldos iniciales. Los períodos contables son
+    históricos y no pueden modificarse una vez creados.</p>
 
 <!-- Mensajes Flash -->
 {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="flash-{{ category }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="flash-{{ category }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
 {% endwith %}
 
 <form method="POST" action="{{ url_for('admin.ingresar_saldos') }}">
     <!-- Sección 1: Datos del Período -->
     <div class="card" style="margin-bottom: 30px;">
         <h3>Datos del Nuevo Período</h3>
-        
+
         <div class="form-grid-periodo">
             <div>
                 <label for="anio">
                     <i class="fa-solid fa-calendar"></i> Año del Período
                 </label>
-                <input type="number" 
-                       id="anio" 
-                       name="anio" 
-                       placeholder="Ej: 2024" 
-                       min="2000" 
-                       max="2100"
-                       value=""
-                       required>
+                <input type="number" id="anio" name="anio" placeholder="Ej: 2024" min="2000" max="2100" value=""
+                    required>
                 <small style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px; display: block;">
                     Ingresa el año del nuevo período contable
                 </small>
@@ -46,57 +41,65 @@
                 <label for="fecha_cierre">
                     <i class="fa-solid fa-calendar-days"></i> Fecha de Cierre
                 </label>
-                <input type="date" 
-                       id="fecha_cierre" 
-                       name="fecha_cierre" 
-                       required>
+                <input type="date" id="fecha_cierre" name="fecha_cierre" required>
                 <small style="color: var(--text-secondary); font-size: 0.85em; margin-top: 4px; display: block;">
                     Fecha de cierre del período (ej: 31/12/2024)
                 </small>
             </div>
         </div>
-        
-        <div style="margin-top: 20px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border-left: 4px solid var(--success);">
+
+        <div
+            style="margin-top: 20px; padding: 16px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border-left: 4px solid var(--success);">
             <strong style="color: var(--success); display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-shield-check"></i> Seguridad e Integridad
             </strong>
             <p style="margin: 8px 0 0 0; color: var(--text-secondary); font-size: 0.9em; line-height: 1.6;">
-                Los períodos contables son registros históricos inmutables. Una vez creado un período con sus saldos, <strong>no podrá ser modificado</strong> para mantener la integridad de los datos financieros. Si necesitas corregir información, deberás crear un nuevo período.
+                Los períodos contables son registros históricos inmutables. Una vez creado un período con sus saldos,
+                <strong>no podrá ser modificado</strong> para mantener la integridad de los datos financieros. Si
+                necesitas corregir información, deberás crear un nuevo período.
             </p>
         </div>
     </div>
 
     <!-- Sección 2: Saldos de Cuentas -->
-    <h2 class="main-title" style="font-size: 1.8em; margin-top: 40px;">Saldos de Cuentas</h2>
-    
+    <h2 class="main-title" style="font-size: 1.8em; margin-top: 40px; margin-bottom: 20px;">Saldos de Cuentas</h2>
+
+    <!-- Buscador de Cuentas -->
+    <div class="search-card">
+        <div class="search-info">
+            <h3><i class="fa-solid fa-filter"></i> Filtrar Cuentas</h3>
+            <p>Encuentra rápidamente la cuenta que buscas por código o nombre.</p>
+        </div>
+        <div class="search-input-wrapper">
+            <input type="text" id="search-accounts" class="search-input-field" placeholder="Buscar cuenta...">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+    </div>
+
     <!-- Iteramos sobre los tipos principales (Activo, Pasivo, etc.) -->
     {% for tipo, subtipos in cuentas_agrupadas.items() %}
-        <div class="account-group card">
-            <h3>{{ tipo }}</h3>
-            
-            <!-- Iteramos sobre los subtipos (Activo Corriente, etc.) -->
-            {% for subtipo, cuentas in subtipos.items() %}
-                <h4>{{ subtipo }}</h4>
-                <div class="account-list">
-                    
-                    <!-- Iteramos sobre las cuentas finales -->
-                    {% for cuenta in cuentas %}
-                    <div class="account-input">
-                        <label for="monto-{{ cuenta.CuentaID }}">
-                            ({{ cuenta.CuentaID }}) {{ cuenta.NombreCuenta }}
-                        </label>
-                        <!-- El 'name' es dinámico y crucial para el backend -->
-                        <input type="number" 
-                               id="monto-{{ cuenta.CuentaID }}" 
-                               name="monto-{{ cuenta.CuentaID }}" 
-                               step="0.01" 
-                               placeholder="C$ 0.00"
-                               value="0.00">
-                    </div>
-                    {% endfor %}
-                </div>
+    <div class="account-group card">
+        <h3>{{ tipo }}</h3>
+
+        <!-- Iteramos sobre los subtipos (Activo Corriente, etc.) -->
+        {% for subtipo, cuentas in subtipos.items() %}
+        <h4>{{ subtipo }}</h4>
+        <div class="account-list">
+
+            <!-- Iteramos sobre las cuentas finales -->
+            {% for cuenta in cuentas %}
+            <div class="account-input">
+                <label for="monto-{{ cuenta.CuentaID }}">
+                    ({{ cuenta.CuentaID }}) {{ cuenta.NombreCuenta }}
+                </label>
+                <!-- El 'name' es dinámico y crucial para el backend -->
+                <input type="number" id="monto-{{ cuenta.CuentaID }}" name="monto-{{ cuenta.CuentaID }}" step="0.01"
+                    placeholder="C$ 0.00" value="0.00">
+            </div>
             {% endfor %}
         </div>
+        {% endfor %}
+    </div>
     {% endfor %}
 
     <!-- Botón de Envío Fijo -->
@@ -109,13 +112,44 @@
 </form>
 
 <script>
-// Establecer año actual como sugerencia
-document.addEventListener('DOMContentLoaded', function() {
-    const yearInput = document.getElementById('anio');
-    if (yearInput && !yearInput.value) {
-        const currentYear = new Date().getFullYear();
-        yearInput.placeholder = `Ej: ${currentYear}`;
-    }
-});
+    // Establecer año actual como sugerencia
+    document.addEventListener('DOMContentLoaded', function () {
+        const yearInput = document.getElementById('anio');
+        if (yearInput && !yearInput.value) {
+            const currentYear = new Date().getFullYear();
+            yearInput.placeholder = `Ej: ${currentYear}`;
+        }
+
+        // Funcionalidad de Búsqueda de Cuentas
+        const searchInput = document.getElementById('search-accounts');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase().trim();
+                const accountInputs = document.querySelectorAll('.account-input');
+                const accountGroups = document.querySelectorAll('.account-group');
+
+                accountInputs.forEach(inputDiv => {
+                    const label = inputDiv.querySelector('label').textContent.toLowerCase();
+                    if (label.includes(searchTerm)) {
+                        inputDiv.style.display = '';
+                        // Asegurar que el padre (lista) y el abuelo (grupo) sean visibles
+                        inputDiv.closest('.account-list').style.display = '';
+                    } else {
+                        inputDiv.style.display = 'none';
+                    }
+                });
+
+                // Ocultar grupos vacíos (opcional, para mejor UX)
+                accountGroups.forEach(group => {
+                    const visibleInputs = group.querySelectorAll('.account-input:not([style*="display: none"])');
+                    if (visibleInputs.length === 0) {
+                        group.style.display = 'none';
+                    } else {
+                        group.style.display = '';
+                    }
+                });
+            });
+        }
+    });
 </script>
 {% endblock %}

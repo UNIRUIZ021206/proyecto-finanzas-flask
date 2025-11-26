@@ -1,0 +1,720 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>Origen y Aplicación de Recursos - Sistema Financiero</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid my-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="main-title mb-3">Origen y Aplicación de Recursos</h2>
+            <p class="main-subtitle mb-4">Análisis de cambios en el Balance General entre dos períodos. Los orígenes
+                representan ingresos de recursos y las aplicaciones representan usos de recursos.</p>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('analysis.origen_aplicacion') }}">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="periodo_base" class="form-label fw-bold">Año Base:</label>
+                                <select name="periodo_base" id="periodo_base" class="form-select">
+                                    <option value="">-- Selecciona --</option>
+                                    {% for anio in periodos %}
+                                    <option value="{{ anio }}" {% if anio==periodo_base %}selected{% endif %}>
+                                        Año {{ anio }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="periodo_analisis" class="form-label fw-bold">Año de Análisis:</label>
+                                <select name="periodo_analisis" id="periodo_analisis" class="form-select">
+                                    <option value="">-- Selecciona --</option>
+                                    {% for anio in periodos %}
+                                    <option value="{{ anio }}" {% if anio==periodo_analisis %}selected{% endif %}>
+                                        Año {{ anio }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa-solid fa-chart-pie me-2"></i> Calcular
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fa-solid fa-info-circle me-1"></i> El año base debe ser menor que el año de
+                            análisis.
+                            <br>
+                            <strong>Nota:</strong> Un aumento de activos es una aplicación. Una disminución de activos
+                            es un origen. Lo inverso para pasivo y capital.
+                        </small>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro de Cuentas -->
+    {% if origen_aplicacion_data %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-12">
+                    <label for="account-filter" class="form-label fw-bold">
+                        <i class="fa-solid fa-filter me-2"></i> Filtrar Cuentas:
+                    </label>
+                    <select id="account-filter" class="form-select">
+                        <option value="all">Mostrar Todo</option>
+                        <!-- Opciones se llenarán dinámicamente con JS -->
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'warning') }} alert-dismissible fade show"
+        role="alert">
+        <i
+            class="fa-solid fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Botón de Exportar a Excel (solo cuando hay datos calculados) -->
+    {% if origen_aplicacion_data %}
+    <div class="export-section"
+        style="margin-top: 20px; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #4a9eff 0%, #3a7fcc 100%); border-radius: 16px; box-shadow: 0 4px 16px rgba(74, 158, 255, 0.4); border: 1px solid rgba(74, 158, 255, 0.3);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h3 style="color: white; margin: 0 0 8px 0; font-size: 1.3em;">
+                    Origen de Recursos - Período Base ({{ periodo_base }}) vs Período Análisis ({{
+                    periodo_analisis
+                    }})
+                </h3>
+                <small class="d-block mt-2">Los orígenes incluyen: aumentos de Pasivo y Patrimonio,
+                    disminuciones de
+                    Activos</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered border-success mb-0" style="background-color: white !important;">
+                        <thead class="table-success">
+                            <tr>
+                                <th style="width: 35%; color: white !important;">Cuenta</th>
+                                <th class="text-end" style="color: white !important;">Tipo</th>
+                                <th class="text-end" style="color: white !important;">Año Base ({{
+                                    periodo_base }})
+                                </th>
+                                <th class="text-end" style="color: white !important;">Año Análisis ({{
+                                    periodo_analisis }})</th>
+                                <th class="text-end" style="color: white !important;">Variación (Origen)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody style="background-color: white !important;">
+                            {% if origen_aplicacion_data.Origen %}
+                            {% for subtipo, cuentas in origen_aplicacion_data.Origen.items() %}
+                            {% if cuentas and cuentas|length > 0 %}
+                            <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Origen" data-subtype="{{ subtipo }}">
+                                <td colspan="5" class="fw-bold"
+                                    style="color: #000 !important; background-color: #0dcaf0 !important;">
+                                    {{ subtipo
+                                    }}</td>
+                            </tr>
+                            {% for cuenta in cuentas %}
+                            <tr style="background-color: white !important;" data-main-type="Origen" data-subtype="{{ subtipo }}">
+                                <td class="ps-4"
+                                    style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                    {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
+                                    %}{{
+                                    cuenta['nombre'] }}{% else %}Sin nombre{% endif %}
+                                </td>
+                                <td class="text-end" style="background-color: white !important;">
+                                    <span class="badge bg-secondary" style="color: white !important;">
+                                        {% if cuenta.tipo %}{{ cuenta.tipo }}{% elif cuenta['tipo'] %}{{
+                                        cuenta['tipo'] }}{% else %}N/A{% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-end"
+                                    style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                    C$ {% if cuenta.monto_base is defined %}{{
+                                    "%.2f"|format(cuenta.monto_base) }}{%
+                                    elif cuenta['monto_base'] is defined %}{{
+                                    "%.2f"|format(cuenta['monto_base'])
+                                    }}{% else %}0.00{% endif %}
+                                </td>
+                                <td class="text-end"
+                                    style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                    C$ {% if cuenta.monto_analisis is defined %}{{
+                                    "%.2f"|format(cuenta.monto_analisis) }}{% elif
+                                    cuenta['monto_analisis'] is
+                                    defined %}{{ "%.2f"|format(cuenta['monto_analisis']) }}{% else
+                                    %}0.00{% endif %}
+                                </td>
+                                <td class="text-end fw-bold"
+                                    style="color: #198754 !important; background-color: white !important;">
+                                    C$ {% if cuenta.variacion is defined %}{{
+                                    "%.2f"|format(cuenta.variacion) }}{%
+                                    elif cuenta['variacion'] is defined %}{{
+                                    "%.2f"|format(cuenta['variacion']) }}{%
+                                    else %}0.00{% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            {% set total_subtipo_origen = origen_aplicacion_data.Totales.get('Origen',
+                            {}).get(subtipo, 0.0) %}
+                            {% if total_subtipo_origen %}
+                            <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Origen" data-subtype="{{ subtipo }}">
+                                <td class="ps-4 fw-bold" colspan="4"
+                                    style="color: #000000 !important; background-color: #f8f9fa !important;">
+                                    Total
+                                    {{ subtipo }}</td>
+                                <td class="text-end fw-bold"
+                                    style="color: #198754 !important; background-color: #f8f9fa !important;">
+                                    C$ {{ "%.2f"|format(total_subtipo_origen) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            <tr style="background-color: white !important;">
+                                <td colspan="5" class="text-center"
+                                    style="color: #000000 !important; background-color: white !important;">
+                                    No hay
+                                    orígenes de recursos en este período</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot class="table-dark" style="background-color: #212529 !important;">
+                            <tr style="background-color: #212529 !important;">
+                                <td class="fw-bold fs-5" colspan="4"
+                                    style="color: white !important; background-color: #212529 !important;">
+                                    TOTAL
+                                    ORIGEN DE RECURSOS</td>
+                                <td class="text-end fw-bold fs-5"
+                                    style="color: #198754 !important; background-color: #212529 !important;">
+                                    C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Origen',
+                                    {}).get('Total', 0.0)) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- APLICACIÓN DE RECURSOS -->
+        <div class="card shadow-lg mb-5">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0">
+                    <i class="fa-solid fa-arrow-down me-2"></i>
+                    Aplicación de Recursos - Período Base ({{ periodo_base }}) vs Período Análisis ({{
+                    periodo_analisis }})
+                </h3>
+                <small class="d-block mt-2">Las aplicaciones incluyen: aumentos de Activos,
+                    disminuciones de Pasivo
+                    y Patrimonio</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered border-danger mb-0" style="background-color: white !important;">
+                        <thead class="table-danger">
+                            <tr>
+                                <th style="width: 35%; color: white !important;">Cuenta</th>
+                                <th class="text-end" style="color: white !important;">Tipo</th>
+                                <th class="text-end" style="color: white !important;">Año Base ({{
+                                    periodo_base }})
+                                </th>
+                                <th class="text-end" style="color: white !important;">Año Análisis ({{
+                                    periodo_analisis }})</th>
+                                <th class="text-end" style="color: white !important;">Variación
+                                    (Aplicación)</th>
+                            </tr>
+                        </thead>
+                        <tbody style="background-color: white !important;">
+                            {% if origen_aplicacion_data.Aplicacion %}
+                            {% for subtipo, cuentas in origen_aplicacion_data.Aplicacion.items() %}
+                            {% if cuentas and cuentas|length > 0 %}
+                            <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                                <td colspan="5" class="fw-bold"
+                                    style="color: #000 !important; background-color: #0dcaf0 !important;">
+                                    {{ subtipo
+                                    }}</td>
+                            </tr>
+                            {% for cuenta in cuentas %}
+                            <tr style="background-color: white !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                                <td class="ps-4"
+                                    style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                    {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
+                                    %}{{
+                                    cuenta['nombre'] }}{% else %}Sin nombre{% endif %}
+                                </td>
+                                <td class="text-end" style="background-color: white !important;">
+                                    <span class="badge bg-secondary" style="color: white !important;">
+                                        {% if cuenta.tipo %}{{ cuenta.tipo }}{% elif cuenta['tipo'] %}{{
+                                        cuenta['tipo'] }}{% else %}N/A{% endif %}
+                                    </span>
+                                </td>
+                                <td class="text-end"
+                                    style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                    C$ {% if cuenta.monto_base is defined %}{{
+                                    "%.2f"|format(cuenta.monto_base) }}{%
+                                    elif cuenta['monto_base'] is defined %}{{
+                                    "%.2f"|format(cuenta['monto_base'])
+                                    }}{% else %}0.00{% endif %}
+                                </td>
+                                <td class="text-end"
+                                    style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                                    C$ {% if cuenta.monto_analisis is defined %}{{
+                                    "%.2f"|format(cuenta.monto_analisis) }}{% elif
+                                    cuenta['monto_analisis'] is
+                                    defined %}{{ "%.2f"|format(cuenta['monto_analisis']) }}{% else
+                                    %}0.00{% endif %}
+                                </td>
+                                <td class="text-end fw-bold"
+                                    style="color: #dc3545 !important; background-color: white !important;">
+                                    C$ {% if cuenta.variacion is defined %}{{
+                                    "%.2f"|format(cuenta.variacion) }}{%
+                                    elif cuenta['variacion'] is defined %}{{
+                                    "%.2f"|format(cuenta['variacion']) }}{%
+                                    else %}0.00{% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            {% set total_subtipo_aplicacion =
+                            origen_aplicacion_data.Totales.get('Aplicacion',
+                            {}).get(subtipo, 0.0) %}
+                            {% if total_subtipo_aplicacion %}
+                            <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                                <td class="ps-4 fw-bold" colspan="4"
+                                    style="color: #000000 !important; background-color: #f8f9fa !important;">
+                                    Total
+                                    {{ subtipo }}</td>
+                                <td class="text-end fw-bold"
+                                    style="color: #dc3545 !important; background-color: #f8f9fa !important;">
+                                    C$ {{ "%.2f"|format(total_subtipo_aplicacion) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            <tr style="background-color: white !important;">
+                                <td colspan="5" class="text-center"
+                                    style="color: #000000 !important; background-color: white !important;">
+                                    No hay
+                                    aplicaciones de recursos en este período</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot class="table-dark" style="background-color: #212529 !important;">
+                            <tr style="background-color: #212529 !important;">
+                                <td class="fw-bold fs-5" colspan="4"
+                                    style="color: white !important; background-color: #212529 !important;">
+                                    TOTAL
+                                    APLICACIÓN DE RECURSOS</td>
+                                <td class="text-end fw-bold fs-5"
+                                    style="color: #dc3545 !important; background-color: #212529 !important;">
+                                    C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Aplicacion',
+                                    {}).get('Total', 0.0)) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="card shadow-lg mb-5">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">
+                    <i class="fa-solid fa-balance-scale me-2"></i>
+                    Resumen de Origen y Aplicación de Recursos
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Total Origen de Recursos</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <h2 class="text-success mb-0">
+                                    C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Origen',
+                                    {}).get('Total', 0.0)) }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-danger mb-3">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">Total Aplicación de Recursos</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <h2 class="text-danger mb-0">
+                                    C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Aplicacion',
+                                    {}).get('Total', 0.0)) }}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        {% set total_origen = origen_aplicacion_data.Totales.get('Origen',
+                        {}).get('Total', 0.0) %}
+                        {% set total_aplicacion = origen_aplicacion_data.Totales.get('Aplicacion',
+                        {}).get('Total',
+                        0.0) %}
+                        {% set diferencia = total_origen - total_aplicacion %}
+                        <div
+                            class="card {% if diferencia > 0 %}border-success{% elif diferencia < 0 %}border-warning{% else %}border-info{% endif %}">
+                            <div
+                                class="card-header {% if diferencia > 0 %}bg-success{% elif diferencia < 0 %}bg-warning{% else %}bg-info{% endif %} text-white">
+                                <h5 class="mb-0">Diferencia (Origen - Aplicación)</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <h3
+                                    class="mb-0 {% if diferencia > 0 %}text-success{% elif diferencia < 0 %}text-warning{% else %}text-info{% endif %}">
+                                    C$ {{ "%.2f"|format(diferencia) }}
+                                </h3>
+                                <small class="text-muted">
+                                    {% if diferencia > 0 %}
+                                    Los orígenes superan a las aplicaciones. La empresa generó más
+                                    recursos de los
+                                    que aplicó.
+                                    {% elif diferencia < 0 %} Las aplicaciones superan a los orígenes. La empresa aplicó
+                                        más recursos de los que generó. {% else %} Los orígenes y aplicaciones están
+                                        equilibrados. {% endif %} </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- APLICACIÓN DE RECURSOS -->
+<div class="card shadow-lg mb-5">
+    <div class="card-header bg-danger text-white">
+        <h3 class="mb-0">
+            <i class="fa-solid fa-arrow-down me-2"></i>
+            Aplicación de Recursos - Período Base ({{ periodo_base }}) vs Período Análisis ({{
+            periodo_analisis }})
+        </h3>
+        <small class="d-block mt-2">Las aplicaciones incluyen: aumentos de Activos,
+            disminuciones de Pasivo
+            y Patrimonio</small>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered border-danger mb-0" style="background-color: white !important;">
+                <thead class="table-danger">
+                    <tr>
+                        <th style="width: 35%; color: white !important;">Cuenta</th>
+                        <th class="text-end" style="color: white !important;">Tipo</th>
+                        <th class="text-end" style="color: white !important;">Año Base ({{
+                            periodo_base }})
+                        </th>
+                        <th class="text-end" style="color: white !important;">Año Análisis ({{
+                            periodo_analisis }})</th>
+                        <th class="text-end" style="color: white !important;">Variación
+                            (Aplicación)</th>
+                    </tr>
+                </thead>
+                <tbody style="background-color: white !important;">
+                    {% if origen_aplicacion_data.Aplicacion %}
+                    {% for subtipo, cuentas in origen_aplicacion_data.Aplicacion.items() %}
+                    {% if cuentas and cuentas|length > 0 %}
+                    <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                        <td colspan="5" class="fw-bold"
+                            style="color: #000 !important; background-color: #0dcaf0 !important;">
+                            {{ subtipo
+                            }}</td>
+                    </tr>
+                    {% for cuenta in cuentas %}
+                    <tr style="background-color: white !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                        <td class="ps-4"
+                            style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                            {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
+                            %}{{
+                            cuenta['nombre'] }}{% else %}Sin nombre{% endif %}
+                        </td>
+                        <td class="text-end" style="background-color: white !important;">
+                            <span class="badge bg-secondary" style="color: white !important;">
+                                {% if cuenta.tipo %}{{ cuenta.tipo }}{% elif cuenta['tipo'] %}{{
+                                cuenta['tipo'] }}{% else %}N/A{% endif %}
+                            </span>
+                        </td>
+                        <td class="text-end"
+                            style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                            C$ {% if cuenta.monto_base is defined %}{{
+                            "%.2f"|format(cuenta.monto_base) }}{%
+                            elif cuenta['monto_base'] is defined %}{{
+                            "%.2f"|format(cuenta['monto_base'])
+                            }}{% else %}0.00{% endif %}
+                        </td>
+                        <td class="text-end"
+                            style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                            C$ {% if cuenta.monto_analisis is defined %}{{
+                            "%.2f"|format(cuenta.monto_analisis) }}{% elif
+                            cuenta['monto_analisis'] is
+                            defined %}{{ "%.2f"|format(cuenta['monto_analisis']) }}{% else
+                            %}0.00{% endif %}
+                        </td>
+                        <td class="text-end fw-bold"
+                            style="color: #dc3545 !important; background-color: white !important;">
+                            C$ {% if cuenta.variacion is defined %}{{
+                            "%.2f"|format(cuenta.variacion) }}{%
+                            elif cuenta['variacion'] is defined %}{{
+                            "%.2f"|format(cuenta['variacion']) }}{%
+                            else %}0.00{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                    {% set total_subtipo_aplicacion =
+                    origen_aplicacion_data.Totales.get('Aplicacion',
+                    {}).get(subtipo, 0.0) %}
+                    {% if total_subtipo_aplicacion %}
+                    <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                        <td class="ps-4 fw-bold" colspan="4"
+                            style="color: #000000 !important; background-color: #f8f9fa !important;">
+                            Total
+                            {{ subtipo }}</td>
+                        <td class="text-end fw-bold"
+                            style="color: #dc3545 !important; background-color: #f8f9fa !important;">
+                            C$ {{ "%.2f"|format(total_subtipo_aplicacion) }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <tr style="background-color: white !important;">
+                        <td colspan="5" class="text-center"
+                            style="color: #000000 !important; background-color: white !important;">
+                            No hay
+                            aplicaciones de recursos en este período</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+                <tfoot class="table-dark" style="background-color: #212529 !important;">
+                    <tr style="background-color: #212529 !important;">
+                        <td class="fw-bold fs-5" colspan="4"
+                            style="color: white !important; background-color: #212529 !important;">
+                            TOTAL
+                            APLICACIÓN DE RECURSOS</td>
+                        <td class="text-end fw-bold fs-5"
+                            style="color: #dc3545 !important; background-color: #212529 !important;">
+                            C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Aplicacion',
+                            {}).get('Total', 0.0)) }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- RESUMEN -->
+<div class="card shadow-lg mb-5">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">
+            <i class="fa-solid fa-balance-scale me-2"></i>
+            Resumen de Origen y Aplicación de Recursos
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-success mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Total Origen de Recursos</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 class="text-success mb-0">
+                            C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Origen',
+                            {}).get('Total', 0.0)) }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-danger mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Total Aplicación de Recursos</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 class="text-danger mb-0">
+                            C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Aplicacion',
+                            {}).get('Total', 0.0)) }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                {% set total_origen = origen_aplicacion_data.Totales.get('Origen',
+                {}).get('Total', 0.0) %}
+                {% set total_aplicacion = origen_aplicacion_data.Totales.get('Aplicacion',
+                {}).get('Total',
+                0.0) %}
+                {% set diferencia = total_origen - total_aplicacion %}
+                <div
+                    class="card {% if diferencia > 0 %}border-success{% elif diferencia < 0 %}border-warning{% else %}border-info{% endif %}">
+                    <div
+                        class="card-header {% if diferencia > 0 %}bg-success{% elif diferencia < 0 %}bg-warning{% else %}bg-info{% endif %} text-white">
+                        <h5 class="mb-0">Diferencia (Origen - Aplicación)</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3
+                            class="mb-0 {% if diferencia > 0 %}text-success{% elif diferencia < 0 %}text-warning{% else %}text-info{% endif %}">
+                            C$ {{ "%.2f"|format(diferencia) }}
+                        </h3>
+                        <small class="text-muted">
+                            {% if diferencia > 0 %}
+                            Los orígenes superan a las aplicaciones. La empresa generó más
+                            recursos de los
+                            que aplicó.
+                            {% elif diferencia < 0 %} Las aplicaciones superan a los orígenes. La empresa aplicó más
+                                recursos de los que generó. {% else %} Los orígenes y aplicaciones están equilibrados.
+                                {% endif %} </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    <i class="fa-solid fa-info-circle me-2"></i>
+    No hay datos disponibles. Por favor, selecciona un año base y un año de análisis diferentes.
+</div>
+{% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const aiContainer = document.getElementById('ai-analysis-container');
+        if (aiContainer) {
+            const base = "{{ periodo_base }}";
+            const analisis = "{{ periodo_analisis }}";
+
+            if (base && analisis && base !== "None" && analisis !== "None") {
+                fetch(`{{ url_for('analysis.api_origen_aplicacion_ia') }}?base=${base}&analisis=${analisis}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.html) {
+                            aiContainer.innerHTML = `
+                                <div class="card shadow-lg mb-4 border-0">
+                                    <div class="card-header text-white" style="background: linear-gradient(45deg, #6610f2, #6f42c1);">
+                                        <h3 class="mb-0"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h3>
+                                    </div>
+                                    <div class="card-body bg-light">
+                                        <div class="ai-content">
+                                            ${data.html}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            aiContainer.innerHTML = `
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                    No se pudo generar el análisis por IA en este momento.
+                                    ${data.error ? '<br><small>' + data.error + '</small>' : ''}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AI analysis:', error);
+                        aiContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fa-solid fa-circle-xmark me-2"></i>
+                                Error al conectar con el servicio de IA.
+                            </div>
+                        `;
+                    });
+            }
+        }
+    });
+
+    // Script para el filtro de cuentas por subtipos
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterSelect = document.getElementById('account-filter');
+        if (!filterSelect) return;
+
+        // Recolectar todos los subtipos únicos
+        const rows = document.querySelectorAll('tr[data-subtype]');
+        const subtypes = new Set();
+
+        rows.forEach(row => {
+            const subtype = row.getAttribute('data-subtype');
+            if (subtype) subtypes.add(subtype);
+        });
+
+        // Agregar opciones de subtipos
+        if (subtypes.size > 0) {
+            Array.from(subtypes).sort().forEach(subtype => {
+                const option = document.createElement('option');
+                option.value = subtype;
+                option.textContent = subtype;
+                filterSelect.appendChild(option);
+            });
+        }
+
+        // Manejar evento de cambio
+        filterSelect.addEventListener('change', function () {
+            const value = this.value;
+            const allRows = document.querySelectorAll('tr[data-subtype]');
+            const cards = document.querySelectorAll('.card.shadow-lg');
+
+            if (value === 'all') {
+                // Mostrar todo
+                allRows.forEach(row => row.classList.remove('hidden-row'));
+                cards.forEach(card => card.classList.remove('hidden-section'));
+            } else {
+                // Ocultar todo primero
+                allRows.forEach(row => row.classList.add('hidden-row'));
+
+                // Mostrar solo las filas que coinciden con el subtipo seleccionado
+                document.querySelectorAll(`tr[data-subtype="${value}"]`).forEach(row => {
+                    row.classList.remove('hidden-row');
+                });
+
+                // Ocultar cards vacíos
+                cards.forEach(card => {
+                    const visibleRows = card.querySelectorAll('tr:not(.hidden-row)');
+                    if (visibleRows.length === 0) {
+                        card.classList.add('hidden-section');
+                    } else {
+                        card.classList.remove('hidden-section');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock %}

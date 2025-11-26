@@ -14,44 +14,54 @@
         <h2 class="main-title">Análisis Vertical</h2>
         <p class="main-subtitle">Análisis de la estructura porcentual de los estados financieros.</p>
     </div>
-    
+
     <!-- Menú Desplegable de Períodos -->
     <div class="report-selector">
         <form method="GET" action="{{ url_for('analysis.analisis_vertical') }}">
             <label for="anio">Seleccionar Período:</label>
             <select name="anio" id="anio" onchange="this.form.submit()">
                 {% if not periodos %}
-                    <option>No hay períodos</option>
+                <option>No hay períodos</option>
                 {% else %}
-                    {% for anio in periodos %}
-                        <option value="{{ anio }}" {% if anio == anio_seleccionado %}selected{% endif %}>
-                            Año {{ anio }}
-                        </option>
-                    {% endfor %}
+                {% for anio in periodos %}
+                <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}>
+                    Año {{ anio }}
+                </option>
+                {% endfor %}
                 {% endif %}
             </select>
             <noscript><button type="submit">Cargar</button></noscript>
         </form>
     </div>
+
+    <!-- Filtro de Cuentas -->
+    {% if report_data %}
+    <div class="report-selector filter-selector">
+        <div class="selector-group">
+            <label for="account-filter"><i class="fa-solid fa-filter"></i> Filtrar Cuentas:</label>
+            <select id="account-filter">
+                <option value="all">Mostrar Todo</option>
+                <!-- Opciones se llenarán dinámicamente con JS -->
+            </select>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- NUEVO: Sección de Análisis con IA -->
-{% if analisis_ia %}
-<div class="ai-analysis-wrapper">
-    <div class="ai-header">
-        <i class="fa-solid fa-sparkles"></i>
-        <h3>Análisis Ejecutivo por IA (Gemini)</h3>
+<div id="ai-analysis-container" class="mb-4">
+    {% if report_data %}
+    <div class="card shadow-sm border-0" style="background-color: #f8f9fa;">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h5 class="text-muted">Generando análisis financiero inteligente con Gemini AI...</h5>
+            <p class="text-muted small">Esto puede tomar unos segundos.</p>
+        </div>
     </div>
-    <div class="ai-content">
-        <!-- Usamos el filtro 'safe' para que Flask renderice el HTML que generamos desde Markdown -->
-        {{ analisis_ia | safe }}
-    </div>
+    {% endif %}
 </div>
-{% elif report_data %}
-<div class="ai-analysis-wrapper">
-    <p>Generando análisis con IA...</p>
-</div>
-{% endif %}
 
 <!-- Contenedor de Reportes -->
 {% if report_data %}
@@ -60,7 +70,7 @@
     <!-- Columna 1: Balance General -->
     <div class="report-wrapper">
         <h3>Balance General (Base 100% = Total Activos: C$ {{ base_bg | round(2) }})</h3>
-        
+
         <!-- === ACTIVOS === -->
         <table class="report-table">
             <thead>
@@ -73,18 +83,21 @@
             <tbody>
                 {% if 'Activo' in report_data %}
                 {% for subtipo, cuentas in report_data.Activo.items() %}
-                <tr class="group-header"><td colspan="3">{{ subtipo }}</td></tr>
-                    {% for cuenta in cuentas %}
-                    <tr class="item-row">
-                        <td>{{ cuenta.nombre }}</td>
-                        <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
-                        <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                    </tr>
-                    {% endfor %}
-                <tr class="subtotal-row">
+                <tr class="group-header" data-main-type="Activo" data-subtype="{{ subtipo }}">
+                    <td colspan="3">{{ subtipo }}</td>
+                </tr>
+                {% for cuenta in cuentas %}
+                <tr class="item-row" data-main-type="Activo" data-subtype="{{ subtipo }}">
+                    <td>{{ cuenta.nombre }}</td>
+                    <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
+                    <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                </tr>
+                {% endfor %}
+                <tr class="subtotal-row" data-main-type="Activo" data-subtype="{{ subtipo }}">
                     <td>Total {{ subtipo }}</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get(subtipo, 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if
+                        base_bg else 0) }}%</td>
                 </tr>
                 {% endfor %}
                 {% endif %}
@@ -93,7 +106,8 @@
                 <tr>
                     <td>Total Activo</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Total Activo', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Activo', 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Activo', 0.0) / base_bg *
+                        100) if base_bg else 0) }}%</td>
                 </tr>
             </tfoot>
         </table>
@@ -111,59 +125,69 @@
             <tbody>
                 {% if 'Pasivo' in report_data %}
                 {% for subtipo, cuentas in report_data.Pasivo.items() %}
-                <tr class="group-header"><td colspan="3">{{ subtipo }}</td></tr>
-                    {% for cuenta in cuentas %}
-                    <tr class="item-row">
-                        <td>{{ cuenta.nombre }}</td>
-                        <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
-                        <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                    </tr>
-                    {% endfor %}
-                <tr class="subtotal-row">
+                <tr class="group-header" data-main-type="Pasivo" data-subtype="{{ subtipo }}">
+                    <td colspan="3">{{ subtipo }}</td>
+                </tr>
+                {% for cuenta in cuentas %}
+                <tr class="item-row" data-main-type="Pasivo" data-subtype="{{ subtipo }}">
+                    <td>{{ cuenta.nombre }}</td>
+                    <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
+                    <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                </tr>
+                {% endfor %}
+                <tr class="subtotal-row" data-main-type="Pasivo" data-subtype="{{ subtipo }}">
                     <td>Total {{ subtipo }}</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get(subtipo, 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if
+                        base_bg else 0) }}%</td>
                 </tr>
                 {% endfor %}
                 <!-- Total Pasivo -->
                 <tr class="total-row">
                     <td>Total Pasivo</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Total Pasivo', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Pasivo', 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Pasivo', 0.0) / base_bg *
+                        100) if base_bg else 0) }}%</td>
                 </tr>
                 {% endif %}
             </tbody>
             <!-- Patrimonio -->
             <tbody>
-                 {% if 'Patrimonio' in report_data %}
+                {% if 'Patrimonio' in report_data %}
                 {% for subtipo, cuentas in report_data.Patrimonio.items() %}
-                <tr class="group-header"><td colspan="3">{{ subtipo }}</td></tr>
-                    {% for cuenta in cuentas %}
-                    <tr class="item-row">
-                        <td>{{ cuenta.nombre }}</td>
-                        <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
-                        <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                    </tr>
-                    {% endfor %}
-                <tr class="subtotal-row">
+                <tr class="group-header" data-main-type="Patrimonio" data-subtype="{{ subtipo }}">
+                    <td colspan="3">{{ subtipo }}</td>
+                </tr>
+                {% for cuenta in cuentas %}
+                <tr class="item-row" data-main-type="Patrimonio" data-subtype="{{ subtipo }}">
+                    <td>{{ cuenta.nombre }}</td>
+                    <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
+                    <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                </tr>
+                {% endfor %}
+                <tr class="subtotal-row" data-main-type="Patrimonio" data-subtype="{{ subtipo }}">
                     <td>Total {{ subtipo }}</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get(subtipo, 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if
+                        base_bg else 0) }}%</td>
                 </tr>
                 {% endfor %}
                 <!-- Total Patrimonio -->
                 <tr class="total-row">
                     <td>Total Patrimonio</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Total Patrimonio', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Patrimonio', 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Patrimonio', 0.0) / base_bg
+                        * 100) if base_bg else 0) }}%</td>
                 </tr>
                 {% endif %}
             </tbody>
             <tfoot class="total-footer">
                 <tr>
                     <td>Total Pasivo y Patrimonio</td>
-                    <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Total Pasivo y Patrimonio', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Pasivo y Patrimonio', 0.0) / base_bg * 100) if base_bg else 0) }}%</td>
+                    <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Total Pasivo y Patrimonio', 0.0)) }}
+                    </td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Total Pasivo y Patrimonio', 0.0)
+                        / base_bg * 100) if base_bg else 0) }}%</td>
                 </tr>
             </tfoot>
         </table>
@@ -172,7 +196,7 @@
     <!-- Columna 2: Estado de Resultados -->
     <div class="report-wrapper">
         <h3>Estado de Resultados (Base 100% = Ingresos: C$ {{ base_er | round(2) }})</h3>
-        
+
         <!-- === INGRESOS === -->
         <table class="report-table">
             <thead>
@@ -185,13 +209,13 @@
             <tbody>
                 {% if 'Ingreso' in report_data %}
                 {% for subtipo, cuentas in report_data.Ingreso.items() %}
-                    {% for cuenta in cuentas %}
-                    <tr class="item-row">
-                        <td>{{ cuenta.nombre }}</td>
-                        <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
-                        <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                    </tr>
-                    {% endfor %}
+                {% for cuenta in cuentas %}
+                <tr class="item-row" data-main-type="Ingreso" data-subtype="{{ subtipo }}">
+                    <td>{{ cuenta.nombre }}</td>
+                    <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
+                    <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                </tr>
+                {% endfor %}
                 {% endfor %}
                 {% endif %}
             </tbody>
@@ -199,7 +223,8 @@
                 <tr>
                     <td>Total Ingresos</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Ingreso', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Ingreso', 0.0) / base_er * 100) if base_er else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Ingreso', 0.0) / base_er * 100)
+                        if base_er else 0) }}%</td>
                 </tr>
             </tfoot>
         </table>
@@ -214,15 +239,15 @@
                 </tr>
             </thead>
             <tbody>
-                 {% if 'Costo' in report_data %}
+                {% if 'Costo' in report_data %}
                 {% for subtipo, cuentas in report_data.Costo.items() %}
-                    {% for cuenta in cuentas %}
-                    <tr class="item-row">
-                        <td>{{ cuenta.nombre }}</td>
-                        <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
-                        <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                    </tr>
-                    {% endfor %}
+                {% for cuenta in cuentas %}
+                <tr class="item-row" data-main-type="Costo" data-subtype="{{ subtipo }}">
+                    <td>{{ cuenta.nombre }}</td>
+                    <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
+                    <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                </tr>
+                {% endfor %}
                 {% endfor %}
                 {% endif %}
             </tbody>
@@ -230,18 +255,20 @@
                 <tr>
                     <td>Total Costos</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Costo', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Costo', 0.0) / base_er * 100) if base_er else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Costo', 0.0) / base_er * 100) if
+                        base_er else 0) }}%</td>
                 </tr>
             </tfoot>
         </table>
-        
+
         <!-- Utilidad Bruta -->
         <table class="report-table">
             <tbody class="total-row">
                 <tr>
                     <td>Utilidad Bruta</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Utilidad Bruta', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Utilidad Bruta', 0.0) / base_er * 100) if base_er else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Utilidad Bruta', 0.0) / base_er *
+                        100) if base_er else 0) }}%</td>
                 </tr>
             </tbody>
         </table>
@@ -258,13 +285,13 @@
             <tbody>
                 {% if 'Gasto' in report_data %}
                 {% for subtipo, cuentas in report_data.Gasto.items() %}
-                    {% for cuenta in cuentas %}
-                    <tr class="item-row">
-                        <td>{{ cuenta.nombre }}</td>
-                        <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
-                        <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                    </tr>
-                    {% endfor %}
+                {% for cuenta in cuentas %}
+                <tr class="item-row" data-main-type="Gasto" data-subtype="{{ subtipo }}">
+                    <td>{{ cuenta.nombre }}</td>
+                    <td class="col-monto">{{ "%.2f"|format(cuenta.monto) }}</td>
+                    <td class="col-percent">{{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                </tr>
+                {% endfor %}
                 {% endfor %}
                 {% endif %}
             </tbody>
@@ -272,18 +299,20 @@
                 <tr>
                     <td>Total Gastos</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Gasto', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Gasto', 0.0) / base_er * 100) if base_er else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Gasto', 0.0) / base_er * 100) if
+                        base_er else 0) }}%</td>
                 </tr>
             </tfoot>
         </table>
-        
+
         <!-- Utilidad Neta -->
         <table class="report-table">
             <tfoot class="total-footer">
                 <tr>
                     <td>Utilidad Neta</td>
                     <td class="col-monto">{{ "%.2f"|format(report_data.Totales.get('Utilidad Neta', 0.0)) }}</td>
-                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Utilidad Neta', 0.0) / base_er * 100) if base_er else 0) }}%</td>
+                    <td class="col-percent">{{ "%.2f"|format((report_data.Totales.get('Utilidad Neta', 0.0) / base_er *
+                        100) if base_er else 0) }}%</td>
                 </tr>
             </tfoot>
         </table>
@@ -293,20 +322,124 @@
 </div> <!-- fin reports-container -->
 
 {% else %}
-    <!-- Mensaje si no hay datos -->
-    <div class="report-wrapper">
-        <p>No hay datos para mostrar para el período seleccionado o no se encontraron saldos.</p>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages" style="margin-top: 20px;">
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">{{ message }}</div>
-                {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+<!-- Mensaje si no hay datos -->
+<div class="report-wrapper">
+    <p>No hay datos para mostrar para el período seleccionado o no se encontraron saldos.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages" style="margin-top: 20px;">
+        {% for category, message in messages %}
+        <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
     </div>
+    {% endif %}
+    {% endwith %}
+</div>
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const aiContainer = document.getElementById('ai-analysis-container');
+        // Solo ejecutar si existe el contenedor (lo que implica que hay datos)
+        if (aiContainer) {
+            const anio = "{{ anio_seleccionado }}";
+
+            if (anio && anio !== "None") {
+                fetch(`{{ url_for('analysis.api_vertical_ia', anio=0) }}`.replace('0', anio))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.html) {
+                            aiContainer.innerHTML = `
+                                <div class="card shadow-lg mb-4 border-0">
+                                    <div class="card-header text-white" style="background: linear-gradient(45deg, #6610f2, #6f42c1);">
+                                        <h3 class="mb-0"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h3>
+                                    </div>
+                                    <div class="card-body bg-light">
+                                        <div class="ai-content">
+                                            ${data.html}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            aiContainer.innerHTML = `
+                                <div class="alert alert-warning">
+                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                    No se pudo generar el análisis por IA en este momento.
+                                    ${data.error ? '<br><small>' + data.error + '</small>' : ''}
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AI analysis:', error);
+                        aiContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fa-solid fa-circle-xmark me-2"></i>
+                                Error al conectar con el servicio de IA.
+                            </div>
+                        `;
+                    });
+            }
+        }
+    });
+
+    // Script para el filtro de cuentas por subtipos
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterSelect = document.getElementById('account-filter');
+        if (!filterSelect) return;
+
+        // Recolectar todos los subtipos únicos
+        const rows = document.querySelectorAll('tr[data-subtype]');
+        const subtypes = new Set();
+
+        rows.forEach(row => {
+            const subtype = row.getAttribute('data-subtype');
+            if (subtype) subtypes.add(subtype);
+        });
+
+        // Agregar opciones de subtipos
+        if (subtypes.size > 0) {
+            Array.from(subtypes).sort().forEach(subtype => {
+                const option = document.createElement('option');
+                option.value = subtype;
+                option.textContent = subtype;
+                filterSelect.appendChild(option);
+            });
+        }
+
+        // Manejar evento de cambio
+        filterSelect.addEventListener('change', function () {
+            const value = this.value;
+            const allRows = document.querySelectorAll('tr[data-subtype]');
+            const wrappers = document.querySelectorAll('.report-wrapper');
+
+            if (value === 'all') {
+                // Mostrar todo
+                allRows.forEach(row => row.classList.remove('hidden-row'));
+                wrappers.forEach(wrapper => wrapper.classList.remove('hidden-section'));
+            } else {
+                // Ocultar todo primero
+                allRows.forEach(row => row.classList.add('hidden-row'));
+
+                // Mostrar solo las filas que coinciden con el subtipo seleccionado
+                document.querySelectorAll(`tr[data-subtype="${value}"]`).forEach(row => {
+                    row.classList.remove('hidden-row');
+                });
+
+                // Ocultar wrappers vacíos
+                wrappers.forEach(wrapper => {
+                    const visibleRows = wrapper.querySelectorAll('tr:not(.hidden-row)');
+                    if (visibleRows.length === 0) {
+                        wrapper.classList.add('hidden-section');
+                    } else {
+                        wrapper.classList.remove('hidden-section');
+                    }
+                });
+            }
+        });
+    });
+</script>
 
 {% endblock %}
