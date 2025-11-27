@@ -86,14 +86,13 @@
         <h4>{{ subtipo }}</h4>
         <div class="account-list">
 
-            <!-- Iteramos sobre las cuentas finales -->
             {% for cuenta in cuentas %}
             <div class="account-input">
-                <label for="monto-{{ cuenta.CuentaID }}">
+                <label for="saldo-{{ cuenta.CuentaID }}">
                     ({{ cuenta.CuentaID }}) {{ cuenta.NombreCuenta }}
                 </label>
                 <!-- El 'name' es dinámico y crucial para el backend -->
-                <input type="number" id="monto-{{ cuenta.CuentaID }}" name="monto-{{ cuenta.CuentaID }}" step="0.01"
+                <input type="number" id="saldo-{{ cuenta.CuentaID }}" name="saldo_{{ cuenta.CuentaID }}" step="0.01"
                     placeholder="C$ 0.00" value="0.00">
             </div>
             {% endfor %}

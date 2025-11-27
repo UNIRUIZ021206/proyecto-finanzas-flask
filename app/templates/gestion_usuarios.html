@@ -16,16 +16,9 @@
             <i class="fa-solid fa-info-circle"></i> ¿Qué puedes hacer aquí?
         </h3>
         <ul style="margin-bottom: 0;">
-            {% if es_super_admin %}
-            <li><strong>Cambiar roles:</strong> Como Super Administrador, puedes cambiar el rol de cualquier usuario
-            </li>
+            <li><strong>Cambiar roles:</strong> Puedes cambiar el rol de cualquier usuario</li>
             <li><strong>Ver permisos:</strong> Cada rol tiene diferentes permisos en el sistema</li>
             <li><strong>Gestión segura:</strong> No puedes cambiar tu propio rol por seguridad</li>
-            {% else %}
-            <li><strong>Permisos limitados:</strong> Solo el Super Administrador puede cambiar roles de usuarios</li>
-            <li><strong>Ver información:</strong> Puedes ver los usuarios y sus roles actuales</li>
-            <li><strong>Contacta al SA:</strong> Si necesitas cambiar un rol, contacta al Super Administrador</li>
-            {% endif %}
         </ul>
     </div>
 
@@ -42,38 +35,29 @@
                 </tr>
             </thead>
             <tbody>
-                {% for usuario in usuarios %}
-                <tr data-user-id="{{ usuario.id }}">
-                    <td>{{ usuario.nombre }}</td>
-                    <td>{{ usuario.correo }}</td>
+                {% for user in users %}
+                <tr data-user-id="{{ user[0] }}">
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
                     <td>
-                        <span class="rol-badge rol-{{ usuario.rol_nombre|lower|replace(' ', '-') }}">
-                            {{ usuario.rol_nombre }}
+                        <span class="rol-badge rol-{{ user[3]|lower|replace(' ', '-') }}">
+                            {{ user[3] }}
                         </span>
                     </td>
                     <td>
-                        {% if es_super_admin %}
-                        <select class="rol-select" data-user-id="{{ usuario.id }}"
-                            data-current-rol="{{ usuario.id_rol }}">
-                            {% for rol in roles %}
-                            <option value="{{ rol.id }}" {% if rol.id==usuario.id_rol %}selected{% endif %}>
-                                {{ rol.nombre }}
+                        <select class="rol-select" data-user-id="{{ user[0] }}" data-current-rol="{{ user[5] }}">
+                            {% for role in roles %}
+                            <option value="{{ role[0] }}" {% if role[0]==user[5] %}selected{% endif %}>
+                                {{ role[1] }}
                             </option>
                             {% endfor %}
                         </select>
-                        {% else %}
-                        <span style="color: var(--text-tertiary); font-style: italic;">Solo SA puede cambiar</span>
-                        {% endif %}
                     </td>
                     <td>
-                        {% if es_super_admin %}
-                        <button class="btn-save-rol" data-user-id="{{ usuario.id }}" {% if usuario.id==current_user.id
+                        <button class="btn-save-rol" data-user-id="{{ user[0] }}" {% if user[0]==current_user.id
                             %}disabled title="No puedes cambiar tu propio rol" {% endif %}>
                             <i class="fa-solid fa-save"></i> Guardar
                         </button>
-                        {% else %}
-                        <span style="color: var(--text-tertiary); font-size: 0.85rem;">No disponible</span>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

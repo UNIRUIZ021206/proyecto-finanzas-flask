@@ -1,6 +1,6 @@
 # app/admin/routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_required, current_user
 from sqlalchemy import text
 from decimal import Decimal, InvalidOperation
 from collections import defaultdict
@@ -11,129 +11,6 @@ from ..extensions import engine
 from ..utils import admin_required, get_financial_reports
 
 # Creamos el Blueprint
-# No especificamos template_folder para usar el de la app principal
-admin_bp = Blueprint('admin', __name__)
-
-
-@admin_bp.route('/gestion')
-@login_required
-@admin_required
-def gestion():
-    anio_seleccionado = request.args.get('anio', type=int)
-    periodos = []
-    report_data = None
-    
-    try:
-        with engine.connect() as conn:
-            periodos_query = text("SELECT Anio FROM Periodo ORDER BY Anio DESC")
-            periodos_result = conn.execute(periodos_query).fetchall()
-            periodos = [row[0] for row in periodos_result]
-            
-            if not anio_seleccionado and periodos:
-                anio_seleccionado = periodos[0]
-            
-            if anio_seleccionado:
-                report_data = get_financial_reports(anio_seleccionado)
-                if not report_data:
-                    flash(f'No se encontraron datos de saldos para el año {anio_seleccionado}.', 'error')
-
-    except Exception as e:
-        print(f"Error en la ruta /gestion: {e}")
-        flash('Error al conectar con la base de datos.', 'error')
-    
-    return render_template('gestion.html', 
-                           periodos=periodos, 
-                           anio_seleccionado=anio_seleccionado,
-                           report_data=report_data)
-
-@admin_bp.route('/catalogo-cuentas/', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def catalogo_cuentas():
-    if request.method == 'POST':
-        cuenta_id = request.form.get('cuenta_id')
-        nombre = request.form.get('nombre')
-        tipo = request.form.get('tipo')
-        subtipo = request.form.get('subtipo')
-        
-        if not cuenta_id:
-            flash('El ID de cuenta es requerido.', 'error')
-            return redirect(url_for('admin.catalogo_cuentas'))
-        
-        try:
-            with engine.begin() as conn:
-                conn.execute(
-                    text("INSERT INTO CatalogoCuentas (CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta) VALUES (:cuenta_id, :nombre, :tipo, :subtipo)"),
-                    {"cuenta_id": cuenta_id, "nombre": nombre, "tipo": tipo, "subtipo": subtipo}
-                )
-                flash('Cuenta agregada exitosamente.', 'success')
-        except Exception as e:
-            print(f"Error en catalogo_cuentas (POST): {e}")
-            flash(f'Error al guardar la cuenta: {e}', 'error')
-        
-        return redirect(url_for('admin.catalogo_cuentas'))
-
-    # --- Lógica GET ---
-    cuentas_list = []
-    try:
-        with engine.connect() as conn:
-            query_get = text("SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta FROM CatalogoCuentas ORDER BY CuentaID")
-            cuentas_list = conn.execute(query_get).fetchall()
-    except Exception as e:
-        print(f"Error en catalogo_cuentas (GET): {e}")
-        flash(f'Error al cargar las cuentas: {e}', 'error')
-
-    return render_template('catalogo_cuentas.html', cuentas=cuentas_list)
-
-
-@admin_bp.route('/ingresar-saldos/', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def ingresar_saldos():
-    if request.method == 'POST':
-        anio = request.form.get('anio')
-        
-        try:
-            with engine.begin() as conn:
-                # Verificar si el periodo existe, si no crearlo
-                periodo_query = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
-                periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone();
-                
-                if not periodo_result:
-                    # PostgreSQL: Agregar FechaCierre requerido
-                    fecha_cierre = date(int(anio), 12, 31)
-                    conn.execute(
-                        text("INSERT INTO Periodo (Anio, FechaCierre) VALUES (:anio, :fecha_cierre)"), 
-                        {"anio": anio, "fecha_cierre": fecha_cierre}
-                    )
-                    periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone()
-                
-                periodo_id = periodo_result[0]
-                
-                # Procesar saldos
-                for key, value in request.form.items():
-                    if key.startswith('saldo_'):
-                        cuenta_id = key.split('_')[1]
-                        monto = value
-                        if monto:
-                            # PostgreSQL: INSERT ... ON CONFLICT (reemplaza MERGE)
-                            conn.execute(text("""
-                                INSERT INTO SaldoCuenta (CuentaID, PeriodoID, Monto)
-                                VALUES (:cuenta_id, :periodo_id, :monto)
-# app/admin/routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
-from sqlalchemy import text
-from decimal import Decimal, InvalidOperation
-from collections import defaultdict
-from datetime import date
-
-# Importamos engine y nuestras funciones de utils
-from ..extensions import engine
-from ..utils import admin_required, get_financial_reports
-
-# Creamos el Blueprint
-# No especificamos template_folder para usar el de la app principal
 admin_bp = Blueprint('admin', __name__)
 
 
@@ -261,8 +138,19 @@ def ingresar_saldos():
             cuentas = conn.execute(query).fetchall()
             
             for cuenta in cuentas:
-                # Usamos índices para evitar problemas de mayúsculas/minúsculas
-                cuentas_agrupadas[cuenta[2]][cuenta[3]].append(cuenta)
+                # Usar acceso por índice para evitar problemas con nombres de columnas
+                cuenta_id = cuenta[0]
+                nombre_cuenta = cuenta[1]
+                tipo_cuenta = cuenta[2]
+                subtipo_cuenta = cuenta[3]
+                
+                # Agrupar las cuentas
+                cuentas_agrupadas[tipo_cuenta][subtipo_cuenta].append({
+                    'CuentaID': cuenta_id,
+                    'NombreCuenta': nombre_cuenta,
+                    'TipoCuenta': tipo_cuenta,
+                    'SubTipoCuenta': subtipo_cuenta
+                })
                 
     except Exception as e:
         print(f"Error en ingresar_saldos (GET): {e}")
@@ -302,8 +190,6 @@ def gestion_usuarios():
 @login_required
 @admin_required
 def update_user_role():
-    from flask import jsonify
-    
     # Manejar solicitud JSON (AJAX)
     if request.is_json:
         data = request.get_json()
