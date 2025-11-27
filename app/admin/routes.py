@@ -4,6 +4,7 @@ from flask_login import login_required
 from sqlalchemy import text
 from decimal import Decimal, InvalidOperation
 from collections import defaultdict
+from datetime import date
 
 # Importamos engine y nuestras funciones de utils
 from ..extensions import engine
@@ -50,15 +51,20 @@ def gestion():
 @admin_required
 def catalogo_cuentas():
     if request.method == 'POST':
+        cuenta_id = request.form.get('cuenta_id')
         nombre = request.form.get('nombre')
         tipo = request.form.get('tipo')
         subtipo = request.form.get('subtipo')
         
+        if not cuenta_id:
+            flash('El ID de cuenta es requerido.', 'error')
+            return redirect(url_for('admin.catalogo_cuentas'))
+        
         try:
             with engine.begin() as conn:
                 conn.execute(
-                    text("INSERT INTO CatalogoCuentas (NombreCuenta, TipoCuenta, SubTipoCuenta) VALUES (:nombre, :tipo, :subtipo)"),
-                    {"nombre": nombre, "tipo": tipo, "subtipo": subtipo}
+                    text("INSERT INTO CatalogoCuentas (CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta) VALUES (:cuenta_id, :nombre, :tipo, :subtipo)"),
+                    {"cuenta_id": cuenta_id, "nombre": nombre, "tipo": tipo, "subtipo": subtipo}
                 )
                 flash('Cuenta agregada exitosamente.', 'success')
         except Exception as e:
@@ -91,10 +97,15 @@ def ingresar_saldos():
             with engine.begin() as conn:
                 # Verificar si el periodo existe, si no crearlo
                 periodo_query = text("SELECT PeriodoID FROM Periodo WHERE Anio = :anio")
-                periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone()
+                periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone();
                 
                 if not periodo_result:
-                    conn.execute(text("INSERT INTO Periodo (Anio) VALUES (:anio)"), {"anio": anio})
+                    # PostgreSQL: Agregar FechaCierre requerido
+                    fecha_cierre = date(int(anio), 12, 31)
+                    conn.execute(
+                        text("INSERT INTO Periodo (Anio, FechaCierre) VALUES (:anio, :fecha_cierre)"), 
+                        {"anio": anio, "fecha_cierre": fecha_cierre}
+                    )
                     periodo_result = conn.execute(periodo_query, {"anio": anio}).fetchone()
                 
                 periodo_id = periodo_result[0]
@@ -105,15 +116,12 @@ def ingresar_saldos():
                         cuenta_id = key.split('_')[1]
                         monto = value
                         if monto:
-                            # Insertar o actualizar saldo
+                            # PostgreSQL: INSERT ... ON CONFLICT (reemplaza MERGE)
                             conn.execute(text("""
-                                MERGE SaldoCuenta AS target
-                                USING (SELECT :cuenta_id AS CuentaID, :periodo_id AS PeriodoID) AS source
-                                ON (target.CuentaID = source.CuentaID AND target.PeriodoID = source.PeriodoID)
-                                WHEN MATCHED THEN
-                                    UPDATE SET Monto = :monto
-                                WHEN NOT MATCHED THEN
-                                    INSERT (CuentaID, PeriodoID, Monto) VALUES (:cuenta_id, :periodo_id, :monto);
+                                INSERT INTO SaldoCuenta (CuentaID, PeriodoID, Monto)
+                                VALUES (:cuenta_id, :periodo_id, :monto)
+                                ON CONFLICT (PeriodoID, CuentaID)
+                                DO UPDATE SET Monto = EXCLUDED.Monto
                             """), {"cuenta_id": cuenta_id, "periodo_id": periodo_id, "monto": monto})
 
             flash(f'Saldos guardados exitosamente para el año {anio}.', 'success')

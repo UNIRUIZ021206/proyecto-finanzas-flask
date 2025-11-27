@@ -195,8 +195,8 @@ def account_history():
         if not account_ids:
             return jsonify({'error': 'No accounts provided'}), 400
             
-        # Convert to integers
-        account_ids = [int(aid) for aid in account_ids if aid.isdigit()]
+        # FIX: CuentaID es VARCHAR, mantener como strings
+        account_ids = [str(aid).strip() for aid in account_ids if str(aid).strip()]
         
         if not account_ids:
             return jsonify({'error': 'Invalid account IDs'}), 400
@@ -216,8 +216,8 @@ def account_history():
             
             names_query = text(f"SELECT CuentaID, NombreCuenta FROM CatalogoCuentas WHERE CuentaID IN ({placeholders})")
             names_result = conn.execute(names_query, params).fetchall()
-            # Ensure keys are integers to match account_ids
-            account_names = {int(row[0]): row[1] for row in names_result}
+            # FIX: CuentaID es VARCHAR
+            account_names = {str(row[0]): row[1] for row in names_result}
             
             # Get balances
             balances_query = text(f"""
@@ -236,7 +236,7 @@ def account_history():
                 
             for row in balances_result:
                 try:
-                    aid = int(row[0]) # Ensure integer
+                    aid = str(row[0]).strip() # FIX: Ensure string
                     pid = row[1]
                     monto = float(row[2])
                     

@@ -124,7 +124,7 @@ def register():
             # Si aún no se encuentra, buscar cualquier rol activo como fallback
             if not id_rol_cliente:
                 with engine.connect() as conn:
-                    fallback_rol = text("SELECT TOP 1 Id_Rol FROM Roles WHERE Estado = 1 ORDER BY Id_Rol")
+                    fallback_rol = text("SELECT Id_Rol FROM Roles WHERE Estado = 1 ORDER BY Id_Rol LIMIT 1")
                     rol_result = conn.execute(fallback_rol).fetchone()
                     if rol_result:
                         id_rol_cliente = rol_result[0]
