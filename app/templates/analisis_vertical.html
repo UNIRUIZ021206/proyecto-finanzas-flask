@@ -7,29 +7,29 @@
 {% block content %}
 <div class="container-fluid px-4 py-4">
 
-    <!-- Header Simplificado -->
+    <!-- 1. HEADER Y SELECTOR -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
         <div>
             <h2 class="display-6 fw-bold text-white mb-1">
-                <i class="fa-solid fa-chart-simple me-2 text-primary"></i>Análisis Vertical
+                <i class="fa-solid fa-chart-pie me-2 text-primary"></i>Análisis Vertical
             </h2>
-            <p class="text-muted mb-0">Estructura porcentual de los estados financieros</p>
+            <p class="text-muted mb-0">Evaluación de la estructura porcentual financiera</p>
         </div>
 
-        <!-- Selector de Año -->
+        <!-- Tarjeta Selector de Año -->
         <div class="card border-0 shadow-sm"
-            style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border-radius: 12px; min-width: 200px;">
+            style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border-radius: 12px; min-width: 220px;">
             <div class="card-body p-2">
                 <form method="GET" action="{{ url_for('analysis.analisis_vertical') }}"
-                    class="d-flex align-items-center">
-                    <label for="anio" class="fw-bold text-white mb-0 me-3 small text-uppercase ls-1">
-                        Período:
+                    class="d-flex align-items-center justify-content-between">
+                    <label for="anio" class="fw-bold text-white mb-0 me-2 small text-uppercase ls-1">
+                        <i class="fa-regular fa-calendar me-1"></i>Período:
                     </label>
                     <select name="anio" id="anio"
                         class="form-select form-select-sm border-0 bg-transparent text-white fw-bold shadow-none text-end"
-                        style="cursor: pointer; font-size: 1.1rem;" onchange="this.form.submit()">
+                        style="cursor: pointer; font-size: 1.1rem; width: auto;" onchange="this.form.submit()">
                         {% if not periodos %}
-                        <option>No hay períodos</option>
+                        <option>Sin datos</option>
                         {% else %}
                         {% for anio in periodos %}
                         <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}
@@ -46,45 +46,62 @@
 
     {% if report_data %}
 
-    <!-- Sección de CTNO (Capital de Trabajo Neto Operativo) -->
+    <!-- 2. SECCIÓN CNO (Capital de Trabajo Neto Operativo) -->
     {% if ctno_data %}
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-lg"
-                style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="card border-0 shadow-lg overflow-hidden"
+                style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
                         <div class="icon-box bg-info bg-gradient text-white rounded-3 p-2 me-3 shadow-sm">
                             <i class="fa-solid fa-calculator fa-lg"></i>
                         </div>
-                        <h4 class="fw-bold text-white mb-0">Capital de Trabajo Neto Operativo (CNO)</h4>
+                        <div>
+                            <h4 class="fw-bold text-white mb-0">Capital de Trabajo Neto Operativo (CNO)</h4>
+                            <p class="text-muted small mb-0">Indicador de liquidez operativa</p>
+                        </div>
                     </div>
 
-                    <div class="row g-4 align-items-center">
-                        <div class="col-md-4">
-                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
-                                <h6 class="text-muted text-uppercase small ls-1 mb-2">Activo Corriente</h6>
-                                <h3 class="text-info fw-bold mb-0 font-monospace">{{
-                                    ctno_data['activo_corriente']|currency }}</h3>
+                    <div class="row g-0 align-items-center justify-content-center text-center">
+                        <!-- Activo Corriente -->
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="p-3 rounded-4"
+                                style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2);">
+                                <h6 class="text-info text-uppercase small ls-1 mb-2 fw-bold">Activo Corriente</h6>
+                                <h4 class="text-white fw-bold mb-0 font-monospace">{{
+                                    ctno_data['activo_corriente']|currency }}</h4>
                             </div>
                         </div>
-                        <div class="col-md-1 text-center text-muted">
+
+                        <!-- Signo Menos -->
+                        <div class="col-md-1 text-muted">
                             <i class="fa-solid fa-minus fa-xl"></i>
                         </div>
-                        <div class="col-md-4">
-                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
-                                <h6 class="text-muted text-uppercase small ls-1 mb-2">Pasivo Corriente</h6>
-                                <h3 class="text-warning fw-bold mb-0 font-monospace">{{
-                                    ctno_data['pasivo_corriente']|currency }}</h3>
+
+                        <!-- Pasivo Corriente -->
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <div class="p-3 rounded-4"
+                                style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2);">
+                                <h6 class="text-warning text-uppercase small ls-1 mb-2 fw-bold">Pasivo Corriente</h6>
+                                <h4 class="text-white fw-bold mb-0 font-monospace">{{
+                                    ctno_data['pasivo_corriente']|currency }}</h4>
                             </div>
                         </div>
-                        <div class="col-md-1 text-center text-muted">
+
+                        <!-- Signo Igual -->
+                        <div class="col-md-1 text-muted">
                             <i class="fa-solid fa-equals fa-xl"></i>
                         </div>
-                        <div class="col-md-2">
-                            <div class="p-3 rounded-3"
-                                style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
-                                <h6 class="text-success text-uppercase small ls-1 mb-2 fw-bold">CNO</h6>
+
+                        <!-- Resultado CNO -->
+                        <div class="col-md-3">
+                            <div class="p-3 rounded-4 position-relative overflow-hidden"
+                                style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);">
+                                <div class="position-absolute top-0 end-0 p-2 opacity-25">
+                                    <i class="fa-solid fa-check-circle text-success"></i>
+                                </div>
+                                <h6 class="text-success text-uppercase small ls-1 mb-2 fw-bold">Resultado CNO</h6>
                                 <h3 class="text-success fw-bold mb-0 font-monospace">{{ ctno_data['ctno']|currency }}
                                 </h3>
                             </div>
@@ -96,13 +113,14 @@
     </div>
     {% endif %}
 
-    <!-- Contenedor de Análisis Vertical -->
+    <!-- 3. GRID DE REPORTES -->
     <div class="row g-4">
 
-        <!-- Balance General -->
+        <!-- COLUMNA IZQUIERDA: BALANCE GENERAL -->
         <div class="col-xl-6">
             <div class="card border-0 shadow-lg h-100"
                 style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <!-- Header Card -->
                 <div class="card-header border-0 p-4"
                     style="background: linear-gradient(90deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;">
                     <div class="d-flex justify-content-between align-items-center">
@@ -118,23 +136,24 @@
                     </div>
                 </div>
 
+                <!-- Body Card -->
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead>
-                                <tr class="bg-dark bg-opacity-50">
-                                    <th class="text-info py-3 px-4 text-uppercase ls-1">Cuenta</th>
-                                    <th class="text-end text-info py-3 px-4 text-uppercase ls-1">Monto</th>
-                                    <th class="text-end text-info py-3 px-4 text-uppercase ls-1">%</th>
+                                <tr class="bg-dark bg-opacity-50 border-bottom border-secondary">
+                                    <th class="text-info py-3 px-4 text-uppercase ls-1 small">Cuenta</th>
+                                    <th class="text-end text-info py-3 px-4 text-uppercase ls-1 small">Monto</th>
+                                    <th class="text-end text-info py-3 px-4 text-uppercase ls-1 small">% Vertical</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- ACTIVOS -->
+                                <!-- === ACTIVOS === -->
                                 {% if 'Activo' in report_data %}
                                 {% for subtipo, cuentas in report_data.Activo.items() %}
                                 <tr class="bg-primary bg-opacity-10">
-                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{ subtipo
-                                        }}</td>
+                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase ls-1"
+                                        style="background: rgba(59, 130, 246, 0.1);">{{ subtipo }}</td>
                                 </tr>
                                 {% for cuenta in cuentas %}
                                 <tr>
@@ -148,8 +167,10 @@
                                         {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
                                 </tr>
                                 {% endfor %}
-                                <tr class="bg-primary bg-opacity-5">
-                                    <td class="ps-4 fw-bold text-info py-2">Total {{ subtipo }}</td>
+                                <!-- Subtotal Activo -->
+                                <tr style="background: rgba(59, 130, 246, 0.05);">
+                                    <td class="ps-4 fw-bold text-info py-2 small text-uppercase">Total {{ subtipo }}
+                                    </td>
                                     <td class="text-end pe-4 fw-bold text-info py-2 font-monospace">{{
                                         report_data.Totales.get(subtipo, 0.0)|currency }}</td>
                                     <td class="text-end pe-4 fw-bold text-info py-2 font-monospace">{{
@@ -157,14 +178,22 @@
                                         else 0) }}%</td>
                                 </tr>
                                 {% endfor %}
+                                <!-- Total Activo -->
+                                <tr
+                                    style="border-top: 2px solid #3b82f6; background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);">
+                                    <td class="py-3 px-4 fw-bold text-white">TOTAL ACTIVO</td>
+                                    <td class="py-3 pe-4 text-end fw-bold text-white font-monospace fs-6">{{
+                                        report_data.Totales.get('Total Activo', 0.0)|currency }}</td>
+                                    <td class="py-3 pe-4 text-end fw-bold text-white font-monospace fs-6">100.00%</td>
+                                </tr>
                                 {% endif %}
 
-                                <!-- PASIVOS -->
+                                <!-- === PASIVOS === -->
                                 {% if 'Pasivo' in report_data %}
                                 {% for subtipo, cuentas in report_data.Pasivo.items() %}
                                 <tr class="bg-warning bg-opacity-10">
-                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{ subtipo
-                                        }}</td>
+                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase ls-1"
+                                        style="background: rgba(245, 158, 11, 0.1);">{{ subtipo }}</td>
                                 </tr>
                                 {% for cuenta in cuentas %}
                                 <tr>
@@ -178,8 +207,9 @@
                                         {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
                                 </tr>
                                 {% endfor %}
-                                <tr class="bg-warning bg-opacity-5">
-                                    <td class="ps-4 fw-bold text-warning py-2">Total {{ subtipo }}</td>
+                                <tr style="background: rgba(245, 158, 11, 0.05);">
+                                    <td class="ps-4 fw-bold text-warning py-2 small text-uppercase">Total {{ subtipo }}
+                                    </td>
                                     <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
                                         report_data.Totales.get(subtipo, 0.0)|currency }}</td>
                                     <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
@@ -189,12 +219,12 @@
                                 {% endfor %}
                                 {% endif %}
 
-                                <!-- PATRIMONIO -->
+                                <!-- === PATRIMONIO === -->
                                 {% if 'Patrimonio' in report_data %}
                                 {% for subtipo, cuentas in report_data.Patrimonio.items() %}
                                 <tr class="bg-success bg-opacity-10">
-                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{ subtipo
-                                        }}</td>
+                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase ls-1"
+                                        style="background: rgba(16, 185, 129, 0.1);">{{ subtipo }}</td>
                                 </tr>
                                 {% for cuenta in cuentas %}
                                 <tr>
@@ -208,8 +238,9 @@
                                         {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
                                 </tr>
                                 {% endfor %}
-                                <tr class="bg-success bg-opacity-5">
-                                    <td class="ps-4 fw-bold text-success py-2">Total {{ subtipo }}</td>
+                                <tr style="background: rgba(16, 185, 129, 0.05);">
+                                    <td class="ps-4 fw-bold text-success py-2 small text-uppercase">Total {{ subtipo }}
+                                    </td>
                                     <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
                                         report_data.Totales.get(subtipo, 0.0)|currency }}</td>
                                     <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
@@ -218,6 +249,15 @@
                                 </tr>
                                 {% endfor %}
                                 {% endif %}
+
+                                <!-- Total Pasivo + Patrimonio -->
+                                <tr
+                                    style="border-top: 2px solid #f59e0b; background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);">
+                                    <td class="py-3 px-4 fw-bold text-white">TOTAL PASIVO Y PATRIMONIO</td>
+                                    <td class="py-3 pe-4 text-end fw-bold text-white font-monospace fs-6">{{
+                                        report_data.Totales.get('Total Pasivo y Patrimonio', 0.0)|currency }}</td>
+                                    <td class="py-3 pe-4 text-end fw-bold text-white font-monospace fs-6">100.00%</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -225,10 +265,11 @@
             </div>
         </div>
 
-        <!-- Estado de Resultados -->
+        <!-- COLUMNA DERECHA: ESTADO DE RESULTADOS -->
         <div class="col-xl-6">
             <div class="card border-0 shadow-lg h-100"
                 style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <!-- Header Card -->
                 <div class="card-header border-0 p-4"
                     style="background: linear-gradient(90deg, rgba(22, 163, 74, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;">
                     <div class="d-flex justify-content-between align-items-center">
@@ -244,18 +285,20 @@
                     </div>
                 </div>
 
+                <!-- Body Card -->
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead>
-                                <tr class="bg-dark bg-opacity-50">
-                                    <th class="text-success py-3 px-4 text-uppercase ls-1">Cuenta</th>
-                                    <th class="text-end text-success py-3 px-4 text-uppercase ls-1">Monto</th>
-                                    <th class="text-end text-success py-3 px-4 text-uppercase ls-1">%</th>
+                                <tr class="bg-dark bg-opacity-50 border-bottom border-secondary">
+                                    <th class="text-success py-3 px-4 text-uppercase ls-1 small">Cuenta</th>
+                                    <th class="text-end text-success py-3 px-4 text-uppercase ls-1 small">Monto</th>
+                                    <th class="text-end text-success py-3 px-4 text-uppercase ls-1 small">% Vertical
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- INGRESOS -->
+                                <!-- === INGRESOS === -->
                                 {% if 'Ingreso' in report_data %}
                                 {% for subtipo, cuentas in report_data.Ingreso.items() %}
                                 {% for cuenta in cuentas %}
@@ -271,7 +314,7 @@
                                 </tr>
                                 {% endfor %}
                                 {% endfor %}
-                                <tr class="bg-success bg-opacity-10">
+                                <tr style="background: rgba(22, 163, 74, 0.1); border-left: 3px solid #16a34a;">
                                     <td class="ps-4 fw-bold text-success py-2">TOTAL INGRESOS</td>
                                     <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
                                         report_data.Totales.get('Ingreso', 0.0)|currency }}</td>
@@ -279,7 +322,7 @@
                                 </tr>
                                 {% endif %}
 
-                                <!-- COSTOS -->
+                                <!-- === COSTOS === -->
                                 {% if 'Costo' in report_data %}
                                 {% for subtipo, cuentas in report_data.Costo.items() %}
                                 {% for cuenta in cuentas %}
@@ -295,7 +338,7 @@
                                 </tr>
                                 {% endfor %}
                                 {% endfor %}
-                                <tr class="bg-danger bg-opacity-10">
+                                <tr style="background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626;">
                                     <td class="ps-4 fw-bold text-danger py-2">TOTAL COSTOS</td>
                                     <td class="text-end pe-4 fw-bold text-danger py-2 font-monospace">{{
                                         report_data.Totales.get('Costo', 0.0)|currency }}</td>
@@ -305,7 +348,18 @@
                                 </tr>
                                 {% endif %}
 
-                                <!-- GASTOS -->
+                                <!-- Utilidad Bruta -->
+                                <tr
+                                    style="background: rgba(14, 165, 233, 0.1); border-top: 1px solid rgba(255,255,255,0.1);">
+                                    <td class="py-3 px-4 fw-bold text-info">UTILIDAD BRUTA</td>
+                                    <td class="py-3 pe-4 text-end fw-bold text-info font-monospace">{{
+                                        report_data.Totales.get('Utilidad Bruta', 0.0)|currency }}</td>
+                                    <td class="py-3 pe-4 text-end fw-bold text-info font-monospace">{{
+                                        "%.2f"|format((report_data.Totales.get('Utilidad Bruta', 0.0) / base_er * 100)
+                                        if base_er else 0) }}%</td>
+                                </tr>
+
+                                <!-- === GASTOS === -->
                                 {% if 'Gasto' in report_data %}
                                 {% for subtipo, cuentas in report_data.Gasto.items() %}
                                 {% for cuenta in cuentas %}
@@ -321,7 +375,7 @@
                                 </tr>
                                 {% endfor %}
                                 {% endfor %}
-                                <tr class="bg-warning bg-opacity-10">
+                                <tr style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b;">
                                     <td class="ps-4 fw-bold text-warning py-2">TOTAL GASTOS</td>
                                     <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
                                         report_data.Totales.get('Gasto', 0.0)|currency }}</td>
@@ -347,9 +401,9 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- Fin Row Reportes -->
 
-    <!-- Sección de Análisis con IA -->
+    <!-- 4. SECCIÓN IA -->
     <div id="ai-analysis-container" class="mt-5">
         <div class="card border-0 shadow-lg"
             style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
@@ -364,6 +418,7 @@
     </div>
 
     {% else %}
+    <!-- 5. EMPTY STATE -->
     <div class="text-center py-5">
         <div class="mb-4">
             <i class="fa-solid fa-folder-open fa-4x text-muted opacity-50"></i>
@@ -374,6 +429,7 @@
     {% endif %}
 </div>
 
+<!-- 6. ESTILOS Y SCRIPTS -->
 <style>
     .ls-1 {
         letter-spacing: 1px;
