@@ -649,46 +649,6 @@
             role="alert">
             <i
                 class="fa-solid fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        {% if ratios_data %}
-
-        <!-- Botón de Exportar a Excel -->
-        <div class="export-section">
-            <div class="export-info">
-                <h3><i class="fa-solid fa-file-excel me-2"></i>Exportar Análisis</h3>
-                <p>Descarga todos los indicadores en formato Excel</p>
-            </div>
-            <a href="{{ url_for('analysis.exportar_excel', tipo='ratios', anio=anio_seleccionado) }}"
-                class="btn-export">
-                <i class="fa-solid fa-download me-2"></i> Descargar
-            </a>
-        </div>
-
-        <!-- Sección de Análisis con IA -->
-        <div id="ai-analysis-container" class="mb-5">
-            <div class="card border-0 shadow-lg"
-                style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
-                <div class="card-body text-center py-5">
-                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="visually-hidden">Cargando...</span>
-                    </div>
-                    <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
-                    <p class="text-muted small">Esto puede tomar unos segundos.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 1. RAZONES DE LIQUIDEZ -->
-        {% if ratios_data.Liquidez %}
-        <div class="section-title-bar">
-            <i class="fa-solid fa-coins"></i>
-            <h3>Razones de Liquidez</h3>
         </div>
         <div class="kpi-grid">
             {% for ratio_name, ratio_info in ratios_data.Liquidez.items() %}
