@@ -1017,13 +1017,17 @@
         </div>
 
         <div class="highlight-card">
-            <span style="color: var(--text-secondary);">Endeudamiento:</span>
-            <strong style="color: var(--text-primary);">{{ "{:.1f}%".format(kpis.razon_endeudamiento)
-                }}</strong>
-        </div>
-        <div class="progress-bar">
-            <div class="progress-fill"
-                style="width: {{ kpis.razon_endeudamiento }}%; background: {% if kpis.razon_endeudamiento < 50 %}var(--success){% elif kpis.razon_endeudamiento < 70 %}var(--warning){% else %}var(--error){% endif %};">
+            <h3><i class="fa-solid fa-scale-balanced"></i> Endeudamiento</h3>
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: var(--text-secondary);">Endeudamiento:</span>
+                    <strong style="color: var(--text-primary);">{{ "{:.1f}%".format(kpis.razon_endeudamiento) }}</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"
+                        style="width: {{ kpis.razon_endeudamiento }}%; background: {% if kpis.razon_endeudamiento < 50 %}var(--success){% elif kpis.razon_endeudamiento < 70 %}var(--warning){% else %}var(--error){% endif %};">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
