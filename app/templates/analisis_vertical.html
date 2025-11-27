@@ -40,337 +40,374 @@
                         {% endif %}
                     </select>
                 </form>
-                <!-- Balance General -->
-                <div class="col-xl-6">
-                    <div class="card border-0 shadow-lg h-100"
-                        style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
-                        <div class="card-header border-0 p-4"
-                            style="background: linear-gradient(90deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon-box bg-primary text-white rounded-3 p-2 me-3 shadow-sm">
-                                        <i class="fa-solid fa-scale-balanced fa-lg"></i>
-                                    </div>
-                                    <h4 class="fw-bold text-white mb-0">Balance General</h4>
-                                </div>
-                                <span
-                                    class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">Base:
-                                    Total Activos</span>
-                            </div>
+            </div>
+        </div>
+    </div>
+
+    {% if report_data %}
+
+    <!-- Sección de CTNO (Capital de Trabajo Neto Operativo) -->
+    {% if ctno_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg"
+                style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box bg-info bg-gradient text-white rounded-3 p-2 me-3 shadow-sm">
+                            <i class="fa-solid fa-calculator fa-lg"></i>
                         </div>
-
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead>
-                                        <tr class="bg-dark bg-opacity-50">
-                                            <th class="text-info py-3 px-4 text-uppercase ls-1">Cuenta</th>
-                                            <th class="text-end text-info py-3 px-4 text-uppercase ls-1">Monto</th>
-                                            <th class="text-end text-info py-3 px-4 text-uppercase ls-1">%</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- ACTIVOS -->
-                                        {% if 'Activo' in report_data %}
-                                        {% for subtipo, cuentas in report_data.Activo.items() %}
-                                        <tr class="bg-primary bg-opacity-10">
-                                            <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{
-                                                subtipo
-                                                }}</td>
-                                        </tr>
-                                        {% for cuenta in cuentas %}
-                                        <tr>
-                                            <td
-                                                class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">
-                                                {{
-                                                cuenta.nombre }}</td>
-                                            <td
-                                                class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ cuenta.monto|currency }}</td>
-                                            <td
-                                                class="text-end pe-4 fw-bold text-info border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        <tr class="bg-primary bg-opacity-5">
-                                            <td class="ps-4 fw-bold text-info py-2">Total {{ subtipo }}</td>
-                                            <td class="text-end pe-4 fw-bold text-info py-2 font-monospace">{{
-                                                report_data.Totales.get(subtipo, 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-info py-2 font-monospace">{{
-                                                "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if
-                                                base_bg
-                                                else 0) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        {% endif %}
-
-                                        <!-- PASIVOS -->
-                                        {% if 'Pasivo' in report_data %}
-                                        {% for subtipo, cuentas in report_data.Pasivo.items() %}
-                                        <tr class="bg-warning bg-opacity-10">
-                                            <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{
-                                                subtipo
-                                                }}</td>
-                                        </tr>
-                                        {% for cuenta in cuentas %}
-                                        <tr>
-                                            <td
-                                                class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">
-                                                {{
-                                                cuenta.nombre }}</td>
-                                            <td
-                                                class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ cuenta.monto|currency }}</td>
-                                            <td
-                                                class="text-end pe-4 fw-bold text-warning border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        <tr class="bg-warning bg-opacity-5">
-                                            <td class="ps-4 fw-bold text-warning py-2">Total {{ subtipo }}</td>
-                                            <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
-                                                report_data.Totales.get(subtipo, 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
-                                                "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if
-                                                base_bg
-                                                else 0) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        {% endif %}
-
-                                        <!-- PATRIMONIO -->
-                                        {% if 'Patrimonio' in report_data %}
-                                        {% for subtipo, cuentas in report_data.Patrimonio.items() %}
-                                        <tr class="bg-success bg-opacity-10">
-                                            <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{
-                                                subtipo
-                                                }}</td>
-                                        </tr>
-                                        {% for cuenta in cuentas %}
-                                        <tr>
-                                            <td
-                                                class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">
-                                                {{
-                                                cuenta.nombre }}</td>
-                                            <td
-                                                class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ cuenta.monto|currency }}</td>
-                                            <td
-                                                class="text-end pe-4 fw-bold text-success border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        <tr class="bg-success bg-opacity-5">
-                                            <td class="ps-4 fw-bold text-success py-2">Total {{ subtipo }}</td>
-                                            <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
-                                                report_data.Totales.get(subtipo, 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
-                                                "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if
-                                                base_bg
-                                                else 0) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        {% endif %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        <h4 class="fw-bold text-white mb-0">Capital de Trabajo Neto Operativo (CNO)</h4>
                     </div>
-                </div>
 
-                <!-- Estado de Resultados -->
-                <div class="col-xl-6">
-                    <div class="card border-0 shadow-lg h-100"
-                        style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
-                        <div class="card-header border-0 p-4"
-                            style="background: linear-gradient(90deg, rgba(22, 163, 74, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon-box bg-success text-white rounded-3 p-2 me-3 shadow-sm">
-                                        <i class="fa-solid fa-chart-line fa-lg"></i>
-                                    </div>
-                                    <h4 class="fw-bold text-white mb-0">Estado de Resultados</h4>
-                                </div>
-                                <span
-                                    class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Base:
-                                    Ingresos</span>
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
+                                <h6 class="text-muted text-uppercase small ls-1 mb-2">Activo Corriente</h6>
+                                <h3 class="text-info fw-bold mb-0 font-monospace">{{
+                                    ctno_data['activo_corriente']|currency }}</h3>
                             </div>
                         </div>
-
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead>
-                                        <tr class="bg-dark bg-opacity-50">
-                                            <th class="text-success py-3 px-4 text-uppercase ls-1">Cuenta</th>
-                                            <th class="text-end text-success py-3 px-4 text-uppercase ls-1">Monto</th>
-                                            <th class="text-end text-success py-3 px-4 text-uppercase ls-1">%</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- INGRESOS -->
-                                        {% if 'Ingreso' in report_data %}
-                                        {% for subtipo, cuentas in report_data.Ingreso.items() %}
-                                        {% for cuenta in cuentas %}
-                                        <tr>
-                                            <td
-                                                class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">
-                                                {{
-                                                cuenta.nombre }}</td>
-                                            <td
-                                                class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ cuenta.monto|currency }}</td>
-                                            <td
-                                                class="text-end pe-4 fw-bold text-success border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        {% endfor %}
-                                        <tr class="bg-success bg-opacity-10">
-                                            <td class="ps-4 fw-bold text-success py-2">TOTAL INGRESOS</td>
-                                            <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
-                                                report_data.Totales.get('Ingreso', 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">100.00%
-                                            </td>
-                                        </tr>
-                                        {% endif %}
-
-                                        <!-- COSTOS -->
-                                        {% if 'Costo' in report_data %}
-                                        {% for subtipo, cuentas in report_data.Costo.items() %}
-                                        {% for cuenta in cuentas %}
-                                        <tr>
-                                            <td
-                                                class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">
-                                                {{
-                                                cuenta.nombre }}</td>
-                                            <td
-                                                class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ cuenta.monto|currency }}</td>
-                                            <td
-                                                class="text-end pe-4 fw-bold text-danger border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        {% endfor %}
-                                        <tr class="bg-danger bg-opacity-10">
-                                            <td class="ps-4 fw-bold text-danger py-2">TOTAL COSTOS</td>
-                                            <td class="text-end pe-4 fw-bold text-danger py-2 font-monospace">{{
-                                                report_data.Totales.get('Costo', 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-danger py-2 font-monospace">{{
-                                                "%.2f"|format((report_data.Totales.get('Costo', 0.0) / base_er * 100) if
-                                                base_er
-                                                else 0) }}%</td>
-                                        </tr>
-                                        {% endif %}
-
-                                        <!-- GASTOS -->
-                                        {% if 'Gasto' in report_data %}
-                                        {% for subtipo, cuentas in report_data.Gasto.items() %}
-                                        {% for cuenta in cuentas %}
-                                        <tr>
-                                            <td
-                                                class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">
-                                                {{
-                                                cuenta.nombre }}</td>
-                                            <td
-                                                class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ cuenta.monto|currency }}</td>
-                                            <td
-                                                class="text-end pe-4 fw-bold text-warning border-bottom border-secondary border-opacity-25 py-2 font-monospace">
-                                                {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
-                                        </tr>
-                                        {% endfor %}
-                                        {% endfor %}
-                                        <tr class="bg-warning bg-opacity-10">
-                                            <td class="ps-4 fw-bold text-warning py-2">TOTAL GASTOS</td>
-                                            <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
-                                                report_data.Totales.get('Gasto', 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
-                                                "%.2f"|format((report_data.Totales.get('Gasto', 0.0) / base_er * 100) if
-                                                base_er
-                                                else 0) }}%</td>
-                                        </tr>
-                                        {% endif %}
-
-                                        <!-- UTILIDAD NETA -->
-                                        <tr
-                                            style="background: linear-gradient(135deg, #15803d 0%, #14532d 100%); border-top: 2px solid #22c55e;">
-                                            <td class="ps-4 fw-bold text-white py-3 text-uppercase">UTILIDAD NETA</td>
-                                            <td class="text-end pe-4 fw-bold text-white py-3 font-monospace fs-5">{{
-                                                report_data.Totales.get('Utilidad Neta', 0.0)|currency }}</td>
-                                            <td class="text-end pe-4 fw-bold text-white py-3 font-monospace fs-5">{{
-                                                "%.2f"|format((report_data.Totales.get('Utilidad Neta', 0.0) / base_er *
-                                                100) if
-                                                base_er else 0) }}%</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="col-md-1 text-center text-muted">
+                            <i class="fa-solid fa-minus fa-xl"></i>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
+                                <h6 class="text-muted text-uppercase small ls-1 mb-2">Pasivo Corriente</h6>
+                                <h3 class="text-warning fw-bold mb-0 font-monospace">{{
+                                    ctno_data['pasivo_corriente']|currency }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-1 text-center text-muted">
+                            <i class="fa-solid fa-equals fa-xl"></i>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-3 rounded-3"
+                                style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <h6 class="text-success text-uppercase small ls-1 mb-2 fw-bold">CNO</h6>
+                                <h3 class="text-success fw-bold mb-0 font-monospace">{{ ctno_data['ctno']|currency }}
+                                </h3>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    {% endif %}
 
-            <!-- Sección de Análisis con IA -->
-            <div id="ai-analysis-container" class="mt-5">
-                <div class="card border-0 shadow-lg"
-                    style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
-                    <div class="card-body text-center py-5">
-                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-                            <span class="visually-hidden">Cargando...</span>
+    <!-- Contenedor de Análisis Vertical -->
+    <div class="row g-4">
+
+        <!-- Balance General -->
+        <div class="col-xl-6">
+            <div class="card border-0 shadow-lg h-100"
+                style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <div class="card-header border-0 p-4"
+                    style="background: linear-gradient(90deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-primary text-white rounded-3 p-2 me-3 shadow-sm">
+                                <i class="fa-solid fa-scale-balanced fa-lg"></i>
+                            </div>
+                            <h4 class="fw-bold text-white mb-0">Balance General</h4>
                         </div>
-                        <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
-                        <p class="text-muted small">Esto puede tomar unos segundos.</p>
+                        <span
+                            class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">Base:
+                            Total Activos</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="bg-dark bg-opacity-50">
+                                    <th class="text-info py-3 px-4 text-uppercase ls-1">Cuenta</th>
+                                    <th class="text-end text-info py-3 px-4 text-uppercase ls-1">Monto</th>
+                                    <th class="text-end text-info py-3 px-4 text-uppercase ls-1">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- ACTIVOS -->
+                                {% if 'Activo' in report_data %}
+                                {% for subtipo, cuentas in report_data.Activo.items() %}
+                                <tr class="bg-primary bg-opacity-10">
+                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{ subtipo
+                                        }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">{{
+                                        cuenta.nombre }}</td>
+                                    <td
+                                        class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ cuenta.monto|currency }}</td>
+                                    <td
+                                        class="text-end pe-4 fw-bold text-info border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="bg-primary bg-opacity-5">
+                                    <td class="ps-4 fw-bold text-info py-2">Total {{ subtipo }}</td>
+                                    <td class="text-end pe-4 fw-bold text-info py-2 font-monospace">{{
+                                        report_data.Totales.get(subtipo, 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-info py-2 font-monospace">{{
+                                        "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if base_bg
+                                        else 0) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+
+                                <!-- PASIVOS -->
+                                {% if 'Pasivo' in report_data %}
+                                {% for subtipo, cuentas in report_data.Pasivo.items() %}
+                                <tr class="bg-warning bg-opacity-10">
+                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{ subtipo
+                                        }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">{{
+                                        cuenta.nombre }}</td>
+                                    <td
+                                        class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ cuenta.monto|currency }}</td>
+                                    <td
+                                        class="text-end pe-4 fw-bold text-warning border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="bg-warning bg-opacity-5">
+                                    <td class="ps-4 fw-bold text-warning py-2">Total {{ subtipo }}</td>
+                                    <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
+                                        report_data.Totales.get(subtipo, 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
+                                        "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if base_bg
+                                        else 0) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+
+                                <!-- PATRIMONIO -->
+                                {% if 'Patrimonio' in report_data %}
+                                {% for subtipo, cuentas in report_data.Patrimonio.items() %}
+                                <tr class="bg-success bg-opacity-10">
+                                    <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase">{{ subtipo
+                                        }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">{{
+                                        cuenta.nombre }}</td>
+                                    <td
+                                        class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ cuenta.monto|currency }}</td>
+                                    <td
+                                        class="text-end pe-4 fw-bold text-success border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="bg-success bg-opacity-5">
+                                    <td class="ps-4 fw-bold text-success py-2">Total {{ subtipo }}</td>
+                                    <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
+                                        report_data.Totales.get(subtipo, 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
+                                        "%.2f"|format((report_data.Totales.get(subtipo, 0.0) / base_bg * 100) if base_bg
+                                        else 0) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            {% else %}
-            <div class="text-center py-5">
-                <div class="mb-4">
-                    <i class="fa-solid fa-folder-open fa-4x text-muted opacity-50"></i>
-                </div>
-                <h3 class="text-muted">No hay datos financieros disponibles para este período.</h3>
-                <p class="text-muted">Selecciona otro año o ingresa datos en el sistema.</p>
-            </div>
-            {% endif %}
         </div>
 
-        <style>
-            .ls-1 {
-                letter-spacing: 1px;
-            }
+        <!-- Estado de Resultados -->
+        <div class="col-xl-6">
+            <div class="card border-0 shadow-lg h-100"
+                style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <div class="card-header border-0 p-4"
+                    style="background: linear-gradient(90deg, rgba(22, 163, 74, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-success text-white rounded-3 p-2 me-3 shadow-sm">
+                                <i class="fa-solid fa-chart-line fa-lg"></i>
+                            </div>
+                            <h4 class="fw-bold text-white mb-0">Estado de Resultados</h4>
+                        </div>
+                        <span
+                            class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Base:
+                            Ingresos</span>
+                    </div>
+                </div>
 
-            .font-monospace {
-                font-family: 'SF Mono', 'Monaco', 'Consolas', monospace !important;
-            }
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="bg-dark bg-opacity-50">
+                                    <th class="text-success py-3 px-4 text-uppercase ls-1">Cuenta</th>
+                                    <th class="text-end text-success py-3 px-4 text-uppercase ls-1">Monto</th>
+                                    <th class="text-end text-success py-3 px-4 text-uppercase ls-1">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- INGRESOS -->
+                                {% if 'Ingreso' in report_data %}
+                                {% for subtipo, cuentas in report_data.Ingreso.items() %}
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">{{
+                                        cuenta.nombre }}</td>
+                                    <td
+                                        class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ cuenta.monto|currency }}</td>
+                                    <td
+                                        class="text-end pe-4 fw-bold text-success border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                                <tr class="bg-success bg-opacity-10">
+                                    <td class="ps-4 fw-bold text-success py-2">TOTAL INGRESOS</td>
+                                    <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">{{
+                                        report_data.Totales.get('Ingreso', 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-success py-2 font-monospace">100.00%</td>
+                                </tr>
+                                {% endif %}
 
-            .icon-box {
-                width: 40px;
-                height: 40px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+                                <!-- COSTOS -->
+                                {% if 'Costo' in report_data %}
+                                {% for subtipo, cuentas in report_data.Costo.items() %}
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">{{
+                                        cuenta.nombre }}</td>
+                                    <td
+                                        class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ cuenta.monto|currency }}</td>
+                                    <td
+                                        class="text-end pe-4 fw-bold text-danger border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                                <tr class="bg-danger bg-opacity-10">
+                                    <td class="ps-4 fw-bold text-danger py-2">TOTAL COSTOS</td>
+                                    <td class="text-end pe-4 fw-bold text-danger py-2 font-monospace">{{
+                                        report_data.Totales.get('Costo', 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-danger py-2 font-monospace">{{
+                                        "%.2f"|format((report_data.Totales.get('Costo', 0.0) / base_er * 100) if base_er
+                                        else 0) }}%</td>
+                                </tr>
+                                {% endif %}
 
-            .table-hover tbody tr:hover td {
-                background-color: rgba(255, 255, 255, 0.05);
-                transition: background-color 0.2s ease;
-            }
-        </style>
+                                <!-- GASTOS -->
+                                {% if 'Gasto' in report_data %}
+                                {% for subtipo, cuentas in report_data.Gasto.items() %}
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2">{{
+                                        cuenta.nombre }}</td>
+                                    <td
+                                        class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ cuenta.monto|currency }}</td>
+                                    <td
+                                        class="text-end pe-4 fw-bold text-warning border-bottom border-secondary border-opacity-25 py-2 font-monospace">
+                                        {{ "%.2f"|format(cuenta.get('percentage', 0.0)) }}%</td>
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                                <tr class="bg-warning bg-opacity-10">
+                                    <td class="ps-4 fw-bold text-warning py-2">TOTAL GASTOS</td>
+                                    <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
+                                        report_data.Totales.get('Gasto', 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-warning py-2 font-monospace">{{
+                                        "%.2f"|format((report_data.Totales.get('Gasto', 0.0) / base_er * 100) if base_er
+                                        else 0) }}%</td>
+                                </tr>
+                                {% endif %}
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const aiContainer = document.getElementById('ai-analysis-container');
-                if (aiContainer) {
-                    const anio = "{{ anio_seleccionado }}";
-                    if (anio && anio !== "None") {
-                        fetch(`{{ url_for('analysis.api_vertical_ia', anio=0) }}`.replace('0', anio))
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.html) {
-                                    aiContainer.innerHTML = `
+                                <!-- UTILIDAD NETA -->
+                                <tr
+                                    style="background: linear-gradient(135deg, #15803d 0%, #14532d 100%); border-top: 2px solid #22c55e;">
+                                    <td class="ps-4 fw-bold text-white py-3 text-uppercase">UTILIDAD NETA</td>
+                                    <td class="text-end pe-4 fw-bold text-white py-3 font-monospace fs-5">{{
+                                        report_data.Totales.get('Utilidad Neta', 0.0)|currency }}</td>
+                                    <td class="text-end pe-4 fw-bold text-white py-3 font-monospace fs-5">{{
+                                        "%.2f"|format((report_data.Totales.get('Utilidad Neta', 0.0) / base_er * 100) if
+                                        base_er else 0) }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Análisis con IA -->
+    <div id="ai-analysis-container" class="mt-5">
+        <div class="card border-0 shadow-lg"
+            style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
+                <p class="text-muted small">Esto puede tomar unos segundos.</p>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fa-solid fa-folder-open fa-4x text-muted opacity-50"></i>
+        </div>
+        <h3 class="text-muted">No hay datos financieros disponibles para este período.</h3>
+        <p class="text-muted">Selecciona otro año o ingresa datos en el sistema.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .ls-1 {
+        letter-spacing: 1px;
+    }
+
+    .font-monospace {
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace !important;
+    }
+
+    .icon-box {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .table-hover tbody tr:hover td {
+        background-color: rgba(255, 255, 255, 0.05);
+        transition: background-color 0.2s ease;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const aiContainer = document.getElementById('ai-analysis-container');
+        if (aiContainer) {
+            const anio = "{{ anio_seleccionado }}";
+            if (anio && anio !== "None") {
+                fetch(`{{ url_for('analysis.api_vertical_ia', anio=0) }}`.replace('0', anio))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.html) {
+                            aiContainer.innerHTML = `
                                 <div class="card border-0 shadow-lg" style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
                                     <div class="card-header border-0 p-4" style="background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); border-radius: 16px 16px 0 0;">
                                         <h4 class="mb-0 text-white"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h4>
@@ -382,27 +419,27 @@
                                     </div>
                                 </div>
                             `;
-                                } else {
-                                    aiContainer.innerHTML = `
+                        } else {
+                            aiContainer.innerHTML = `
                                 <div class="alert alert-warning border-0 shadow-sm rounded-3">
                                     <i class="fa-solid fa-exclamation-triangle me-2"></i>
                                     No se pudo generar el análisis por IA en este momento.
                                     ${data.error ? '<br><small>' + data.error + '</small>' : ''}
                                 </div>
                             `;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching AI analysis:', error);
-                                aiContainer.innerHTML = `
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AI analysis:', error);
+                        aiContainer.innerHTML = `
                             <div class="alert alert-danger border-0 shadow-sm rounded-3">
                                 <i class="fa-solid fa-circle-xmark me-2"></i>
                                 Error al conectar con el servicio de IA.
                             </div>
                         `;
-                            });
-                    }
-                }
-            });
-        </script>
-        {% endblock %}
+                    });
+            }
+        }
+    });
+</script>
+{% endblock %}
