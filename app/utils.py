@@ -2526,8 +2526,10 @@ def generar_analisis_dupont(anio_actual):
         roe_act = dupont_act['roe']
         roe_ant = dupont_ant['roe']
         
+        variacion_roe_decimal = 0.0
         if roe_ant:
-            cambio_roe_val = ((roe_act - roe_ant) / abs(roe_ant)) * 100
+            variacion_roe_decimal = (roe_act - roe_ant) / abs(roe_ant)
+            cambio_roe_val = variacion_roe_decimal * 100
             cambio_roe = f"{cambio_roe_val:+.1f}%"
         else:
             cambio_roe = "N/A"
@@ -2571,7 +2573,8 @@ def generar_analisis_dupont(anio_actual):
                 str(anio_actual): dupont_act,
                 'variaciones': {
                     'cambio_roe': cambio_roe,
-                    'factor_determinante': determinante_texto
+                    'factor_determinante': determinante_texto,
+                    'roe': variacion_roe_decimal
                 }
             },
             'exito': True
