@@ -1830,25 +1830,25 @@ input::placeholder {
     border-radius: 8px;
 }
 
-    .table-container::-webkit-scrollbar {
-        height: 8px;
-    }
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
 
-    .table-container::-webkit-scrollbar-track {
-        background: var(--bg-tertiary);
-        border-radius: 4px;
-    }
+.table-container::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
 
-    .table-container::-webkit-scrollbar-thumb {
-        background: var(--secondary);
-        border-radius: 4px;
-    }
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 4px;
+}
 
-    .table-container::-webkit-scrollbar-thumb:hover {
-        background: var(--secondary-dark);
-    }
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-dark);
+}
 
-    /* Media queries adicionales para tablas y reportes */
+/* Media queries adicionales para tablas y reportes */
 @media (max-width: 768px) {
 
     /* Mejoras para tablas en tablets */
@@ -1977,247 +1977,167 @@ input::placeholder {
     }
 }
 
-    /* Estilos adicionales para móviles pequeños ya están en el media query de arriba */
+/* Estilos adicionales para móviles pequeños ya están en el media query de arriba */
 
-    .report-selector {
-        background: var(--bg-elevated);
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--border-light);
-        margin-bottom: 32px;
-        transition: all 0.3s ease;
-    }
+.report-selector {
+    background: var(--bg-elevated);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    margin-bottom: 32px;
+    transition: all 0.3s ease;
+}
 
-    .report-selector:hover {
-        box-shadow: var(--shadow-lg);
-        border-color: var(--border-medium);
-    }
+.report-selector:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-medium);
+}
 
-    .report-selector label {
-        font-weight: 600;
-        margin-right: 16px;
-        font-size: 1.1em;
-        color: var(--text-primary);
-    }
+.report-selector label {
+    font-weight: 600;
+    margin-right: 16px;
+    font-size: 1.1em;
+    color: var(--text-primary);
+}
 
-    .report-selector select {
-        font-size: 1.1em;
-        padding: 12px 18px;
-        padding-right: 45px;
-        border-radius: 10px;
-        border: 2px solid var(--border-medium);
-        font-family: 'Inter', sans-serif;
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A1A' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        background-size: 14px;
-        position: relative;
-    }
+.report-selector select {
+    font-size: 1.1em;
+    padding: 12px 18px;
+    padding-right: 45px;
+    border-radius: 10px;
+    border: 2px solid var(--border-medium);
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A1A' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 14px;
+    position: relative;
+}
 
-    .report-selector select:hover {
-        border-color: var(--secondary);
-        background-color: var(--bg-tertiary);
-        transform: translateY(-1px);
-    }
+.report-selector select:hover {
+    border-color: var(--secondary);
+    background-color: var(--bg-tertiary);
+    transform: translateY(-1px);
+}
 
-    .report-selector select:focus {
-        outline: none;
-        border-color: var(--secondary);
-        box-shadow: 0 0 0 4px rgba(139, 26, 26, 0.2), 0 4px 12px rgba(139, 26, 26, 0.15);
-        background-color: var(--bg-secondary);
-        transform: translateY(-2px);
-    }
+.report-selector select:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 4px rgba(139, 26, 26, 0.2), 0 4px 12px rgba(139, 26, 26, 0.15);
+    background-color: var(--bg-secondary);
+    transform: translateY(-2px);
+}
 
-    /* Animación para el dropdown */
-    .report-selector select {
-        animation: selectAppear 0.3s ease;
-    }
+/* Animación para el dropdown */
+.report-selector select {
+    animation: selectAppear 0.3s ease;
+}
 
-    @keyframes selectAppear {
-        from {
-            opacity: 0;
-            transform: translateY(-5px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Estilos mejorados para todos los select */
-    select {
-        font-size: 1em;
-        padding: 12px 18px;
-        padding-right: 45px;
-        border-radius: 10px;
-        border: 2px solid var(--border-medium);
-        font-family: 'Inter', sans-serif;
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A1A' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        background-size: 14px;
-    }
-
-    select:hover {
-        border-color: var(--secondary);
-        background-color: var(--bg-tertiary);
-        transform: translateY(-1px);
-    }
-
-    select:focus {
-        outline: none;
-        border-color: var(--secondary);
-        box-shadow: 0 0 0 4px rgba(139, 26, 26, 0.2);
-        background-color: var(--bg-secondary);
-    }
-
-    /* Contenedor para poner reportes uno al lado del otro */
-    .reports-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-        gap: 28px;
-        align-items: stretch;
-        margin: 10px 0 40px;
-    }
-
-    .report-wrapper {
-        position: relative;
-        background: radial-gradient(circle at top, rgba(255, 255, 255, 0.12), rgba(15, 23, 42, 0.85) 65%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-        overflow: hidden;
-        backdrop-filter: blur(14px);
-        transition: transform 0.35s ease, border-color 0.35s ease;
-    }
-
-    .report-wrapper::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(120deg, rgba(220, 38, 38, 0.08), transparent 55%);
-        pointer-events: none;
+@keyframes selectAppear {
+    from {
         opacity: 0;
-        transition: opacity 0.35s ease;
+        transform: translateY(-5px);
     }
 
-    .report-wrapper:hover {
-        transform: translateY(-6px);
-        border-color: rgba(220, 38, 38, 0.4);
-    }
-
-    .report-wrapper:hover::after {
+    to {
         opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    .report-wrapper h3 {
-        margin-top: 0;
-        margin-bottom: 18px;
-        font-size: 1.35em;
-        letter-spacing: 0.02em;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+/* Estilos mejorados para todos los select */
+select {
+    font-size: 1em;
+    padding: 12px 18px;
+    padding-right: 45px;
+    border-radius: 10px;
+    border: 2px solid var(--border-medium);
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B1A1A' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 14px;
+}
 
-    .report-wrapper h3::before {
-        content: '';
-        width: 26px;
-        height: 26px;
-        border-radius: 8px;
-        background: var(--gradient-secondary);
-        box-shadow: 0 8px 18px rgba(220, 38, 38, 0.35);
-    }
+select:hover {
+    border-color: var(--secondary);
+    background-color: var(--bg-tertiary);
+    transform: translateY(-1px);
+}
 
-    .report-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        font-size: 0.95em;
-    }
+select:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 4px rgba(139, 26, 26, 0.2);
+    background-color: var(--bg-secondary);
+}
 
-    .report-table th,
-    .report-table td {
-        padding: 10px 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
+/* Contenedor para poner reportes uno al lado del otro */
+.reports-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 28px;
+    align-items: stretch;
+    margin: 10px 0 40px;
+}
 
-    .report-table td {
-        color: var(--text-secondary);
-    }
+.report-wrapper {
+    position: relative;
+    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.12), rgba(15, 23, 42, 0.85) 65%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    backdrop-filter: blur(14px);
+    transition: transform 0.35s ease, border-color 0.35s ease;
+}
 
-    .report-table tr:last-child td {
-        border-bottom: none;
-    }
+.report-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(220, 38, 38, 0.08), transparent 55%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
 
-    .report-table tr:hover td {
-        background: rgba(255, 255, 255, 0.03);
-    }
+.report-wrapper:hover {
+    transform: translateY(-6px);
+    border-color: rgba(220, 38, 38, 0.4);
+}
 
-    .report-table .monto {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-        color: var(--text-primary);
-        font-weight: 600;
-    }
+.report-wrapper:hover::after {
+    opacity: 1;
+}
 
-    .report-table .header-group th {
-        background: rgba(15, 23, 42, 0.85);
-        border-radius: 12px 12px 0 0;
-        padding: 14px 16px;
-        text-transform: uppercase;
-        font-size: 0.75em;
-        letter-spacing: 0.12em;
-        color: var(--text-secondary);
-        border-bottom: none;
-    }
+.report-wrapper h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.35em;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-    .report-table .sub-header td {
-        background: rgba(220, 38, 38, 0.1);
-        color: var(--text-primary);
-        font-weight: 600;
-        letter-spacing: 0.02em;
-    }
-
-    .report-table .sub-total td {
-        font-weight: 600;
-        color: var(--text-primary);
-        background: rgba(255, 255, 255, 0.02);
-    }
-
-    .report-table .grand-total td {
-        font-weight: 700;
-        background: rgba(15, 23, 42, 0.9);
-        color: var(--secondary-light);
-        border-bottom: none;
-    }
-
-    .report-table .final-total td {
-        border-radius: 0 0 14px 14px;
-        background: linear-gradient(135deg, rgba(220, 38, 38, 0.25), rgba(59, 130, 246, 0.15));
-        color: white;
-        font-size: 1.05em;
-        letter-spacing: 0.04em;
-    }
-
-    .filter-selector .selector-group {
-        background: rgba(15, 23, 42, 0.6);
-        border-color: rgba(255, 255, 255, 0.08);
-    }
+.report-wrapper h3::before {
+    content: '';
+    width: 26px;
+    height: 26px;
 
     .filter-selector select {
         min-width: 200px;

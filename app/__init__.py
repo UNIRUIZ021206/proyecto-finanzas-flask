@@ -73,6 +73,17 @@ def create_app():
         from .utils import get_rol_name_by_id
         return get_rol_name_by_id(id_rol) # Llama a la función de utils
 
+    @app.template_filter('currency')
+    def currency_filter(value, symbol='C$'):
+        """Formatea un número como moneda con separadores de miles"""
+        try:
+            num = float(value)
+            # Formatear con separadores de miles y 2 decimales
+            formatted = f"{num:,.2f}"
+            return f"{symbol} {formatted}"
+        except (ValueError, TypeError):
+            return f"{symbol} 0.00"
+
     # --- 6. Registrar Context Processors ---
     @app.context_processor
     def inject_roles():
