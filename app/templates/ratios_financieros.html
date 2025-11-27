@@ -6,7 +6,6 @@
 
 {% block content %}
 
-<!-- Estilos copiados y adaptados del Dashboard para consistencia -->
 <style>
     .investor-hero {
         background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
@@ -123,7 +122,6 @@
         align-items: center;
         gap: 8px;
         height: 48px;
-        /* Match select height approximately */
     }
 
     .btn-calculate:hover {
@@ -409,6 +407,21 @@
             text-align: center;
         }
     }
+
+    /* Estilos para el Análisis de IA */
+    .ai-content {
+        color: #1e293b !important;
+    }
+
+    .ai-content * {
+        color: #1e293b !important;
+    }
+
+    .ai-content strong,
+    .ai-content b {
+        color: #0f172a !important;
+        font-weight: 700;
+    }
 </style>
 
 <div class="investor-hero">
@@ -469,466 +482,272 @@
         <p>Descarga todos los indicadores en formato Excel</p>
     </div>
     <a href="{{ url_for('analysis.exportar_excel', tipo='ratios', anio=anio_seleccionado) }}" class="btn-export">
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 0.85em;
-        color: var(--text-tertiary);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        }
+        <i class="fa-solid fa-download me-2"></i> Descargar
+    </a>
+</div>
 
-        .kpi-details {
-        margin-top: auto;
-        padding-top: 12px;
-        border-top: 1px solid var(--border-light);
-        font-size: 0.9em;
-        color: var(--text-secondary);
-        }
-
-        .kpi-details span {
-        display: block;
-        margin-bottom: 4px;
-        }
-
-        .export-section {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-        border-radius: 16px;
-        padding: 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 32px;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .export-info h3 {
-        color: white;
-        margin: 0 0 4px 0;
-        font-size: 1.2em;
-        }
-
-        .export-info p {
-        color: rgba(255, 255, 255, 0.9);
-        margin: 0;
-        font-size: 0.9em;
-        }
-
-        .btn-export {
-        background: white;
-        color: var(--accent);
-        padding: 10px 20px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-export:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        background: #f8fafc;
-        color: var(--accent-dark);
-        }
-
-        /* Dupont specific */
-        .dupont-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 24px;
-        }
-
-        .dupont-card {
-        background: var(--bg-card);
-        border-radius: 16px;
-        padding: 24px;
-        border: 1px solid var(--border-light);
-        text-align: center;
-        }
-
-        .dupont-header {
-        font-size: 1.2em;
-        font-weight: 700;
-        margin-bottom: 16px;
-        color: var(--text-primary);
-        }
-
-        .dupont-roe {
-        font-size: 2.5em;
-        font-weight: 800;
-        color: var(--accent);
-        margin-bottom: 8px;
-        }
-
-        .dupont-factors {
-        margin-top: 20px;
-        text-align: left;
-        }
-
-        .dupont-factor-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--border-light);
-        color: var(--text-secondary);
-        }
-
-        .dupont-factor-row:last-child {
-        border-bottom: none;
-        }
-
-        .dupont-factor-value {
-        font-weight: 600;
-        color: var(--text-primary);
-        }
-
-        @media (max-width: 768px) {
-        .investor-hero {
-        padding: 24px;
-        }
-
-        .investor-hero h1 {
-        font-size: 1.8em;
-        }
-
-        .year-selector {
-        flex-direction: column;
-        align-items: stretch;
-        }
-
-        .export-section {
-        flex-direction: column;
-        gap: 16px;
-        text-align: center;
-        }
-        }
-        </style>
-
-        <div class="investor-hero">
-            <h1>Ratios Financieros</h1>
-            <p>Análisis de indicadores financieros para evaluar la situación económica de la empresa.</p>
-        </div>
-
-        <div class="year-selector">
-            <form method="GET" action="{{ url_for('analysis.ratios_financieros') }}" style="display: contents;">
-                <div class="form-group">
-                    <label for="anio"><i class="fa-solid fa-calendar-days me-2"></i>Año de Análisis</label>
-                    <select name="anio" id="anio" class="form-select" required>
-                        <option value="">-- Selecciona --</option>
-                        {% for anio in periodos %}
-                        <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}>
-                            Año {{ anio }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="anio_anterior"><i class="fa-solid fa-clock-rotate-left me-2"></i>Año Anterior
-                        (Opcional)</label>
-                    <select name="anio_anterior" id="anio_anterior" class="form-select">
-                        <option value="">-- Selecciona --</option>
-                        {% for anio in periodos %}
-                        <option value="{{ anio }}" {% if anio==anio_anterior %}selected{% endif %}>
-                            Año {{ anio }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn-calculate">
-                    <i class="fa-solid fa-calculator"></i> Calcular
-                </button>
-            </form>
-        </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'warning') }} alert-dismissible fade show mb-4"
-            role="alert">
-            <i
-                class="fa-solid fa-{% if category == 'error' %}exclamation-circle{% elif category == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
-        </div>
-        <div class="kpi-grid">
-            {% for ratio_name, ratio_info in ratios_data.Liquidez.items() %}
-            <div class="kpi-card {{ ratio_info.estado }}">
-                <div class="kpi-header">
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                    <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
-                </div>
-                <div class="kpi-value">
-                    {% if ratio_info.valor is not none %}
-                    {{ "%.2f"|format(ratio_info.valor) }}
-                    {% if ratio_info.get('unidad') %}<small style="font-size: 0.5em;">{{ ratio_info.unidad }}</small>{%
-                    endif %}
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </div>
-                <div class="kpi-label">{{ ratio_name }}</div>
-
-                <div class="kpi-formula">
-                    <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
-                </div>
-
-                <div class="kpi-details">
-                    <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
-                    {% if ratio_info.get('inventarios') is not none %}
-                    <span><strong>Inventarios:</strong> C$ {{ "%.2f"|format(ratio_info.inventarios) }}</span>
-                    {% endif %}
-                    {% if ratio_info.interpretacion %}
-                    <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion
-                        }}"</span>
-                    {% endif %}
-                </div>
+<!-- Sección de Análisis con IA -->
+<div id="ai-analysis-container" class="mb-5">
+    <div class="card border-0 shadow-lg"
+        style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
             </div>
-            {% endfor %}
+            <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
+            <p class="text-muted small">Esto puede tomar unos segundos.</p>
         </div>
-        {% endif %}
+    </div>
+</div>
 
-        <!-- 2. RAZONES DE ACTIVIDADES -->
-        {% if ratios_data.Actividades %}
-        <div class="section-title-bar">
-            <i class="fa-solid fa-chart-line"></i>
-            <h3>Razones de Actividades</h3>
-        </div>
-        <div class="kpi-grid">
-            {% for ratio_name, ratio_info in ratios_data.Actividades.items() %}
-            <div class="kpi-card {{ ratio_info.estado }}">
-                <div class="kpi-header">
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-rotate"></i>
-                    </div>
-                    <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
-                </div>
-                <div class="kpi-value">
-                    {% if ratio_info.valor is not none %}
-                    {{ "%.2f"|format(ratio_info.valor) }}
-                    {% if ratio_info.get('unidad') %}<small style="font-size: 0.5em;">{{ ratio_info.unidad }}</small>{%
-                    endif %}
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </div>
-                <div class="kpi-label">{{ ratio_name }}</div>
-
-                <div class="kpi-formula">
-                    <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
-                </div>
-
-                <div class="kpi-details">
-                    <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
-                    {% if ratio_info.interpretacion %}
-                    <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion
-                        }}"</span>
-                    {% endif %}
-                </div>
+<!-- 1. RAZONES DE LIQUIDEZ -->
+{% if ratios_data.Liquidez %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-coins"></i>
+    <h3>Razones de Liquidez</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Liquidez.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-wallet"></i>
             </div>
-            {% endfor %}
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
         </div>
-        {% endif %}
-
-        <!-- 3. RAZONES DE ENDEUDAMIENTO -->
-        {% if ratios_data.Endeudamiento %}
-        <div class="section-title-bar">
-            <i class="fa-solid fa-scale-balanced"></i>
-            <h3>Razones de Endeudamiento</h3>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}
+            {% if ratio_info.get('unidad') %}<small style="font-size: 0.5em;">{{ ratio_info.unidad }}</small>{% endif %}
+            {% else %}
+            N/A
+            {% endif %}
         </div>
-        <div class="kpi-grid">
-            {% for ratio_name, ratio_info in ratios_data.Endeudamiento.items() %}
-            <div class="kpi-card {{ ratio_info.estado }}">
-                <div class="kpi-header">
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-building-columns"></i>
-                    </div>
-                    <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
-                </div>
-                <div class="kpi-value">
-                    {% if ratio_info.valor is not none %}
-                    {{ "%.2f"|format(ratio_info.valor) }}
-                    {% if ratio_info.get('porcentaje') %}<small style="font-size: 0.5em;">%</small>{% endif %}
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </div>
-                <div class="kpi-label">{{ ratio_name }}</div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.get('inventarios') is not none %}
+            <span><strong>Inventarios:</strong> C$ {{ "%.2f"|format(ratio_info.inventarios) }}</span>
+            {% endif %}
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-                <div class="kpi-formula">
-                    <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
-                </div>
-
-                <div class="kpi-details">
-                    <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
-                    {% if ratio_info.interpretacion %}
-                    <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion
-                        }}"</span>
-                    {% endif %}
-                </div>
+<!-- 2. RAZONES DE ACTIVIDADES -->
+{% if ratios_data.Actividades %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-chart-line"></i>
+    <h3>Razones de Actividades</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Actividades.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-rotate"></i>
             </div>
-            {% endfor %}
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
         </div>
-        {% endif %}
-
-        <!-- 4. RAZONES DE RENTABILIDAD -->
-        {% if ratios_data.Rentabilidad %}
-        <div class="section-title-bar">
-            <i class="fa-solid fa-chart-pie"></i>
-            <h3>Razones de Rentabilidad</h3>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}
+            {% if ratio_info.get('unidad') %}<small style="font-size: 0.5em;">{{ ratio_info.unidad }}</small>{% endif %}
+            {% else %}
+            N/A
+            {% endif %}
         </div>
-        <div class="kpi-grid">
-            {% for ratio_name, ratio_info in ratios_data.Rentabilidad.items() %}
-            <div class="kpi-card {{ ratio_info.estado }}">
-                <div class="kpi-header">
-                    <div class="kpi-icon">
-                        <i class="fa-solid fa-money-bill-trend-up"></i>
-                    </div>
-                    <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
-                </div>
-                <div class="kpi-value">
-                    {% if ratio_info.valor is not none %}
-                    {{ "%.2f"|format(ratio_info.valor) }}<small style="font-size: 0.5em;">%</small>
-                    {% else %}
-                    N/A
-                    {% endif %}
-                </div>
-                <div class="kpi-label">{{ ratio_name }}</div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-                <div class="kpi-formula">
-                    <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
-                </div>
-
-                <div class="kpi-details">
-                    <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
-                    {% if ratio_info.interpretacion %}
-                    <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion
-                        }}"</span>
-                    {% endif %}
-                </div>
+<!-- 3. RAZONES DE ENDEUDAMIENTO -->
+{% if ratios_data.Endeudamiento %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-scale-balanced"></i>
+    <h3>Razones de Endeudamiento</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Endeudamiento.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-building-columns"></i>
             </div>
-            {% endfor %}
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
         </div>
-        {% endif %}
-
-        <!-- 5. ANÁLISIS DUPONT -->
-        {% if dupont_data %}
-        <div class="section-title-bar">
-            <i class="fa-solid fa-sitemap"></i>
-            <h3>Análisis DuPont (3 Factores)</h3>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}
+            {% if ratio_info.get('porcentaje') %}<small style="font-size: 0.5em;">%</small>{% endif %}
+            {% else %}
+            N/A
+            {% endif %}
         </div>
-        <div class="dupont-container mb-5">
-            <!-- Año Actual -->
-            <div class="dupont-card">
-                <div class="dupont-header">Año {{ anio_seleccionado }}</div>
-                {% set datos_act = dupont_data[anio_seleccionado|string] %}
-                <div class="dupont-roe">{{ "%.2f"|format(datos_act.roe * 100) }}%</div>
-                <div style="color: var(--text-secondary);">ROE (Retorno sobre Capital)</div>
-                <div class="dupont-factors">
-                    <div class="dupont-factor-row">
-                        <span>Margen Neto</span>
-                        <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.margen_neto * 100) }}%</span>
-                    </div>
-                    <div class="dupont-factor-row">
-                        <span>Rotación Activos</span>
-                        <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.rotacion_activos) }}</span>
-                    </div>
-                    <div class="dupont-factor-row">
-                        <span>Multiplicador</span>
-                        <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.multiplicador) }}</span>
-                    </div>
-                </div>
-            </div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-            <!-- Año Anterior -->
-            <div class="dupont-card">
-                <div class="dupont-header">Año {{ anio_seleccionado - 1 }}</div>
-                {% set anio_ant_str = (anio_seleccionado - 1)|string %}
-                {% if dupont_data[anio_ant_str] %}
-                {% set datos_ant = dupont_data[anio_ant_str] %}
-                <div class="dupont-roe" style="color: var(--text-tertiary);">{{ "%.2f"|format(datos_ant.roe * 100) }}%
-                </div>
-                <div style="color: var(--text-secondary);">ROE (Retorno sobre Capital)</div>
-                <div class="dupont-factors">
-                    <div class="dupont-factor-row">
-                        <span>Margen Neto</span>
-                        <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.margen_neto * 100) }}%</span>
-                    </div>
-                    <div class="dupont-factor-row">
-                        <span>Rotación Activos</span>
-                        <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.rotacion_activos) }}</span>
-                    </div>
-                    <div class="dupont-factor-row">
-                        <span>Multiplicador</span>
-                        <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.multiplicador) }}</span>
-                    </div>
-                </div>
-                {% else %}
-                <div class="py-5 text-muted">
-                    <i class="fa-solid fa-info-circle fa-2x mb-3"></i>
-                    <p>Sin datos históricos</p>
-                </div>
-                {% endif %}
+<!-- 4. RAZONES DE RENTABILIDAD -->
+{% if ratios_data.Rentabilidad %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-chart-pie"></i>
+    <h3>Razones de Rentabilidad</h3>
+</div>
+<div class="kpi-grid">
+    {% for ratio_name, ratio_info in ratios_data.Rentabilidad.items() %}
+    <div class="kpi-card {{ ratio_info.estado }}">
+        <div class="kpi-header">
+            <div class="kpi-icon">
+                <i class="fa-solid fa-money-bill-trend-up"></i>
             </div>
+            <span class="kpi-status-badge">{{ ratio_info.estado|title }}</span>
+        </div>
+        <div class="kpi-value">
+            {% if ratio_info.valor is not none %}
+            {{ "%.2f"|format(ratio_info.valor) }}<small style="font-size: 0.5em;">%</small>
+            {% else %}
+            N/A
+            {% endif %}
+        </div>
+        <div class="kpi-label">{{ ratio_name }}</div>
+        <div class="kpi-formula">
+            <i class="fa-solid fa-calculator"></i> {{ ratio_info.formula }}
+        </div>
+        <div class="kpi-details">
+            <span><strong>Rango Óptimo:</strong> {{ ratio_info.rango_optimo }}</span>
+            {% if ratio_info.interpretacion %}
+            <span class="mt-2" style="font-style: italic; opacity: 0.8;">"{{ ratio_info.interpretacion }}"</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-            <!-- Variación -->
-            <div class="dupont-card">
-                <div class="dupont-header">Análisis de Variación</div>
-                <div style="margin-bottom: 20px;">
-                    <div style="font-size: 0.9em; color: var(--text-secondary);">Cambio en ROE</div>
-                    <div class="dupont-roe"
-                        style="color: {% if '-' in dupont_data.variaciones.cambio_roe %}var(--error){% else %}var(--success){% endif %};">
-                        {{ dupont_data.variaciones.cambio_roe }}
-                    </div>
-                </div>
-                <div style="background: rgba(59, 130, 246, 0.1); padding: 16px; border-radius: 12px; text-align: left;">
-                    <div style="color: var(--accent); font-weight: 700; margin-bottom: 8px;">
-                        <i class="fa-solid fa-magnifying-glass-chart me-2"></i>Factor Determinante:
-                    </div>
-                    <p style="margin: 0; color: var(--text-primary); font-size: 0.95em;">
-                        {{ dupont_data.variaciones.factor_determinante }}
-                    </p>
-                </div>
+<!-- 5. ANÁLISIS DUPONT -->
+{% if dupont_data %}
+<div class="section-title-bar">
+    <i class="fa-solid fa-sitemap"></i>
+    <h3>Análisis DuPont (3 Factores)</h3>
+</div>
+<div class="dupont-container mb-5">
+    <!-- Año Actual -->
+    <div class="dupont-card">
+        <div class="dupont-header">Año {{ anio_seleccionado }}</div>
+        {% set datos_act = dupont_data[anio_seleccionado|string] %}
+        <div class="dupont-roe">{{ "%.2f"|format(datos_act.roe * 100) }}%</div>
+        <div style="color: var(--text-secondary);">ROE (Retorno sobre Capital)</div>
+        <div class="dupont-factors">
+            <div class="dupont-factor-row">
+                <span>Margen Neto</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.margen_neto * 100) }}%</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Rotación Activos</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.rotacion_activos) }}</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Multiplicador</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_act.multiplicador) }}</span>
             </div>
         </div>
-        {% endif %}
+    </div>
 
+    <!-- Año Anterior -->
+    <div class="dupont-card">
+        <div class="dupont-header">Año {{ anio_seleccionado - 1 }}</div>
+        {% set anio_ant_str = (anio_seleccionado - 1)|string %}
+        {% if dupont_data[anio_ant_str] %}
+        {% set datos_ant = dupont_data[anio_ant_str] %}
+        <div class="dupont-roe" style="color: var(--text-tertiary);">{{ "%.2f"|format(datos_ant.roe * 100) }}%</div>
+        <div style="color: var(--text-secondary);">ROE (Retorno sobre Capital)</div>
+        <div class="dupont-factors">
+            <div class="dupont-factor-row">
+                <span>Margen Neto</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.margen_neto * 100) }}%</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Rotación Activos</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.rotacion_activos) }}</span>
+            </div>
+            <div class="dupont-factor-row">
+                <span>Multiplicador</span>
+                <span class="dupont-factor-value">{{ "%.2f"|format(datos_ant.multiplicador) }}</span>
+            </div>
+        </div>
         {% else %}
-        <div class="alert alert-info mt-4" role="alert">
-            <i class="fa-solid fa-info-circle me-2"></i>
-            No hay datos disponibles. Por favor, selecciona un año para calcular los ratios financieros.
-        </div>
+        <div class="text-muted py-5">No hay datos para el año anterior</div>
         {% endif %}
+    </div>
 
-        <style>
-            /* Estilos para el Análisis de IA */
-            .ai-content {
-                color: #1e293b !important;
-            }
+    <!-- Variación -->
+    <div class="dupont-card">
+        <div class="dupont-header">Variación</div>
+        {% if dupont_data.variaciones %}
+        <div class="dupont-roe"
+            style="color: {% if dupont_data.variaciones.roe >= 0 %}var(--success){% else %}var(--error){% endif %};">
+            {{ "%.2f"|format(dupont_data.variaciones.roe * 100) }}%
+        </div>
+        <div style="color: var(--text-secondary);">Cambio en ROE</div>
+        <div class="mt-3 text-start">
+            <p class="mb-1"><strong>Factor Determinante:</strong></p>
+            <p class="text-primary">{{ dupont_data.variaciones.factor_determinante }}</p>
+        </div>
+        {% else %}
+        <div class="text-muted py-5">No hay datos suficientes para calcular variaciones</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
 
-            .ai-content * {
-                color: #1e293b !important;
-            }
+{% else %}
+<div class="alert alert-info mt-4" role="alert">
+    <i class="fa-solid fa-info-circle me-2"></i>
+    No hay datos disponibles. Por favor, selecciona un año para calcular los ratios financieros.
+</div>
+{% endif %}
 
-            .ai-content strong,
-            .ai-content b {
-                color: #0f172a !important;
-                font-weight: 700;
-            }
-        </style>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const aiContainer = document.getElementById('ai-analysis-container');
-                if (aiContainer) {
-                    const anio = "{{ anio_seleccionado }}";
-                    if (anio && anio !== "None") {
-                        fetch(`{{ url_for('analysis.api_ratios_ia', anio=0) }}`.replace('0', anio))
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.html) {
-                                    aiContainer.innerHTML = `
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const aiContainer = document.getElementById('ai-analysis-container');
+        if (aiContainer) {
+            const anio = "{{ anio_seleccionado }}";
+            if (anio && anio !== "None") {
+                fetch(`{{ url_for('analysis.api_ratios_ia', anio=0) }}`.replace('0', anio))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.html) {
+                            aiContainer.innerHTML = `
                                 <div class="card border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(0,0,0,0.1);">
                                     <div class="card-header border-0 p-4" style="background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); border-radius: 16px 16px 0 0;">
                                         <h4 class="mb-0 text-white"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h4>
@@ -940,28 +759,28 @@
                                     </div>
                                 </div>
                             `;
-                                } else {
-                                    aiContainer.innerHTML = `
+                        } else {
+                            aiContainer.innerHTML = `
                                 <div class="alert alert-warning border-0 shadow-sm rounded-3">
                                     <i class="fa-solid fa-exclamation-triangle me-2"></i>
                                     No se pudo generar el análisis por IA en este momento.
                                     ${data.error ? '<br><small>' + data.error + '</small>' : ''}
                                 </div>
                             `;
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching AI analysis:', error);
-                                aiContainer.innerHTML = `
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AI analysis:', error);
+                        aiContainer.innerHTML = `
                             <div class="alert alert-danger border-0 shadow-sm rounded-3">
                                 <i class="fa-solid fa-circle-xmark me-2"></i>
                                 Error al conectar con el servicio de IA.
                             </div>
                         `;
-                            });
-                    }
-                }
-            });
-        </script>
+                    });
+            }
+        }
+    });
+</script>
 
-        {% endblock %}
+{% endblock %}
