@@ -159,7 +159,7 @@
                             </thead>
                             <tbody>
                                 <!-- === ACTIVOS === -->
-                                {% if 'Activo' in report_data %}
+                                {% if report_data.get('Activo') %}
                                 {% for subtipo, cuentas in report_data.Activo.items() %}
                                 <tr class="bg-primary bg-opacity-10">
                                     <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase ls-1"
@@ -199,7 +199,7 @@
                                 {% endif %}
 
                                 <!-- === PASIVOS === -->
-                                {% if 'Pasivo' in report_data %}
+                                {% if report_data.get('Pasivo') %}
                                 {% for subtipo, cuentas in report_data.Pasivo.items() %}
                                 <tr class="bg-warning bg-opacity-10">
                                     <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase ls-1"
@@ -230,7 +230,7 @@
                                 {% endif %}
 
                                 <!-- === PATRIMONIO === -->
-                                {% if 'Patrimonio' in report_data %}
+                                {% if report_data.get('Patrimonio') %}
                                 {% for subtipo, cuentas in report_data.Patrimonio.items() %}
                                 <tr class="bg-success bg-opacity-10">
                                     <td colspan="3" class="py-2 px-4 fw-bold text-white small text-uppercase ls-1"
@@ -309,7 +309,7 @@
                             </thead>
                             <tbody>
                                 <!-- === INGRESOS === -->
-                                {% if 'Ingreso' in report_data %}
+                                {% if report_data.get('Ingreso') %}
                                 {% for subtipo, cuentas in report_data.Ingreso.items() %}
                                 {% for cuenta in cuentas %}
                                 <tr>
@@ -333,7 +333,7 @@
                                 {% endif %}
 
                                 <!-- === COSTOS === -->
-                                {% if 'Costo' in report_data %}
+                                {% if report_data.get('Costo') %}
                                 {% for subtipo, cuentas in report_data.Costo.items() %}
                                 {% for cuenta in cuentas %}
                                 <tr>
@@ -370,7 +370,7 @@
                                 </tr>
 
                                 <!-- === GASTOS === -->
-                                {% if 'Gasto' in report_data %}
+                                {% if report_data.get('Gasto') %}
                                 {% for subtipo, cuentas in report_data.Gasto.items() %}
                                 {% for cuenta in cuentas %}
                                 <tr>
