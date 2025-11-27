@@ -458,9 +458,228 @@
     }
 
     .table-hover tbody tr:hover td {
-        background-color: rgba(255, 255, 255, 0.05);
-        transition: background-color 0.2s ease;
-    }
+        <td class="py-3 px-4 fw-bold text-white">TOTAL PASIVO Y PATRIMONIO</td><td class="py-3 pe-4 text-end fw-bold text-white font-monospace fs-6"> {
+                {
+                report_data.Totales.get('Total Pasivo y Patrimonio', 0.0)|currency
+            }
+        }
+
+        </td><td class="py-3 pe-4 text-end fw-bold text-white font-monospace fs-6">100.00%</td></tr></tbody></table></div></div></div></div>< !-- COLUMNA DERECHA: ESTADO DE RESULTADOS --><div class="col-xl-6"><div class="card border-0 shadow-lg h-100"
+        style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">< !-- Header Card --><div class="card-header border-0 p-4"
+
+        style="background: linear-gradient(90deg, rgba(22, 163, 74, 0.4) 0%, rgba(15, 23, 42, 0) 100%); border-radius: 16px 16px 0 0;"><div class="d-flex justify-content-between align-items-center"><div class="d-flex align-items-center"><div class="icon-box bg-success text-white rounded-3 p-2 me-3 shadow-sm"><i class="fa-solid fa-chart-line fa-lg"></i></div><h4 class="fw-bold text-white mb-0">Estado de Resultados</h4></div><span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Base: Ingresos</span></div></div>< !-- Body Card --><div class="card-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr class="bg-dark bg-opacity-50 border-bottom border-secondary"><th class="text-success py-3 px-4 text-uppercase ls-1 small">Cuenta</th><th class="text-end text-success py-3 px-4 text-uppercase ls-1 small">Monto</th><th class="text-end text-success py-3 px-4 text-uppercase ls-1 small">% Vertical </th></tr></thead><tbody>< !--===INGRESOS===--> {
+            % if report_data.get('Ingreso') %
+        }
+
+            {
+            % for subtipo,
+            cuentas in report_data.Ingreso.items() %
+        }
+
+            {
+            % for cuenta in cuentas %
+        }
+
+        <tr><td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2"> {
+                {
+                cuenta.nombre
+            }
+        }
+
+        </td><td class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace"> {
+                {
+                cuenta.monto|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-success border-bottom border-secondary border-opacity-25 py-2 font-monospace"> {
+                {
+                "%.2f" |format(cuenta.get('percentage', 0.0))
+            }
+        }
+
+        %</td></tr> {
+            % endfor %
+        }
+
+            {
+            % endfor %
+        }
+
+        <tr style="background: rgba(22, 163, 74, 0.1); border-left: 3px solid #16a34a;"><td class="ps-4 fw-bold text-success py-2">TOTAL INGRESOS</td><td class="text-end pe-4 fw-bold text-success py-2 font-monospace"> {
+                {
+                report_data.Totales.get('Ingreso', 0.0)|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-success py-2 font-monospace">100.00%</td></tr> {
+            % endif %
+        }
+
+        < !--===COSTOS===--> {
+            % if report_data.get('Costo') %
+        }
+
+            {
+            % for subtipo,
+            cuentas in report_data.Costo.items() %
+        }
+
+            {
+            % for cuenta in cuentas %
+        }
+
+        <tr><td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2"> {
+                {
+                cuenta.nombre
+            }
+        }
+
+        </td><td class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace"> {
+                {
+                cuenta.monto|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-danger border-bottom border-secondary border-opacity-25 py-2 font-monospace"> {
+                {
+                "%.2f" |format(cuenta.get('percentage', 0.0))
+            }
+        }
+
+        %</td></tr> {
+            % endfor %
+        }
+
+            {
+            % endfor %
+        }
+
+        <tr style="background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626;"><td class="ps-4 fw-bold text-danger py-2">TOTAL COSTOS</td><td class="text-end pe-4 fw-bold text-danger py-2 font-monospace"> {
+                {
+                report_data.Totales.get('Costo', 0.0)|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-danger py-2 font-monospace"> {
+                {
+                "%.2f" |format((report_data.Totales.get('Costo', 0.0) / base_er * 100) if base_er else 0)
+            }
+        }
+
+        %</td></tr> {
+            % endif %
+        }
+
+        < !-- Utilidad Bruta --><tr style="background: rgba(14, 165, 233, 0.1); border-top: 1px solid rgba(255,255,255,0.1);"><td class="py-3 px-4 fw-bold text-info">UTILIDAD BRUTA</td><td class="py-3 pe-4 text-end fw-bold text-info font-monospace"> {
+                {
+                report_data.Totales.get('Utilidad Bruta', 0.0)|currency
+            }
+        }
+
+        </td><td class="py-3 pe-4 text-end fw-bold text-info font-monospace"> {
+                {
+                "%.2f" |format((report_data.Totales.get('Utilidad Bruta', 0.0) / base_er * 100) if base_er else 0)
+            }
+        }
+
+        %</td></tr>< !--===GASTOS===--> {
+            % if report_data.get('Gasto') %
+        }
+
+            {
+            % for subtipo,
+            cuentas in report_data.Gasto.items() %
+        }
+
+            {
+            % for cuenta in cuentas %
+        }
+
+        <tr><td class="ps-4 text-light border-bottom border-secondary border-opacity-25 py-2"> {
+                {
+                cuenta.nombre
+            }
+        }
+
+        </td><td class="text-end pe-4 text-white border-bottom border-secondary border-opacity-25 py-2 font-monospace"> {
+                {
+                cuenta.monto|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-warning border-bottom border-secondary border-opacity-25 py-2 font-monospace"> {
+                {
+                "%.2f" |format(cuenta.get('percentage', 0.0))
+            }
+        }
+
+        %</td></tr> {
+            % endfor %
+        }
+
+            {
+            % endfor %
+        }
+
+        <tr style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b;"><td class="ps-4 fw-bold text-warning py-2">TOTAL GASTOS</td><td class="text-end pe-4 fw-bold text-warning py-2 font-monospace"> {
+                {
+                report_data.Totales.get('Gasto', 0.0)|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-warning py-2 font-monospace"> {
+                {
+                "%.2f" |format((report_data.Totales.get('Gasto', 0.0) / base_er * 100) if base_er else 0)
+            }
+        }
+
+        %</td></tr> {
+            % endif %
+        }
+
+        < !-- UTILIDAD NETA --><tr style="background: linear-gradient(135deg, #15803d 0%, #14532d 100%); border-top: 2px solid #22c55e;"><td class="ps-4 fw-bold text-white py-3 text-uppercase">UTILIDAD NETA</td><td class="text-end pe-4 fw-bold text-white py-3 font-monospace fs-5"> {
+                {
+                report_data.Totales.get('Utilidad Neta', 0.0)|currency
+            }
+        }
+
+        </td><td class="text-end pe-4 fw-bold text-white py-3 font-monospace fs-5"> {
+                {
+                "%.2f" |format((report_data.Totales.get('Utilidad Neta', 0.0) / base_er * 100) if base_er else 0)
+            }
+        }
+
+        %</td></tr></tbody></table></div></div></div></div></div>< !-- Fin Row Reportes -->< !-- 4. SECCIÓN IA --><div id="ai-analysis-container" class="mt-5"><div class="card border-0 shadow-lg"
+
+        style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);"><div class="card-body text-center py-5"><div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Cargando...</span></div><h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5><p class="text-muted small">Esto puede tomar unos segundos.</p></div></div></div> {
+            % else %
+        }
+
+        < !-- 5. EMPTY STATE --><div class="text-center py-5"><div class="mb-4"><i class="fa-solid fa-folder-open fa-4x text-muted opacity-50"></i></div><h3 class="text-muted">No hay datos financieros disponibles para este período.</h3><p class="text-muted">Selecciona otro año o ingresa datos en el sistema.</p></div> {
+            % endif %
+        }
+
+        </div>< !-- 6. ESTILOS Y SCRIPTS --><style>.ls-1 {
+            letter-spacing: 1px;
+        }
+
+        .font-monospace {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace !important;
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-hover tbody tr:hover td {
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s ease;
+        }
 </style>
 
 <script>
@@ -474,12 +693,12 @@
                     .then(data => {
                         if (data.html) {
                             aiContainer.innerHTML = `
-                                <div class="card border-0 shadow-lg" style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                                <div class="card border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(0,0,0,0.1);">
                                     <div class="card-header border-0 p-4" style="background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); border-radius: 16px 16px 0 0;">
                                         <h4 class="mb-0 text-white"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h4>
                                     </div>
-                                    <div class="card-body p-4 text-white">
-                                        <div class="ai-content" style="font-size: 1.05rem; line-height: 1.7;">
+                                    <div class="card-body p-4">
+                                        <div class="ai-content text-dark" style="font-size: 1.05rem; line-height: 1.7; color: #1e293b;">
                                             ${data.html}
                                         </div>
                                     </div>
