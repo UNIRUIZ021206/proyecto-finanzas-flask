@@ -35,8 +35,7 @@
                                 <select name="periodo_analisis" id="periodo_analisis" class="form-select">
                                     <option value="">-- Selecciona --</option>
                                     {% for anio in periodos %}
-                                    <option value="{{ anio }}" {% if anio==periodo_analisis %}selected{% endif
-                                        %}>
+                                    <option value="{{ anio }}" {% if anio==periodo_analisis %}selected{% endif %}>
                                         Año {{ anio }}
                                     </option>
                                     {% endfor %}
@@ -103,12 +102,13 @@
 
     <!-- Contenedor para Análisis IA -->
     <div id="ai-analysis-container" class="mb-5">
-        <div class="card shadow-sm border-0" style="background-color: #f8f9fa;">
+        <div class="card border-0 shadow-lg"
+            style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
             <div class="card-body text-center py-5">
                 <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
-                <h5 class="text-muted">Generando análisis financiero inteligente con Gemini AI...</h5>
+                <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
                 <p class="text-muted small">Esto puede tomar unos segundos.</p>
             </div>
         </div>
@@ -406,6 +406,23 @@
     {% endif %}
 </div>
 
+<style>
+    /* Estilos para el Análisis de IA */
+    .ai-content {
+        color: #1e293b !important;
+    }
+
+    .ai-content * {
+        color: #1e293b !important;
+    }
+
+    .ai-content strong,
+    .ai-content b {
+        color: #0f172a !important;
+        font-weight: 700;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const aiContainer = document.getElementById('ai-analysis-container');
@@ -420,35 +437,35 @@
                     .then(data => {
                         if (data.html) {
                             aiContainer.innerHTML = `
-                        <div class="card shadow-lg mb-4 border-0">
-                            <div class="card-header text-white" style="background: linear-gradient(45deg, #6610f2, #6f42c1);">
-                                <h3 class="mb-0"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h3>
-                            </div>
-                            <div class="card-body bg-light">
-                                <div class="ai-content">
-                                    ${data.html}
+                                <div class="card border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(0,0,0,0.1);">
+                                    <div class="card-header border-0 p-4" style="background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); border-radius: 16px 16px 0 0;">
+                                        <h4 class="mb-0 text-white"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h4>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="ai-content text-dark" style="font-size: 1.05rem; line-height: 1.7; color: #1e293b;">
+                                            ${data.html}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    `;
+                            `;
                         } else {
                             aiContainer.innerHTML = `
-                        <div class="alert alert-warning">
-                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                            No se pudo generar el análisis por IA en este momento.
-                            ${data.error ? '<br><small>' + data.error + '</small>' : ''}
-                        </div>
-                    `;
+                                <div class="alert alert-warning border-0 shadow-sm rounded-3">
+                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                    No se pudo generar el análisis por IA en este momento.
+                                    ${data.error ? '<br><small>' + data.error + '</small>' : ''}
+                                </div>
+                            `;
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching AI analysis:', error);
                         aiContainer.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fa-solid fa-circle-xmark me-2"></i>
-                        Error al conectar con el servicio de IA.
-                    </div>
-                `;
+                            <div class="alert alert-danger border-0 shadow-sm rounded-3">
+                                <i class="fa-solid fa-circle-xmark me-2"></i>
+                                Error al conectar con el servicio de IA.
+                            </div>
+                        `;
                     });
             }
         }
