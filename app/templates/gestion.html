@@ -5,304 +5,297 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="main-title">Gestión de Reportes Financieros</h2>
+<div class="container-fluid my-4">
+    <h2 class="main-title">Gestión de Reportes Financieros</h2>
 
-<div class="report-selector-container">
-    <!-- Menú para seleccionar el año -->
-    <div class="report-selector">
-        <form method="GET" action="" class="selector-form">
-            <div class="selector-group">
-                <label for="anio"><i class="fa-solid fa-calendar-days"></i> Período:</label>
-                <select name="anio" id="anio" onchange="this.form.submit()">
-                    {% for anio in periodos %}
-                    <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}>
-                        Año {{ anio }}
-                    </option>
-                    {% endfor %}
-                </select>
+    <div class="report-selector-container mb-4">
+        <!-- Menú para seleccionar el año -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="GET" action="" class="selector-form">
+                    <div class="row align-items-end">
+                        <div class="col-md-6">
+                            <label for="anio" class="form-label fw-bold">
+                                <i class="fa-solid fa-calendar-days"></i> Período:
+                            </label>
+                            <select name="anio" id="anio" class="form-select" onchange="this.form.submit()">
+                                {% for anio in periodos %}
+                                <option value="{{ anio }}" {% if anio==anio_seleccionado %}selected{% endif %}>
+                                    Año {{ anio }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 
-    <!-- Nuevo: Filtro de Cuentas -->
-    <div class="report-selector filter-selector">
-        <div class="selector-group">
-            <label for="account-filter"><i class="fa-solid fa-filter"></i> Filtrar Cuentas:</label>
-            <select id="account-filter">
-                <option value="all">Mostrar Todo</option>
-                <!-- Opciones se llenarán dinámicamente con JS -->
-            </select>
+    <!-- Mensajes de Flash (errores) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="mb-4">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else ('success' if category == 'success' else 'warning') }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Contenedor de los dos reportes -->
+    <div class="row g-4">
+
+        <!-- Columna del Balance General -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fa-solid fa-balance-scale me-2"></i>
+                        Balance General al {{ anio_seleccionado }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if report_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle mb-0">
+                            <!-- === ACTIVOS === -->
+                            <thead class="table-dark">
+                                <tr>
+                                    <th colspan="2" class="text-center">ACTIVO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subtipo, cuentas in report_data.Activo.items() %}
+                                <tr class="table-secondary">
+                                    <td colspan="2" class="fw-bold">{{ subtipo }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td>{{ cuenta.nombre }}</td>
+                                    <td class="text-end fw-bold">{{ cuenta.monto|currency }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total {{ subtipo }}</td>
+                                    <td class="text-end fw-bold text-primary">{{ report_data.Totales[subtipo]|currency
+                                        }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-warning">
+                                    <td class="fw-bold">TOTAL ACTIVO</td>
+                                    <td class="text-end fw-bold fs-5">{{ report_data.Totales['Total Activo']|currency }}
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                            <!-- === PASIVO Y PATRIMONIO === -->
+                            <thead class="table-dark">
+                                <tr>
+                                    <th colspan="2" class="text-center">PASIVO Y PATRIMONIO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Pasivos -->
+                                {% for subtipo, cuentas in report_data.Pasivo.items() %}
+                                <tr class="table-secondary">
+                                    <td colspan="2" class="fw-bold">{{ subtipo }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td>{{ cuenta.nombre }}</td>
+                                    <td class="text-end fw-bold">{{ cuenta.monto|currency }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total {{ subtipo }}</td>
+                                    <td class="text-end fw-bold text-primary">{{ report_data.Totales[subtipo]|currency
+                                        }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total Pasivo</td>
+                                    <td class="text-end fw-bold text-info">{{ report_data.Totales['Total
+                                        Pasivo']|currency }}</td>
+                                </tr>
+
+                                <!-- Patrimonio -->
+                                {% for subtipo, cuentas in report_data.Patrimonio.items() %}
+                                <tr class="table-secondary">
+                                    <td colspan="2" class="fw-bold">{{ subtipo }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td>{{ cuenta.nombre }}</td>
+                                    <td class="text-end fw-bold">{{ cuenta.monto|currency }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total {{ subtipo }}</td>
+                                    <td class="text-end fw-bold text-primary">{{ report_data.Totales[subtipo]|currency
+                                        }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total Patrimonio</td>
+                                    <td class="text-end fw-bold text-info">{{ report_data.Totales['Total
+                                        Patrimonio']|currency }}</td>
+                                </tr>
+
+                                <!-- Total -->
+                                <tr class="table-warning">
+                                    <td class="fw-bold">TOTAL PASIVO Y PATRIMONIO</td>
+                                    <td class="text-end fw-bold fs-5">{{ report_data.Totales['Total Pasivo y
+                                        Patrimonio']|currency }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay datos de balance para mostrar.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna del Estado de Resultados -->
+        <div class="col-lg-6">
+            <div class="card shadow-lg h-100">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fa-solid fa-chart-line me-2"></i>
+                        Estado de Resultados al {{ anio_seleccionado }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if report_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered align-middle mb-0">
+                            <!-- === INGRESOS === -->
+                            <thead class="table-success">
+                                <tr>
+                                    <th colspan="2" class="text-center">INGRESOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subtipo, cuentas in report_data.Ingreso.items() %}
+                                <tr class="table-secondary">
+                                    <td colspan="2" class="fw-bold">{{ subtipo }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td>{{ cuenta.nombre }}</td>
+                                    <td class="text-end fw-bold">{{ cuenta.monto|currency }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total {{ subtipo }}</td>
+                                    <td class="text-end fw-bold text-success">{{ report_data.Totales[subtipo]|currency
+                                        }}</td>
+                                </tr>
+                                {% endfor %}
+
+                                <!-- Total Ingresos -->
+                                <tr class="table-success">
+                                    <td class="fw-bold">TOTAL INGRESOS</td>
+                                    <td class="text-end fw-bold fs-6 text-white">{{
+                                        report_data.Totales['Ingreso']|currency }}</td>
+                                </tr>
+                            </tbody>
+
+                            <!-- === COSTOS === -->
+                            <thead class="table-danger">
+                                <tr>
+                                    <th colspan="2" class="text-center">MENOS: COSTOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subtipo, cuentas in report_data.Costo.items() %}
+                                <tr class="table-secondary">
+                                    <td colspan="2" class="fw-bold">{{ subtipo }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td>{{ cuenta.nombre }}</td>
+                                    <td class="text-end fw-bold">{{ cuenta.monto|currency }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total {{ subtipo }}</td>
+                                    <td class="text-end fw-bold text-danger">{{ report_data.Totales[subtipo]|currency }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
+                                <!-- Total Costos -->
+                                <tr class="table-danger">
+                                    <td class="fw-bold">TOTAL COSTOS</td>
+                                    <td class="text-end fw-bold fs-6 text-white">{{
+                                        report_data.Totales['Costo']|currency }}</td>
+                                </tr>
+                            </tbody>
+
+                            <!-- === UTILIDAD BRUTA === -->
+                            <tbody>
+                                <tr class="table-info">
+                                    <td class="fw-bold fs-6">UTILIDAD BRUTA</td>
+                                    <td class="text-end fw-bold fs-5 text-white bg-info">{{
+                                        report_data.Totales['Utilidad Bruta']|currency }}</td>
+                                </tr>
+                            </tbody>
+
+                            <!-- === GASTOS === -->
+                            <thead class="table-warning">
+                                <tr>
+                                    <th colspan="2" class="text-center">MENOS: GASTOS OPERATIVOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subtipo, cuentas in report_data.Gasto.items() %}
+                                <tr class="table-secondary">
+                                    <td colspan="2" class="fw-bold">{{ subtipo }}</td>
+                                </tr>
+                                {% for cuenta in cuentas %}
+                                <tr>
+                                    <td>{{ cuenta.nombre }}</td>
+                                    <td class="text-end fw-bold">{{ cuenta.monto|currency }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-light">
+                                    <td class="fw-bold">Total {{ subtipo }}</td>
+                                    <td class="text-end fw-bold text-warning">{{ report_data.Totales[subtipo]|currency
+                                        }}</td>
+                                </tr>
+                                {% endfor %}
+
+                                <!-- Total Gastos -->
+                                <tr class="table-warning">
+                                    <td class="fw-bold">TOTAL GASTOS</td>
+                                    <td class="text-end fw-bold fs-6">{{ report_data.Totales['Gasto']|currency }}</td>
+                                </tr>
+                            </tbody>
+
+                            <!-- === UTILIDAD NETA === -->
+                            <tbody>
+                                <tr class="table-primary">
+                                    <td class="fw-bold fs-5">UTILIDAD NETA DEL EJERCICIO</td>
+                                    <td class="text-end fw-bold fs-4 text-white bg-primary">{{
+                                        report_data.Totales['Utilidad Neta']|currency }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No hay datos de resultados para mostrar.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Mensajes de Flash (errores) -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="flash-messages" style="margin-top: 20px;">
-    {% for category, message in messages %}
-    <div class="flash-{{ category }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-{% endwith %}
-
-<!-- Contenedor de los dos reportes -->
-<div class="reports-container">
-
-    <!-- Columna del Balance General -->
-    <div class="report-wrapper">
-        <h3>Balance General al {{ anio_seleccionado }}</h3>
-
-        {% if report_data %}
-        <table class="report-table">
-            <!-- === ACTIVOS === -->
-            <tr class="header-group">
-                <th colspan="2">ACTIVO</th>
-            </tr>
-
-            {% for subtipo, cuentas in report_data.Activo.items() %}
-            <tr class="sub-header" data-main-type="Activo" data-subtype="{{ subtipo }}">
-                <td colspan="2">{{ subtipo }}</td>
-            </tr>
-            {% for cuenta in cuentas %}
-            <tr data-main-type="Activo" data-subtype="{{ subtipo }}">
-                <td>{{ cuenta.nombre }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total" data-main-type="Activo" data-subtype="{{ subtipo }}">
-                <td>Total {{ subtipo }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="grand-total">
-                <td>TOTAL ACTIVO</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Activo']) }}</td>
-            </tr>
-
-            <!-- === PASIVO Y PATRIMONIO === -->
-            <tr class="header-group">
-                <th colspan="2">PASIVO Y PATRIMONIO</th>
-            </tr>
-
-            <!-- Pasivos -->
-            {% for subtipo, cuentas in report_data.Pasivo.items() %}
-            <tr class="sub-header" data-main-type="Pasivo" data-subtype="{{ subtipo }}">
-                <td colspan="2">{{ subtipo }}</td>
-            </tr>
-            {% for cuenta in cuentas %}
-            <tr data-main-type="Pasivo" data-subtype="{{ subtipo }}">
-                <td>{{ cuenta.nombre }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total" data-main-type="Pasivo" data-subtype="{{ subtipo }}">
-                <td>Total {{ subtipo }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total grand-total">
-                <td>Total Pasivo</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Pasivo']) }}</td>
-            </tr>
-
-            <!-- Patrimonio -->
-            {% for subtipo, cuentas in report_data.Patrimonio.items() %}
-            <tr class="sub-header" data-main-type="Patrimonio" data-subtype="{{ subtipo }}">
-                <td colspan="2">{{ subtipo }}</td>
-            </tr>
-            {% for cuenta in cuentas %}
-            <tr data-main-type="Patrimonio" data-subtype="{{ subtipo }}">
-                <td>{{ cuenta.nombre }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total" data-main-type="Patrimonio" data-subtype="{{ subtipo }}">
-                <td>Total {{ subtipo }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total grand-total">
-                <td>Total Patrimonio</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Patrimonio']) }}</td>
-            </tr>
-
-            <!-- Total -->
-            <tr class="grand-total final-total">
-                <td>TOTAL PASIVO Y PATRIMONIO</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Total Pasivo y Patrimonio']) }}</td>
-            </tr>
-        </table>
-        {% else %}
-        <p>No hay datos de balance para mostrar.</p>
-        {% endif %}
-    </div>
-
-    <!-- Columna del Estado de Resultados -->
-    <div class="report-wrapper">
-        <h3>Estado de Resultados al {{ anio_seleccionado }}</h3>
-
-        {% if report_data %}
-        <table class="report-table">
-            <!-- === INGRESOS === -->
-            <tr class="header-group">
-                <th colspan="2">INGRESOS</th>
-            </tr>
-            {% for subtipo, cuentas in report_data.Ingreso.items() %}
-            <tr class="sub-header" data-main-type="Ingreso" data-subtype="{{ subtipo }}">
-                <td colspan="2">{{ subtipo }}</td>
-            </tr>
-            {% for cuenta in cuentas %}
-            <tr data-main-type="Ingreso" data-subtype="{{ subtipo }}">
-                <td>{{ cuenta.nombre }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total" data-main-type="Ingreso" data-subtype="{{ subtipo }}">
-                <td>Total {{ subtipo }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
-            </tr>
-            {% endfor %}
-
-            <!-- Total Ingresos -->
-            <tr class="grand-total">
-                <td><strong>TOTAL INGRESOS</strong></td>
-                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Ingreso']) }}</strong></td>
-            </tr>
-
-            <!-- === COSTOS === -->
-            <tr class="header-group" style="padding-top: 15px;">
-                <th colspan="2">MENOS: COSTOS</th>
-            </tr>
-            {% for subtipo, cuentas in report_data.Costo.items() %}
-            <tr class="sub-header" data-main-type="Costo" data-subtype="{{ subtipo }}">
-                <td colspan="2">{{ subtipo }}</td>
-            </tr>
-            {% for cuenta in cuentas %}
-            <tr data-main-type="Costo" data-subtype="{{ subtipo }}">
-                <td>{{ cuenta.nombre }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total" data-main-type="Costo" data-subtype="{{ subtipo }}">
-                <td>Total {{ subtipo }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
-            </tr>
-            {% endfor %}
-
-            <!-- Total Costos -->
-            <tr class="sub-total">
-                <td><strong>TOTAL COSTOS</strong></td>
-                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Costo']) }}</strong></td>
-            </tr>
-
-            <!-- === UTILIDAD BRUTA === -->
-            <tr class="grand-total"
-                style="background: linear-gradient(135deg, #4a9eff 0%, #3b82e0 100%); color: white;">
-                <td><strong>UTILIDAD BRUTA</strong></td>
-                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Utilidad Bruta']) }}</strong></td>
-            </tr>
-
-            <!-- === GASTOS === -->
-            <tr class="header-group" style="padding-top: 15px;">
-                <th colspan="2">MENOS: GASTOS OPERATIVOS</th>
-            </tr>
-            {% for subtipo, cuentas in report_data.Gasto.items() %}
-            <tr class="sub-header" data-main-type="Gasto" data-subtype="{{ subtipo }}">
-                <td colspan="2">{{ subtipo }}</td>
-            </tr>
-            {% for cuenta in cuentas %}
-            <tr data-main-type="Gasto" data-subtype="{{ subtipo }}">
-                <td>{{ cuenta.nombre }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(cuenta.monto) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="sub-total" data-main-type="Gasto" data-subtype="{{ subtipo }}">
-                <td>Total {{ subtipo }}</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales[subtipo]) }}</td>
-            </tr>
-            {% endfor %}
-
-            <!-- Total Gastos -->
-            <tr class="sub-total">
-                <td><strong>TOTAL GASTOS</strong></td>
-                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Gasto']) }}</strong></td>
-            </tr>
-
-            <!-- === UTILIDAD NETA === -->
-            <tr class="grand-total final-total">
-                <td><strong>UTILIDAD NETA DEL EJERCICIO</strong></td>
-                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Utilidad Neta']) }}</strong></td>
-            </tr>
-        </table>
-        {% else %}
-        <p>No hay datos de resultados para mostrar.</p>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Aquí es donde pondremos los formularios para agregar cuentas y períodos en el futuro -->
-<div class="management-forms" style="margin-top: 40px;">
-    <h2 class="main-title">Gestión del Catálogo</h2>
-    <p class="main-subtitle">Próximamente: formularios para agregar nuevas cuentas y períodos.</p>
-    <!-- (Formularios irán aqu í) -->
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const filterSelect = document.getElementById('account-filter');
-        if (!filterSelect) return;
-
-        // Recolectar todos los subtipos únicos
-        const rows = document.querySelectorAll('tr[data-subtype]');
-        const subtypes = new Set();
-
-        rows.forEach(row => {
-            const subtype = row.getAttribute('data-subtype');
-            if (subtype) subtypes.add(subtype);
-        });
-
-        // Agregar opciones de subtipos
-        if (subtypes.size > 0) {
-            Array.from(subtypes).sort().forEach(subtype => {
-                const option = document.createElement('option');
-                option.value = subtype;
-                option.textContent = subtype;
-                filterSelect.appendChild(option);
-            });
-        }
-
-        // Manejar evento de cambio
-        filterSelect.addEventListener('change', function () {
-            const value = this.value;
-            const allRows = document.querySelectorAll('tr[data-subtype], tr.sub-total, tr.grand-total, tr.header-group');
-            const wrappers = document.querySelectorAll('.report-wrapper');
-
-            if (value === 'all') {
-                // Mostrar todo
-                allRows.forEach(row => row.classList.remove('hidden-row'));
-                wrappers.forEach(wrapper => wrapper.classList.remove('hidden-section'));
-            } else {
-                // Ocultar todo primero
-                allRows.forEach(row => row.classList.add('hidden-row'));
-
-                // Mostrar solo las filas que coinciden con el subtipo seleccionado
-                document.querySelectorAll(`tr[data-subtype="${value}"]`).forEach(row => {
-                    row.classList.remove('hidden-row');
-                });
-            }
-
-            // Ocultar wrappers vacíos
-            wrappers.forEach(wrapper => {
-                const visibleRows = wrapper.querySelectorAll('tr:not(.hidden-row):not(.header-group)');
-                if (visibleRows.length === 0) {
-                    wrapper.classList.add('hidden-section');
-                } else {
-                    wrapper.classList.remove('hidden-section');
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}
