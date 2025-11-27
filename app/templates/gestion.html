@@ -146,6 +146,9 @@
         {% if report_data %}
         <table class="report-table">
             <!-- === INGRESOS === -->
+            <tr class="header-group">
+                <th colspan="2">INGRESOS</th>
+            </tr>
             {% for subtipo, cuentas in report_data.Ingreso.items() %}
             <tr class="sub-header" data-main-type="Ingreso" data-subtype="{{ subtipo }}">
                 <td colspan="2">{{ subtipo }}</td>
@@ -162,7 +165,16 @@
             </tr>
             {% endfor %}
 
+            <!-- Total Ingresos -->
+            <tr class="grand-total">
+                <td><strong>TOTAL INGRESOS</strong></td>
+                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Ingreso']) }}</strong></td>
+            </tr>
+
             <!-- === COSTOS === -->
+            <tr class="header-group" style="padding-top: 15px;">
+                <th colspan="2">MENOS: COSTOS</th>
+            </tr>
             {% for subtipo, cuentas in report_data.Costo.items() %}
             <tr class="sub-header" data-main-type="Costo" data-subtype="{{ subtipo }}">
                 <td colspan="2">{{ subtipo }}</td>
@@ -179,13 +191,23 @@
             </tr>
             {% endfor %}
 
+            <!-- Total Costos -->
+            <tr class="sub-total">
+                <td><strong>TOTAL COSTOS</strong></td>
+                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Costo']) }}</strong></td>
+            </tr>
+
             <!-- === UTILIDAD BRUTA === -->
-            <tr class="grand-total">
-                <td>UTILIDAD BRUTA</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Utilidad Bruta']) }}</td>
+            <tr class="grand-total"
+                style="background: linear-gradient(135deg, #4a9eff 0%, #3b82e0 100%); color: white;">
+                <td><strong>UTILIDAD BRUTA</strong></td>
+                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Utilidad Bruta']) }}</strong></td>
             </tr>
 
             <!-- === GASTOS === -->
+            <tr class="header-group" style="padding-top: 15px;">
+                <th colspan="2">MENOS: GASTOS OPERATIVOS</th>
+            </tr>
             {% for subtipo, cuentas in report_data.Gasto.items() %}
             <tr class="sub-header" data-main-type="Gasto" data-subtype="{{ subtipo }}">
                 <td colspan="2">{{ subtipo }}</td>
@@ -202,10 +224,16 @@
             </tr>
             {% endfor %}
 
+            <!-- Total Gastos -->
+            <tr class="sub-total">
+                <td><strong>TOTAL GASTOS</strong></td>
+                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Gasto']) }}</strong></td>
+            </tr>
+
             <!-- === UTILIDAD NETA === -->
             <tr class="grand-total final-total">
-                <td>UTILIDAD NETA DEL EJERCICIO</td>
-                <td class="monto">C$ {{ "%.2f"|format(report_data.Totales['Utilidad Neta']) }}</td>
+                <td><strong>UTILIDAD NETA DEL EJERCICIO</strong></td>
+                <td class="monto"><strong>C$ {{ "%.2f"|format(report_data.Totales['Utilidad Neta']) }}</strong></td>
             </tr>
         </table>
         {% else %}
@@ -218,7 +246,7 @@
 <div class="management-forms" style="margin-top: 40px;">
     <h2 class="main-title">Gestión del Catálogo</h2>
     <p class="main-subtitle">Próximamente: formularios para agregar nuevas cuentas y períodos.</p>
-    <!-- (Formularios irán aquí) -->
+    <!-- (Formularios irán aqu í) -->
 </div>
 
 <script>
