@@ -2993,3 +2993,272 @@ select:focus {
 .container-fluid .card-body[style*="background-color: #f8f9fa"] {
     background-color: #f8f9fa !important;
 }
+
+/* ============================================
+   ESTILOS MEJORADOS PARA TABLAS BOOTSTRAP
+   Mejor contraste, legibilidad y diseño moderno
+   ============================================ */
+
+/* Mejoras generales para todas las tablas */
+.table {
+    --bs-table-bg: transparent;
+    color: var(--text-primary) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    font-size: 0.95rem;
+}
+
+/* Headers de tabla mejorados */
+.table thead th {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    font-size: 0.875rem;
+}
+
+/* Estilos específicos para diferentes colores de header */
+.table thead.table-dark th {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%) !important;
+    color: #f3f4f6 !important;
+}
+
+.table thead.table-success th {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    color: #ffffff !important;
+}
+
+.table thead.table-danger th {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    color: #ffffff !important;
+}
+
+.table thead.table-warning th {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: #ffffff !important;
+}
+
+.table thead.table-info th {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Celdas de datos */
+.table tbody td {
+    background-color: rgba(30, 41, 59, 0.4) !important;
+    color: #e2e8f0 !important;
+    padding: 0.875rem 1rem;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    font-weight: 500;
+}
+
+/* Filas alternas para mejor legibilidad */
+.table-striped tbody tr:nth-of-type(odd) td {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+/* Hover effect */
+.table-hover tbody tr:hover td {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #ffffff !important;
+    transition: all 0.2s ease;
+}
+
+/* Filas con clases de color específicas */
+.table tbody tr.table-secondary td {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.3) 0%, rgba(71, 85, 105, 0.3) 100%) !important;
+    color: #f1f5f9 !important;
+    font-weight: 700;
+    font-size: 0.925rem;
+}
+
+.table tbody tr.table-light td {
+    background-color: rgba(51, 65, 85, 0.5) !important;
+    color: #fbbf24 !important;
+    font-weight: 600;
+}
+
+.table tbody tr.table-warning td {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.25) 100%) !important;
+    color: #fef3c7 !important;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.table tbody tr.table-success td {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.25) 100%) !important;
+    color: #d1fae5 !important;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.table tbody tr.table-danger td {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.25) 100%) !important;
+    color: #fecaca !important;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.table tbody tr.table-info td {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(2, 132, 199, 0.3) 100%) !important;
+    color: #e0f2fe !important;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.table tbody tr.table-primary td {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.35) 0%, rgba(37, 99, 235, 0.35) 100%) !important;
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+/* Números con mejor visibilidad */
+.table .text-end {
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.025em;
+}
+
+/* Colores específicos para números */
+.table .text-primary {
+    color: #60d9fa !important;
+    text-shadow: 0 0 8px rgba(96, 217, 250, 0.3);
+}
+
+.table .text-success {
+    color: #34d399 !important;
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+}
+
+.table .text-danger {
+    color: #f87171 !important;
+    text-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
+.table .text-warning {
+    color: #fbbf24 !important;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+}
+
+.table .text-info {
+    color: #38bdf8 !important;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+/* Números en blanco para fondos oscuros */
+.table tbody tr.table-success .text-white,
+.table tbody tr.table-danger .text-white,
+.table tbody tr.table-warning .text-white,
+.table tbody tr.table-primary .text-white {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 800;
+}
+
+/* Cards con mejor diseño */
+.card {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.card-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 1.25rem 1.5rem !important;
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+}
+
+/* Form controls mejorados */
+.form-select,
+.form-control {
+    background-color: rgba(51, 65, 85, 0.6) !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+    color: #f1f5f9 !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus,
+.form-control:focus {
+    background-color: rgba(51, 65, 85, 0.8) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+    color: #ffffff !important;
+}
+
+.form-select option {
+    background-color: #1e293b;
+    color: #f1f5f9;
+}
+
+.form-label {
+    color: #cbd5e1 !important;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botones mejorados */
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border: none !important;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .table thead th {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .table tbody td {
+        padding: 0.625rem 0.5rem;
+    }
+}
+
+/* Asegurar que el texto sea siempre legible */
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+/* Títulos principales */
+.main-title {
+    color: #f8fafc !important;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.main-subtitle {
+    color: #cbd5e1 !important;
+    font-weight: 400;
+}
