@@ -133,20 +133,6 @@ def ingresar_saldos():
             return redirect(url_for('admin.ingresar_saldos'))
 
     # --- Lógica GET ---
-    cuentas_agrupadas = defaultdict(lambda: defaultdict(list))
-    try:
-        with engine.connect() as conn:
-            query = text("SELECT CuentaID, NombreCuenta, TipoCuenta, SubTipoCuenta FROM CatalogoCuentas ORDER BY TipoCuenta, SubTipoCuenta, NombreCuenta")
-            cuentas = conn.execute(query).fetchall()
-            
-            for cuenta in cuentas:
-                cuentas_agrupadas[cuenta.TipoCuenta][cuenta.SubTipoCuenta].append(cuenta)
-                
-    except Exception as e:
-        print(f"Error en ingresar_saldos (GET): {e}")
-        flash('Error al cargar el catálogo de cuentas.', 'error')
-
-    return render_template('ingresar_saldos.html', 
                            cuentas_agrupadas=cuentas_agrupadas)
 
 @admin_bp.route('/gestion-usuarios')
@@ -170,36 +156,6 @@ def gestion_usuarios():
             query_roles = text("SELECT Id_Rol, Nombre FROM Roles WHERE Estado = 1")
             roles = conn.execute(query_roles).fetchall()
             
-    except Exception as e:
-        print(f"Error en gestion_usuarios: {e}")
-        flash('Error al cargar usuarios.', 'error')
-        
-    return render_template('gestion_usuarios.html', users=users, roles=roles)
-
-@admin_bp.route('/update-user-role', methods=['POST'])
-@login_required
-@admin_required
-def update_user_role():
-    user_id = request.form.get('user_id')
-    new_role_id = request.form.get('role_id')
-    
-    try:
-        with engine.begin() as conn:
-            conn.execute(
-                text("UPDATE Usuarios SET Id_Rol = :role_id WHERE Id_Usuario = :user_id"),
-                {"role_id": new_role_id, "user_id": user_id}
-            )
-        flash('Rol de usuario actualizado correctamente.', 'success')
-    except Exception as e:
-        print(f"Error updating user role: {e}")
-        flash('Error al actualizar el rol.', 'error')
-        
-    return redirect(url_for('admin.gestion_usuarios'))
-
-@admin_bp.route('/toggle-user-status', methods=['POST'])
-@login_required
-@admin_required
-def toggle_user_status():
     user_id = request.form.get('user_id')
     
     try:
