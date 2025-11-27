@@ -126,14 +126,16 @@
                             {% if origen_aplicacion_data.Origen %}
                             {% for subtipo, cuentas in origen_aplicacion_data.Origen.items() %}
                             {% if cuentas and cuentas|length > 0 %}
-                            <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Origen" data-subtype="{{ subtipo }}">
+                            <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Origen"
+                                data-subtype="{{ subtipo }}">
                                 <td colspan="5" class="fw-bold"
                                     style="color: #000 !important; background-color: #0dcaf0 !important;">
                                     {{ subtipo
                                     }}</td>
                             </tr>
                             {% for cuenta in cuentas %}
-                            <tr style="background-color: white !important;" data-main-type="Origen" data-subtype="{{ subtipo }}">
+                            <tr style="background-color: white !important;" data-main-type="Origen"
+                                data-subtype="{{ subtipo }}">
                                 <td class="ps-4"
                                     style="color: #000000 !important; font-weight: 500; background-color: white !important;">
                                     {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
@@ -176,7 +178,8 @@
                             {% set total_subtipo_origen = origen_aplicacion_data.Totales.get('Origen',
                             {}).get(subtipo, 0.0) %}
                             {% if total_subtipo_origen %}
-                            <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Origen" data-subtype="{{ subtipo }}">
+                            <tr class="table-secondary" style="background-color: #f8f9fa !important;"
+                                data-main-type="Origen" data-subtype="{{ subtipo }}">
                                 <td class="ps-4 fw-bold" colspan="4"
                                     style="color: #000000 !important; background-color: #f8f9fa !important;">
                                     Total
@@ -247,14 +250,16 @@
                             {% if origen_aplicacion_data.Aplicacion %}
                             {% for subtipo, cuentas in origen_aplicacion_data.Aplicacion.items() %}
                             {% if cuentas and cuentas|length > 0 %}
-                            <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                            <tr class="table-info" style="background-color: #0dcaf0 !important;"
+                                data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
                                 <td colspan="5" class="fw-bold"
                                     style="color: #000 !important; background-color: #0dcaf0 !important;">
                                     {{ subtipo
                                     }}</td>
                             </tr>
                             {% for cuenta in cuentas %}
-                            <tr style="background-color: white !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                            <tr style="background-color: white !important;" data-main-type="Aplicacion"
+                                data-subtype="{{ subtipo }}">
                                 <td class="ps-4"
                                     style="color: #000000 !important; font-weight: 500; background-color: white !important;">
                                     {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
@@ -298,7 +303,8 @@
                             origen_aplicacion_data.Totales.get('Aplicacion',
                             {}).get(subtipo, 0.0) %}
                             {% if total_subtipo_aplicacion %}
-                            <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                            <tr class="table-secondary" style="background-color: #f8f9fa !important;"
+                                data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
                                 <td class="ps-4 fw-bold" colspan="4"
                                     style="color: #000000 !important; background-color: #f8f9fa !important;">
                                     Total
@@ -442,14 +448,16 @@
                     {% if origen_aplicacion_data.Aplicacion %}
                     {% for subtipo, cuentas in origen_aplicacion_data.Aplicacion.items() %}
                     {% if cuentas and cuentas|length > 0 %}
-                    <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                    <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Aplicacion"
+                        data-subtype="{{ subtipo }}">
                         <td colspan="5" class="fw-bold"
                             style="color: #000 !important; background-color: #0dcaf0 !important;">
                             {{ subtipo
                             }}</td>
                     </tr>
                     {% for cuenta in cuentas %}
-                    <tr style="background-color: white !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                    <tr style="background-color: white !important;" data-main-type="Aplicacion"
+                        data-subtype="{{ subtipo }}">
                         <td class="ps-4"
                             style="color: #000000 !important; font-weight: 500; background-color: white !important;">
                             {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
@@ -493,7 +501,8 @@
                     origen_aplicacion_data.Totales.get('Aplicacion',
                     {}).get(subtipo, 0.0) %}
                     {% if total_subtipo_aplicacion %}
-                    <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+                    <tr class="table-secondary" style="background-color: #f8f9fa !important;"
+                        data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
                         <td class="ps-4 fw-bold" colspan="4"
                             style="color: #000000 !important; background-color: #f8f9fa !important;">
                             Total
@@ -605,6 +614,207 @@
 
 </div>
 </div>
+<!-- Sección de Análisis con IA -->
+<div id="ai-analysis-container" class="mb-5">
+    <div class="card border-0 shadow-lg"
+        style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
+            <p class="text-muted small">Esto puede tomar unos segundos.</p>
+        </div>
+    </div>
+    <thead class="table-danger">
+        <tr>
+            <th style="width: 35%; color: white !important;">Cuenta</th>
+            <th class="text-end" style="color: white !important;">Tipo</th>
+            <th class="text-end" style="color: white !important;">Año Base ({{
+                periodo_base }})
+            </th>
+            <th class="text-end" style="color: white !important;">Año Análisis ({{
+                periodo_analisis }})</th>
+            <th class="text-end" style="color: white !important;">Variación
+                (Aplicación)</th>
+        </tr>
+    </thead>
+    <tbody style="background-color: white !important;">
+        {% if origen_aplicacion_data.Aplicacion %}
+        {% for subtipo, cuentas in origen_aplicacion_data.Aplicacion.items() %}
+        {% if cuentas and cuentas|length > 0 %}
+        <tr class="table-info" style="background-color: #0dcaf0 !important;" data-main-type="Aplicacion"
+            data-subtype="{{ subtipo }}">
+            <td colspan="5" class="fw-bold" style="color: #000 !important; background-color: #0dcaf0 !important;">
+                {{ subtipo
+                }}</td>
+        </tr>
+        {% for cuenta in cuentas %}
+        <tr style="background-color: white !important;" data-main-type="Aplicacion" data-subtype="{{ subtipo }}">
+            <td class="ps-4" style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                {% if cuenta.nombre %}{{ cuenta.nombre }}{% elif cuenta['nombre']
+                %}{{
+                cuenta['nombre'] }}{% else %}Sin nombre{% endif %}
+            </td>
+            <td class="text-end" style="background-color: white !important;">
+                <span class="badge bg-secondary" style="color: white !important;">
+                    {% if cuenta.tipo %}{{ cuenta.tipo }}{% elif cuenta['tipo'] %}{{
+                    cuenta['tipo'] }}{% else %}N/A{% endif %}
+                </span>
+            </td>
+            <td class="text-end"
+                style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                C$ {% if cuenta.monto_base is defined %}{{
+                "%.2f"|format(cuenta.monto_base) }}{%
+                elif cuenta['monto_base'] is defined %}{{
+                "%.2f"|format(cuenta['monto_base'])
+                }}{% else %}0.00{% endif %}
+            </td>
+            <td class="text-end"
+                style="color: #000000 !important; font-weight: 500; background-color: white !important;">
+                C$ {% if cuenta.monto_analisis is defined %}{{
+                "%.2f"|format(cuenta.monto_analisis) }}{% elif
+                cuenta['monto_analisis'] is
+                defined %}{{ "%.2f"|format(cuenta['monto_analisis']) }}{% else
+                %}0.00{% endif %}
+            </td>
+            <td class="text-end fw-bold" style="color: #dc3545 !important; background-color: white !important;">
+                C$ {% if cuenta.variacion is defined %}{{
+                "%.2f"|format(cuenta.variacion) }}{%
+                elif cuenta['variacion'] is defined %}{{
+                "%.2f"|format(cuenta['variacion']) }}{%
+                else %}0.00{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        {% set total_subtipo_aplicacion =
+        origen_aplicacion_data.Totales.get('Aplicacion',
+        {}).get(subtipo, 0.0) %}
+        {% if total_subtipo_aplicacion %}
+        <tr class="table-secondary" style="background-color: #f8f9fa !important;" data-main-type="Aplicacion"
+            data-subtype="{{ subtipo }}">
+            <td class="ps-4 fw-bold" colspan="4"
+                style="color: #000000 !important; background-color: #f8f9fa !important;">
+                Total
+                {{ subtipo }}</td>
+            <td class="text-end fw-bold" style="color: #dc3545 !important; background-color: #f8f9fa !important;">
+                C$ {{ "%.2f"|format(total_subtipo_aplicacion) }}
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <tr style="background-color: white !important;">
+            <td colspan="5" class="text-center" style="color: #000000 !important; background-color: white !important;">
+                No hay
+                aplicaciones de recursos en este período</td>
+        </tr>
+        {% endif %}
+    </tbody>
+    <tfoot class="table-dark" style="background-color: #212529 !important;">
+        <tr style="background-color: #212529 !important;">
+            <td class="fw-bold fs-5" colspan="4" style="color: white !important; background-color: #212529 !important;">
+                TOTAL
+                APLICACIÓN DE RECURSOS</td>
+            <td class="text-end fw-bold fs-5" style="color: #dc3545 !important; background-color: #212529 !important;">
+                C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Aplicacion',
+                {}).get('Total', 0.0)) }}
+            </td>
+        </tr>
+    </tfoot>
+    </table>
+</div>
+</div>
+</div>
+
+<!-- RESUMEN -->
+<div class="card shadow-lg mb-5">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">
+            <i class="fa-solid fa-balance-scale me-2"></i>
+            Resumen de Origen y Aplicación de Recursos
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-success mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Total Origen de Recursos</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 class="text-success mb-0">
+                            C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Origen',
+                            {}).get('Total', 0.0)) }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-danger mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Total Aplicación de Recursos</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h2 class="text-danger mb-0">
+                            C$ {{ "%.2f"|format(origen_aplicacion_data.Totales.get('Aplicacion',
+                            {}).get('Total', 0.0)) }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                {% set total_origen = origen_aplicacion_data.Totales.get('Origen',
+                {}).get('Total', 0.0) %}
+                {% set total_aplicacion = origen_aplicacion_data.Totales.get('Aplicacion',
+                {}).get('Total',
+                0.0) %}
+                {% set diferencia = total_origen - total_aplicacion %}
+                <div
+                    class="card {% if diferencia > 0 %}border-success{% elif diferencia < 0 %}border-warning{% else %}border-info{% endif %}">
+                    <div
+                        class="card-header {% if diferencia > 0 %}bg-success{% elif diferencia < 0 %}bg-warning{% else %}bg-info{% endif %} text-white">
+                        <h5 class="mb-0">Diferencia (Origen - Aplicación)</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3
+                            class="mb-0 {% if diferencia > 0 %}text-success{% elif diferencia < 0 %}text-warning{% else %}text-info{% endif %}">
+                            C$ {{ "%.2f"|format(diferencia) }}
+                        </h3>
+                        <small class="text-muted">
+                            {% if diferencia > 0 %}
+                            Los orígenes superan a las aplicaciones. La empresa generó más
+                            recursos de los
+                            que aplicó.
+                            {% elif diferencia < 0 %} Las aplicaciones superan a los orígenes. La empresa aplicó más
+                                recursos de los que generó. {% else %} Los orígenes y aplicaciones están equilibrados.
+                                {% endif %} </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+<!-- Sección de Análisis con IA -->
+<div id="ai-analysis-container" class="mb-5">
+    <div class="card border-0 shadow-lg"
+        style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h5 class="text-white">Generando análisis financiero inteligente con Gemini AI...</h5>
+            <p class="text-muted small">Esto puede tomar unos segundos.</p>
+        </div>
+    </div>
+</div>
+
 {% else %}
 <div class="alert alert-info" role="alert">
     <i class="fa-solid fa-info-circle me-2"></i>
@@ -612,6 +822,23 @@
 </div>
 {% endif %}
 </div>
+
+<style>
+    /* Estilos para el Análisis de IA */
+    .ai-content {
+        color: #1e293b !important;
+    }
+
+    .ai-content * {
+        color: #1e293b !important;
+    }
+
+    .ai-content strong,
+    .ai-content b {
+        color: #0f172a !important;
+        font-weight: 700;
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -626,12 +853,12 @@
                     .then(data => {
                         if (data.html) {
                             aiContainer.innerHTML = `
-                                <div class="card shadow-lg mb-4 border-0">
-                                    <div class="card-header text-white" style="background: linear-gradient(45deg, #6610f2, #6f42c1);">
-                                        <h3 class="mb-0"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h3>
+                                <div class="card border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(0,0,0,0.1);">
+                                    <div class="card-header border-0 p-4" style="background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); border-radius: 16px 16px 0 0;">
+                                        <h4 class="mb-0 text-white"><i class="fa-solid fa-robot me-2"></i>Análisis Inteligente (IA)</h4>
                                     </div>
-                                    <div class="card-body bg-light">
-                                        <div class="ai-content">
+                                    <div class="card-body p-4">
+                                        <div class="ai-content text-dark" style="font-size: 1.05rem; line-height: 1.7; color: #1e293b;">
                                             ${data.html}
                                         </div>
                                     </div>
@@ -639,7 +866,7 @@
                             `;
                         } else {
                             aiContainer.innerHTML = `
-                                <div class="alert alert-warning">
+                                <div class="alert alert-warning border-0 shadow-sm rounded-3">
                                     <i class="fa-solid fa-exclamation-triangle me-2"></i>
                                     No se pudo generar el análisis por IA en este momento.
                                     ${data.error ? '<br><small>' + data.error + '</small>' : ''}
@@ -650,7 +877,7 @@
                     .catch(error => {
                         console.error('Error fetching AI analysis:', error);
                         aiContainer.innerHTML = `
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger border-0 shadow-sm rounded-3">
                                 <i class="fa-solid fa-circle-xmark me-2"></i>
                                 Error al conectar con el servicio de IA.
                             </div>
